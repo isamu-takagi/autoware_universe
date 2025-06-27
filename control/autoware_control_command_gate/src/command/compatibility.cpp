@@ -25,19 +25,28 @@ Compatibility::Compatibility(std::unique_ptr<CommandOutput> && output, rclcpp::N
 : CommandBridge(std::move(output)), node_(node)
 {
   stop_hold_acceleration_ = node.declare_parameter<float>("stop_hold_acceleration");
+  emergency_acceleration_ = node.declare_parameter<float>("emergency_acceleration");
+
   adapi_pause_ = std::make_unique<AdapiPauseInterface>(&node_);
+  emergency_ = std::make_unique<EmergencyInterface>(&node_);
 }
 
 void Compatibility::publish()
 {
   adapi_pause_->publish();
+  emergency_->publish();
 }
 
 void Compatibility::on_control(const Control & msg)
 {
   Control out = msg;
-  adapi_pause_->update(out);
 
+  if (emergency_->is_emergency()) {
+    out.longitudinal.acceleration =
+      std::min(emergency_acceleration_, out.longitudinal.acceleration);
+  }
+
+  adapi_pause_->update(out);
   if (adapi_pause_->is_paused()) {
     out.longitudinal.velocity = std::min(0.0f, out.longitudinal.velocity);
     out.longitudinal.acceleration =
