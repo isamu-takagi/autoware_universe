@@ -32,6 +32,8 @@ using autoware_system_msgs::srv::ChangeOperationMode;
 
 void CommandModeDecider::initialize()
 {
+  use_pull_over_ = node_->declare_parameter<bool>("use_pull_over");
+  use_comfortable_stop_ = node_->declare_parameter<bool>("use_comfortable_stop");
 }
 
 uint16_t CommandModeDecider::from_operation_mode(uint16_t operation_mode)
@@ -89,15 +91,12 @@ std::vector<uint16_t> CommandModeDecider::decide(
     }
   }
 
-  // TODO(Takagi, Isamu): Use the available MRM according to the state transitions.
-  // https://autowarefoundation.github.io/autoware-documentation/main/design/autoware-interfaces/ad-api/features/fail-safe/#behavior
-
   namespace modes = autoware::command_mode_types::modes;
 
-  if (table.available(modes::pull_over, true)) {
+  if (table.available(modes::pull_over, true) && use_pull_over_) {
     return create_vector(modes::pull_over);
   }
-  if (table.available(modes::comfortable_stop, true)) {
+  if (table.available(modes::comfortable_stop, true) && use_comfortable_stop_) {
     return create_vector(modes::comfortable_stop);
   }
   if (table.available(modes::emergency_stop, true)) {

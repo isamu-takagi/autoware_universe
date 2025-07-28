@@ -10,5 +10,6 @@
     <remap from="~/inputs/main/gear" to="/control/shift_decider/gear_cmd"/>
     <remap from="~/inputs/main/hazard_lights" to="/planning/hazard_lights_cmd"/>
     <remap from="~/inputs/main/turn_indicators" to="/planning/turn_indicators_cmd"/>
+    <remap from="~/inputs/emergency_stop/control" to="/system/emergency/control_cmd"/>
   </node>
 </launch>

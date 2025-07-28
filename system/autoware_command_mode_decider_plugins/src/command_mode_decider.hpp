@@ -32,6 +32,10 @@ public:
 
   std::vector<uint16_t> decide(
     const RequestModeStatus & request, const CommandModeStatusTable & table) override;
+
+private:
+  bool use_pull_over_;
+  bool use_comfortable_stop_;
 };
 
 }  // namespace autoware::command_mode_decider
