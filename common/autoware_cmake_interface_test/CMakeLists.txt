@@ -5,8 +5,8 @@ project(autoware_cmake_interface_test NONE)
 find_package(ament_cmake_core REQUIRED)
 find_package(ament_cmake_test REQUIRED)
 
-list(APPEND ${PROJECT_NAME}_CONFIG_EXTRAS
-  "autoware_cmake_interface_test-extras.cmake"
+ament_package(
+  CONFIG_EXTRAS "autoware_cmake_interface_test-extras.cmake"
 )
 
 install(
