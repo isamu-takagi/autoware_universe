@@ -23,8 +23,8 @@ setup(
     maintainer_email="isamu.takagi@tier4.jp",
     description="Tools for interface test",
     license="Apache License 2.0",
-    tests_require=["pytest"],
+    tests_require=["pytest", "jsonschema"],
     entry_points={
-        "console_scripts": ["autoware_interface_test = autoware_interface_test.module:main"],
+        "console_scripts": ["autoware-param-check = autoware_interface_test.param:main"],
     },
 )
