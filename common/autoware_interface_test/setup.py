@@ -25,6 +25,9 @@ setup(
     license="Apache License 2.0",
     tests_require=["pytest", "jsonschema"],
     entry_points={
-        "console_scripts": ["autoware-param-check = autoware_interface_test.param:main"],
+        "console_scripts": [
+            "autoware-interface-check = autoware_interface_test.entrypoint:main",
+            "autoware-param-check = autoware_interface_test.param:main",
+        ]
     },
 )

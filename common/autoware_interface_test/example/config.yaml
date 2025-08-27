@@ -1,0 +1,3 @@
+param-tests:
+  - schema: { package: autoware_mission_planner, path: schema/mission_planner.schema.json }
+    params: { package: autoware_mission_planner, path: config/mission_planner.param.yaml }
