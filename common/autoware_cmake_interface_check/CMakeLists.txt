@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(autoware_cmake_interface_test NONE)
+project(autoware_cmake_interface_check NONE)
 
 find_package(ament_cmake_core REQUIRED)
 find_package(ament_cmake_test REQUIRED)
 
 ament_package(
-  CONFIG_EXTRAS "autoware_cmake_interface_test-extras.cmake"
+  CONFIG_EXTRAS "autoware_cmake_interface_check-extras.cmake"
 )
 
 install(

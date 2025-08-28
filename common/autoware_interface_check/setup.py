@@ -7,7 +7,7 @@ from setuptools import setup
 simplefilter("ignore", category=SetuptoolsDeprecationWarning)
 simplefilter("ignore", category=PkgResourcesDeprecationWarning)
 
-package_name = "autoware_interface_test"
+package_name = "autoware_interface_check"
 
 setup(
     name=package_name,
@@ -21,13 +21,13 @@ setup(
     zip_safe=True,
     maintainer="Takagi, Isamu",
     maintainer_email="isamu.takagi@tier4.jp",
-    description="Tools for interface test",
+    description="Tools for interface check",
     license="Apache License 2.0",
     tests_require=["pytest", "jsonschema"],
     entry_points={
         "console_scripts": [
-            "autoware-interface-check = autoware_interface_test.entrypoint:main",
-            "autoware-param-check = autoware_interface_test.param:main",
+            "autoware-interface-check = autoware_interface_check.entrypoint:main",
+            "autoware-param-check = autoware_interface_check.param:main",
         ]
     },
 )

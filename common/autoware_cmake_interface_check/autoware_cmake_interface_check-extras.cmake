@@ -1,4 +1,5 @@
 # Copyright 2025 The Autoware Contributors
+# Copyright 2014-2015 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,5 +13,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-macro(autoware_package)
-endmacro()
+include("${autoware_cmake_interface_check_DIR}/autoware_interface_check.cmake")
