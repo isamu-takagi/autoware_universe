@@ -27,7 +27,6 @@ setup(
     entry_points={
         "console_scripts": [
             "autoware-interface-check = autoware_interface_check.entrypoint:main",
-            "autoware-param-check = autoware_interface_check.param:main",
         ]
     },
 )
