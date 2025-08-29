@@ -13,8 +13,11 @@
 # limitations under the License.
 
 import argparse
+import textwrap
 import time
+import xml.dom.minidom as MD
 import xml.etree.ElementTree as ET
+import xml.sax.saxutils as sax
 
 from .common.case import TestStatus
 from .common.case import TestSuite
@@ -40,8 +43,7 @@ def main():
         print(f"Test #{index} ({case.result.status.name})")
         print("  message:", case.result.message)
         print("  details:")
-        for key, value in case.result.details:
-            print(f"    {key}: {value}")
+        print(textwrap.indent(format_details(case.result.details), "    "))
         print()
 
     print("Summary")
@@ -64,5 +66,26 @@ def generate_xunit(path, suite, name, duration):
     root.set("failures", str(suite.count(TestStatus.Failure)))
     root.set("time", f"{duration:.3f}")
 
-    tree = ET.ElementTree(root)
-    tree.write(path, xml_declaration=True, encoding="UTF-8")
+    for index, case in enumerate(suite.cases):
+        item = ET.SubElement(root, "testcase")
+        item.set("name", f"Test #{index}")
+        item.set("classname", name)
+
+        if case.result.status == TestStatus.Failure:
+            info = ET.SubElement(item, "failure")
+            info.set("message", sax.quoteattr(case.result.message))
+            info.text = sax.escape(format_details(case.result.details))
+
+        if case.result.status == TestStatus.Error:
+            info = ET.SubElement(item, "error")
+            info.set("message", sax.quoteattr(case.result.message))
+            info.text = sax.escape(format_details(case.result.details))
+
+    with open(path, "w") as fp:
+        xml = MD.parseString(ET.tostring(root, "UTF-8"))
+        xml.writexml(fp, encoding="UTF-8", newl="\n", addindent="  ")
+
+
+# Temporary
+def format_details(details):
+    return "\n".join(f"{key}: {value}" for key, value in details)
