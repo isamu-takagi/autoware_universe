@@ -2,7 +2,8 @@ import argparse
 import time
 import xml.etree.ElementTree as ET
 
-from .common.target import TestSuite
+from .common.case import TestStatus
+from .common.case import TestSuite
 from . import param
 
 
@@ -17,26 +18,35 @@ def main():
 
     suite = TestSuite.Load(args.target)
     for case in suite.cases:
-        param.check(case)
+        case.result = param.check(case.data)
 
     duration = time.time() - start
 
-    for case in suite.cases:
-        print(case.result)
-        print(case.details)
+    for index, case in enumerate(suite.cases):
+        print(f"Test #{index}")
+        print("  status :", case.result.status)
+        print("  message:", case.result.message)
+        print("  details:", case.result.details)
+        print()
+
+    print("Summary")
+    print("  all    :", suite.count())
+    print("  success:", suite.count(TestStatus.Success))
+    print("  failure:", suite.count(TestStatus.Failure))
+    print("  errors :", suite.count(TestStatus.Error))
 
     if args.xunit_file:
         path = args.xunit_file
         name = args.xunit_name
-        generate_xunit(path, name, duration)
+        generate_xunit(path, suite, name, duration)
 
 
-def generate_xunit(path, name, duration):
+def generate_xunit(path, suite, name, duration):
     root = ET.Element("testsuite")
     root.set("name", name)
-    root.set("tests", "1")
-    root.set("errors", "0")
-    root.set("failures", "0")
+    root.set("tests", str(suite.count()))
+    root.set("errors", str(suite.count(TestStatus.Error)))
+    root.set("failures", str(suite.count(TestStatus.Failure)))
     root.set("time", f"{duration:.3f}")
 
     tree = ET.ElementTree(root)
