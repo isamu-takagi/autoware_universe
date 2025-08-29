@@ -18,7 +18,7 @@ def validate(schema_path, params_path):
         target = yaml.safe_load(fp)
     try:
         jsonschema.validate(target, schema)
-        return TestResult.Success()
+        return TestResult.Success("OK", details)
     except jsonschema.ValidationError as error:
         return TestResult.Failure(error.message, details)
 

@@ -19,8 +19,8 @@ class TestResult:
         self.details = details
 
     @staticmethod
-    def Success():
-        return TestResult(TestStatus.Success, "OK", "OK")
+    def Success(message="", details=""):
+        return TestResult(TestStatus.Success, message, details)
 
     @staticmethod
     def Failure(message="", details=""):

@@ -23,10 +23,11 @@ def main():
     duration = time.time() - start
 
     for index, case in enumerate(suite.cases):
-        print(f"Test #{index}")
-        print("  status :", case.result.status)
+        print(f"Test #{index} ({case.result.status.name})")
         print("  message:", case.result.message)
-        print("  details:", case.result.details)
+        print("  details:")
+        for key, value in case.result.details:
+            print(f"    {key}: {value}")
         print()
 
     print("Summary")
