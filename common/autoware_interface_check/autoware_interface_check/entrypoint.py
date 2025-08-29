@@ -2,7 +2,7 @@ import argparse
 import time
 import xml.etree.ElementTree as ET
 
-from .common.target import TestFile
+from .common.target import TestSuite
 from . import param
 
 
@@ -15,11 +15,15 @@ def main():
 
     start = time.time()
 
-    target = TestFile(args.target)
-    for case in target.cases():
+    suite = TestSuite.Load(args.target)
+    for case in suite.cases:
         param.check(case)
 
     duration = time.time() - start
+
+    for case in suite.cases:
+        print(case.result)
+        print(case.details)
 
     if args.xunit_file:
         path = args.xunit_file

@@ -16,7 +16,7 @@ class FilePath:
         if type(data) is str:
             return Path(data)
         package = data.get("package")
-        path = data["path"]
+        path = data["file"]
         if package is None:
             return Path(path)
         package = get_package_share_directory(package)

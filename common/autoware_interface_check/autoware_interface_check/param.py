@@ -5,6 +5,7 @@ import yaml
 
 from .common.path import FilePath
 from .common.target import TestCase
+from .common.target import TestResult
 
 
 def validate(schema_path, params_path):
@@ -22,9 +23,13 @@ def validate(schema_path, params_path):
 
 
 def check(case: TestCase):
-    schema = FilePath(case.data["schema"])
-    params = FilePath(case.data["params"])
-    validate(schema, params)
+    try:
+        schema = FilePath(case.data["schema"])
+        params = FilePath(case.data["params"])
+        validate(schema, params)
+    except Exception as error:
+        case.result = TestResult.ERROR
+        case.details = repr(error)
 
 
 def main():
