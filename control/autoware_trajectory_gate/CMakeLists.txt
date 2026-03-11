@@ -6,7 +6,10 @@ autoware_package()
 
 ament_auto_add_library(${PROJECT_NAME} SHARED
   "src/trajectory_gate.cpp"
+  "src/core/interface.cpp"
   "src/core/input.cpp"
+  "src/core/subscription.cpp"
+  "src/core/publisher.cpp"
 )
 target_include_directories(${PROJECT_NAME} PRIVATE "src")
 

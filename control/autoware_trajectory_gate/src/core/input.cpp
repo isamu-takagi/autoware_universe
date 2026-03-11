@@ -1,4 +1,4 @@
-// Copyright 2025 The Autoware Contributors
+// Copyright 2026 The Autoware Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,23 +14,21 @@
 
 #include "input.hpp"
 
-#include "output.hpp"
-
 #include <memory>
-#include <string>
+#include <utility>
 
 namespace autoware::trajectory_gate
 {
 
-TrajectoryInput::TrajectoryInput(uint16_t id) : id_(id)
+TrajectoryInput::TrajectoryInput(uint16_t id, std::unique_ptr<TimeoutDiag> && timeout) : id_(id)
 {
-  output_ = nullptr;
+  timeout_ = std::move(timeout);
 }
 
-void TrajectoryInput::send(const Control & msg)
+void TrajectoryInput::receive(const Trajectory & msg)
 {
   timeout_->update();
-  output_->send(msg);
+  TrajectorySender::send(msg);
 }
 
 /*

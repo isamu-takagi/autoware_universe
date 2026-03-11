@@ -1,4 +1,4 @@
-// Copyright 2025 The Autoware Contributors
+// Copyright 2026 The Autoware Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,15 +15,40 @@
 #ifndef CORE__INTERFACE_HPP_
 #define CORE__INTERFACE_HPP_
 
+#include <autoware_utils_diagnostics/timeout_diagnostics.hpp>
+
 #include <autoware_planning_msgs/msg/trajectory.hpp>
 
 namespace autoware::trajectory_gate
 {
 
 using autoware_planning_msgs::msg::Trajectory;
+using autoware_utils_diagnostics::TimeoutDiag;
 
-class TrajectoryInput;
-class TrajectoryOutput;
+class TrajectoryReceiver
+{
+public:
+  virtual void receive(const Trajectory & msg) = 0;
+};
+
+class TrajectoryDiscard : public TrajectoryReceiver
+{
+public:
+  void receive(const Trajectory & msg) override;
+};
+
+class TrajectorySender
+{
+public:
+  TrajectorySender();
+  void set_output(TrajectoryReceiver * output);
+
+protected:
+  void send(const Trajectory & msg);
+
+private:
+  TrajectoryReceiver * output_;
+};
 
 }  // namespace autoware::trajectory_gate
 

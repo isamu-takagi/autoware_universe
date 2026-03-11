@@ -12,30 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CORE__INPUT_HPP_
-#define CORE__INPUT_HPP_
-
-#include "interface.hpp"
-
-#include <memory>
+#include "publisher.hpp"
 
 namespace autoware::trajectory_gate
 {
 
-class TrajectoryInput : public TrajectorySender, public TrajectoryReceiver
+TrajectoryPublisher::TrajectoryPublisher(rclcpp::Node & node)
 {
-public:
-  TrajectoryInput(uint16_t id, std::unique_ptr<TimeoutDiag> && timeout);
-  void receive(const Trajectory & msg) override;
+  pub_trajectory_ = node.create_publisher<Trajectory>("~/output/trajectory", rclcpp::QoS(1));
+}
 
-  uint16_t id() const { return id_; }
-  // bool is_timeout() const { return timeout_->is_error(); }
-
-private:
-  const uint16_t id_;
-  std::unique_ptr<TimeoutDiag> timeout_;
-};
+void TrajectoryPublisher::receive(const Trajectory & msg)
+{
+  pub_trajectory_->publish(msg);
+}
 
 }  // namespace autoware::trajectory_gate
-
-#endif  // CORE__INPUT_HPP_

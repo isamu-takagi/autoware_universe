@@ -1,4 +1,4 @@
-// Copyright 2025 The Autoware Contributors
+// Copyright 2026 The Autoware Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "output.hpp"
+#ifndef CORE__PUBLISHER_HPP_
+#define CORE__PUBLISHER_HPP_
+
+#include "interface.hpp"
+
+#include <rclcpp/rclcpp.hpp>
+
+#include <memory>
 
 namespace autoware::trajectory_gate
 {
 
-void TrajectoryOutput::send(const Trajectory & msg)
+class TrajectoryPublisher : public TrajectoryReceiver
 {
-}
+public:
+  explicit TrajectoryPublisher(rclcpp::Node & node);
+  void receive(const Trajectory & msg) override;
+
+private:
+  rclcpp::Publisher<Trajectory>::SharedPtr pub_trajectory_;
+};
 
 }  // namespace autoware::trajectory_gate
+
+#endif  // CORE__PUBLISHER_HPP_

@@ -1,24 +1,27 @@
-//  Copyright 2025 The Autoware Contributors
+// Copyright 2026 The Autoware Contributors
 //
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #ifndef TRAJECTORY_GATE_HPP_
 #define TRAJECTORY_GATE_HPP_
 
 #include "core/input.hpp"
+#include "core/subscription.hpp"
 
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <rclcpp/rclcpp.hpp>
+
+#include <memory>
 
 /*
 #include "command/compatibility.hpp"
@@ -45,6 +48,11 @@ public:
 
 private:
   diagnostic_updater::Updater diag_;
+
+  // DEBUG
+  std::unique_ptr<TrajectoryInput> input_;
+  std::unique_ptr<TrajectorySubscription> subscription_;
+  std::unique_ptr<TrajectoryDiscard> discard_;
 
   /*
     static constexpr uint16_t unknown = autoware::command_mode_types::sources::unknown;

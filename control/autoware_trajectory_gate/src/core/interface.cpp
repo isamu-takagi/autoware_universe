@@ -1,4 +1,4 @@
-// Copyright 2025 The Autoware Contributors
+// Copyright 2026 The Autoware Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CORE__OUTPUT_HPP_
-#define CORE__OUTPUT_HPP_
+#include "interface.hpp"
 
 namespace autoware::trajectory_gate
 {
 
-class TrajectoryOutput
+void TrajectoryDiscard::receive(const Trajectory &)
 {
-public:
-  void send(const Trajectory & msg);
-};
+  // Do nothing.
+}
+
+TrajectorySender::TrajectorySender()
+{
+  output_ = nullptr;
+}
+
+void TrajectorySender::set_output(TrajectoryReceiver * output)
+{
+  output_ = output;
+}
+
+void TrajectorySender::send(const Trajectory & msg)
+{
+  output_->receive(msg);
+}
 
 }  // namespace autoware::trajectory_gate
-
-#endif  // CORE__OUTPUT_HPP_
