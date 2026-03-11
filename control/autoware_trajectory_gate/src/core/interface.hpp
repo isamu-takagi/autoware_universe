@@ -28,6 +28,7 @@ using autoware_utils_diagnostics::TimeoutDiag;
 class TrajectoryReceiver
 {
 public:
+  virtual ~TrajectoryReceiver() = default;
   virtual void receive(const Trajectory & msg) = 0;
 };
 
@@ -40,14 +41,14 @@ public:
 class TrajectorySender
 {
 public:
-  TrajectorySender();
+  virtual ~TrajectorySender() = default;
   void set_output(TrajectoryReceiver * output);
 
 protected:
   void send(const Trajectory & msg);
 
 private:
-  TrajectoryReceiver * output_;
+  TrajectoryReceiver * output_ = nullptr;
 };
 
 }  // namespace autoware::trajectory_gate

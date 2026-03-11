@@ -15,13 +15,13 @@
 #ifndef TRAJECTORY_GATE_HPP_
 #define TRAJECTORY_GATE_HPP_
 
-#include "core/input.hpp"
-#include "core/subscription.hpp"
+#include "core/interface.hpp"
 
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include <memory>
+#include <vector>
 
 /*
 #include "command/compatibility.hpp"
@@ -49,10 +49,8 @@ public:
 private:
   diagnostic_updater::Updater diag_;
 
-  // DEBUG
-  std::unique_ptr<TrajectoryInput> input_;
-  std::unique_ptr<TrajectorySubscription> subscription_;
-  std::unique_ptr<TrajectoryDiscard> discard_;
+  std::vector<std::unique_ptr<TrajectorySender>> subscriptions_;
+  std::vector<std::unique_ptr<TrajectoryReceiver>> receivers_;
 
   /*
     static constexpr uint16_t unknown = autoware::command_mode_types::sources::unknown;

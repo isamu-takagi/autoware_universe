@@ -14,6 +14,10 @@
 
 #include "trajectory_gate.hpp"
 
+#include "core/input.hpp"
+#include "core/publisher.hpp"
+#include "core/subscription.hpp"
+
 #include <memory>
 #include <utility>
 
@@ -43,8 +47,6 @@ TrajectoryGate::TrajectoryGate(const rclcpp::NodeOptions & options)
   diag_.setHardwareID("none");
 
   {
-    discard_ = std::make_unique<TrajectoryDiscard>();
-
     TimeoutDiag::Params param;
     param.warn_duration_ = 1.0;
     param.error_duration_ = 2.0;
@@ -52,14 +54,16 @@ TrajectoryGate::TrajectoryGate(const rclcpp::NodeOptions & options)
     auto task = std::make_unique<TimeoutDiag>(param, *this->get_clock(), "name");
     diag_.add(*task);
 
-    auto input = std::make_unique<TrajectoryInput>(1234, std::move(task));
     auto subscription = std::make_unique<TrajectorySubscription>("main", *this);
+    auto input = std::make_unique<TrajectoryInput>(1234, std::move(task));
+    auto publisher = std::make_unique<TrajectoryPublisher>(*this);
 
     subscription->set_output(input.get());
-    input->set_output(discard_.get());
+    input->set_output(publisher.get());
 
-    input_ = std::move(input);
-    subscription_ = std::move(subscription);
+    subscriptions_.push_back(std::move(subscription));
+    receivers_.push_back(std::move(input));
+    receivers_.push_back(std::move(publisher));
   }
 
   /*

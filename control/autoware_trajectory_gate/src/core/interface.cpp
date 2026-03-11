@@ -22,11 +22,6 @@ void TrajectoryDiscard::receive(const Trajectory &)
   // Do nothing.
 }
 
-TrajectorySender::TrajectorySender()
-{
-  output_ = nullptr;
-}
-
 void TrajectorySender::set_output(TrajectoryReceiver * output)
 {
   output_ = output;
