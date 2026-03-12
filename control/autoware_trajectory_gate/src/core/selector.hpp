@@ -27,8 +27,7 @@ class TrajectorySelector
 {
 public:
   TrajectorySelector();
-  void add_input(uint32_t id, TrajectorySender * input);
-  void set_output(TrajectoryReceiver * output);
+  void add(uint32_t id, TrajectorySender * input);
 
 private:
   std::unordered_map<uint32_t, TrajectorySender *> inputs_;

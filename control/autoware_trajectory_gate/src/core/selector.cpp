@@ -28,6 +28,16 @@ public:
 TrajectorySelector::TrajectorySelector()
 {
   dummy_output_ = std::make_unique<TrajectoryDiscard>();
+  output_ = dummy_output_.get();
+}
+
+void TrajectorySelector::add(uint32_t id, TrajectorySender * input)
+{
+  const auto [iter, success] = inputs_.insert({id, input});
+  if (!success) {
+    throw std::runtime_error("Trajectory ID already exists: " + std::to_string(id));
+  }
+  input->set_output(output_);
 }
 
 }  // namespace autoware::trajectory_gate

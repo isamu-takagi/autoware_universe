@@ -16,6 +16,7 @@
 #define TRAJECTORY_GATE_HPP_
 
 #include "core/interface.hpp"
+#include "core/selector.hpp"
 
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -49,6 +50,7 @@ public:
 private:
   diagnostic_updater::Updater diag_;
 
+  TrajectorySelector selector_;
   std::vector<std::unique_ptr<TrajectorySender>> subscriptions_;
   std::vector<std::unique_ptr<TrajectoryReceiver>> receivers_;
 
