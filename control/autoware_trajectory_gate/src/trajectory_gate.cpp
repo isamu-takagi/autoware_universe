@@ -14,7 +14,7 @@
 
 #include "trajectory_gate.hpp"
 
-#include "core/input.hpp"
+#include "core/monitor.hpp"
 #include "core/publisher.hpp"
 #include "core/subscription.hpp"
 
@@ -39,7 +39,7 @@ namespace autoware::trajectory_gate
 {
 
 TrajectoryGate::TrajectoryGate(const rclcpp::NodeOptions & options)
-: Node("trajectory_gate", options), diag_(this, 0.5)
+: Node("trajectory_gate", options), diag_(this, 0.1)
 {
   using std::placeholders::_1;
   using std::placeholders::_2;
@@ -47,22 +47,25 @@ TrajectoryGate::TrajectoryGate(const rclcpp::NodeOptions & options)
   diag_.setHardwareID("none");
 
   {
+    using autoware_utils_diagnostics::TimeoutDiag;
+    const auto name = "main";
+
     TimeoutDiag::Params param;
     param.warn_duration_ = 1.0;
     param.error_duration_ = 2.0;
 
-    auto task = std::make_unique<TimeoutDiag>(param, *this->get_clock(), "name");
-    diag_.add(*task);
+    auto timeout = std::make_unique<TimeoutDiag>(param, *this->get_clock(), "name");
+    diag_.add(*timeout);
 
-    auto subscription = std::make_unique<TrajectorySubscription>("main", *this);
-    auto input = std::make_unique<TrajectoryInput>(1234, std::move(task));
+    auto subscription = std::make_unique<TrajectorySubscription>(name, *this);
+    auto monitor = std::make_unique<TrajectoryMonitor>(std::move(timeout));
     auto publisher = std::make_unique<TrajectoryPublisher>(*this);
 
-    subscription->set_output(input.get());
-    input->set_output(publisher.get());
+    subscription->set_output(monitor.get());
+    monitor->set_output(publisher.get());
 
     subscriptions_.push_back(std::move(subscription));
-    receivers_.push_back(std::move(input));
+    receivers_.push_back(std::move(monitor));
     receivers_.push_back(std::move(publisher));
   }
 
