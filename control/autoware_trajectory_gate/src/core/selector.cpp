@@ -12,19 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "interface.hpp"
+#include "selector.hpp"
+
+#include <memory>
 
 namespace autoware::trajectory_gate
 {
 
-void TrajectorySender::set_output(TrajectoryReceiver * output)
+class TrajectoryDiscard : public TrajectoryReceiver
 {
-  output_ = output;
-}
+public:
+  void receive(const Trajectory &) override {}
+};
 
-void TrajectorySender::send(const Trajectory & msg)
+TrajectorySelector::TrajectorySelector()
 {
-  output_->receive(msg);
+  dummy_output_ = std::make_unique<TrajectoryDiscard>();
 }
 
 }  // namespace autoware::trajectory_gate

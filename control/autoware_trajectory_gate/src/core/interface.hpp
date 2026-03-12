@@ -29,12 +29,6 @@ public:
   virtual void receive(const Trajectory & msg) = 0;
 };
 
-class TrajectoryDiscard : public TrajectoryReceiver
-{
-public:
-  void receive(const Trajectory & msg) override;
-};
-
 class TrajectorySender
 {
 public:

@@ -8,6 +8,7 @@ ament_auto_add_library(${PROJECT_NAME} SHARED
   "src/trajectory_gate.cpp"
   "src/core/interface.cpp"
   "src/core/monitor.cpp"
+  "src/core/selector.cpp"
   "src/core/subscription.cpp"
   "src/core/publisher.cpp"
 )

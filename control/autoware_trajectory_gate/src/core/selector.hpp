@@ -12,19 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef CORE__SELECTOR_HPP_
+#define CORE__SELECTOR_HPP_
+
 #include "interface.hpp"
+
+#include <memory>
+#include <unordered_map>
 
 namespace autoware::trajectory_gate
 {
 
-void TrajectorySender::set_output(TrajectoryReceiver * output)
+class TrajectorySelector
 {
-  output_ = output;
-}
+public:
+  TrajectorySelector();
+  void add_input(uint32_t id, TrajectorySender * input);
+  void set_output(TrajectoryReceiver * output);
 
-void TrajectorySender::send(const Trajectory & msg)
-{
-  output_->receive(msg);
-}
+private:
+  std::unordered_map<uint32_t, TrajectorySender *> inputs_;
+  std::unique_ptr<TrajectoryReceiver> dummy_output_;
+  TrajectoryReceiver * output_;
+};
 
 }  // namespace autoware::trajectory_gate
+
+#endif  // CORE__SELECTOR_HPP_
