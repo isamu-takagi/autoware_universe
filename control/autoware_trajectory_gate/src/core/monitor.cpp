@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "input.hpp"
+#include "monitor.hpp"
 
 #include <memory>
 #include <utility>
@@ -20,27 +20,15 @@
 namespace autoware::trajectory_gate
 {
 
-TrajectoryInput::TrajectoryInput(uint16_t id, std::unique_ptr<TimeoutDiag> && timeout) : id_(id)
+TrajectoryMonitor::TrajectoryMonitor(std::unique_ptr<TimeoutDiag> && timeout)
 {
   timeout_ = std::move(timeout);
 }
 
-void TrajectoryInput::receive(const Trajectory & msg)
+void TrajectoryMonitor::receive(const Trajectory & msg)
 {
   timeout_->update();
   TrajectorySender::send(msg);
 }
-
-/*
-TimeoutDiag * CommandSource::create_diag_task(
-  const TimeoutDiag::Params & params, const rclcpp::Clock & clock)
-{
-  if (timeout_) {
-    throw std::logic_error("timeout diag has already been created");
-  }
-  timeout_ = std::make_unique<TimeoutDiag>(params, clock, "timeout_" + source_name_);
-  return timeout_.get();
-}
-*/
 
 }  // namespace autoware::trajectory_gate

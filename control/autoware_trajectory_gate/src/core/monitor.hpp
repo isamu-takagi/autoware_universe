@@ -12,30 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CORE__INPUT_HPP_
-#define CORE__INPUT_HPP_
+#ifndef CORE__MONITOR_HPP_
+#define CORE__MONITOR_HPP_
 
 #include "interface.hpp"
+
+#include <autoware_utils_diagnostics/timeout_diagnostics.hpp>
 
 #include <memory>
 
 namespace autoware::trajectory_gate
 {
 
-class TrajectoryInput : public TrajectorySender, public TrajectoryReceiver
+class TrajectoryMonitor : public TrajectorySender, public TrajectoryReceiver
 {
 public:
-  TrajectoryInput(uint16_t id, std::unique_ptr<TimeoutDiag> && timeout);
+  using TimeoutDiag = autoware_utils_diagnostics::TimeoutDiag;
+  explicit TrajectoryMonitor(std::unique_ptr<TimeoutDiag> && timeout);
   void receive(const Trajectory & msg) override;
 
-  uint16_t id() const { return id_; }
-  // bool is_timeout() const { return timeout_->is_error(); }
-
 private:
-  const uint16_t id_;
   std::unique_ptr<TimeoutDiag> timeout_;
 };
 
 }  // namespace autoware::trajectory_gate
 
-#endif  // CORE__INPUT_HPP_
+#endif  // CORE__MONITOR_HPP_

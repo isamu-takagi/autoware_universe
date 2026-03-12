@@ -15,15 +15,12 @@
 #ifndef CORE__INTERFACE_HPP_
 #define CORE__INTERFACE_HPP_
 
-#include <autoware_utils_diagnostics/timeout_diagnostics.hpp>
-
 #include <autoware_planning_msgs/msg/trajectory.hpp>
 
 namespace autoware::trajectory_gate
 {
 
 using autoware_planning_msgs::msg::Trajectory;
-using autoware_utils_diagnostics::TimeoutDiag;
 
 class TrajectoryReceiver
 {
