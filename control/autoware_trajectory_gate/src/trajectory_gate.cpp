@@ -46,26 +46,34 @@ TrajectoryGate::TrajectoryGate(const rclcpp::NodeOptions & options)
 
   diag_.setHardwareID("none");
 
+  // Create input streams.
   {
     using autoware_utils_diagnostics::TimeoutDiag;
     const auto name = "main";
+    const auto id = 100;
 
     TimeoutDiag::Params param;
     param.warn_duration_ = 1.0;
     param.error_duration_ = 2.0;
 
-    auto timeout = std::make_unique<TimeoutDiag>(param, *this->get_clock(), "name");
+    auto timeout = std::make_unique<TimeoutDiag>(param, *this->get_clock(), name);
     diag_.add(*timeout);
 
     auto subscription = std::make_unique<TrajectorySubscription>(name, *this);
     auto monitor = std::make_unique<TrajectoryMonitor>(std::move(timeout));
-    auto publisher = std::make_unique<TrajectoryPublisher>(*this);
 
     subscription->set_output(monitor.get());
-    monitor->set_output(publisher.get());
+    monitor->set_output(nullptr);
+    selector_.add_input(monitor.get(), id);
 
     subscriptions_.push_back(std::move(subscription));
     receivers_.push_back(std::move(monitor));
+  }
+
+  // Create output stream.
+  {
+    auto publisher = std::make_unique<TrajectoryPublisher>(*this);
+    selector_.set_output(publisher.get());
     receivers_.push_back(std::move(publisher));
   }
 

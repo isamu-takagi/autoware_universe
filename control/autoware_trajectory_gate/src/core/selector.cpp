@@ -19,7 +19,7 @@
 namespace autoware::trajectory_gate
 {
 
-class TrajectoryDiscard : public TrajectoryReceiver
+class TrajectoryIgnore : public TrajectoryReceiver
 {
 public:
   void receive(const Trajectory &) override {}
@@ -27,17 +27,25 @@ public:
 
 TrajectorySelector::TrajectorySelector()
 {
-  dummy_output_ = std::make_unique<TrajectoryDiscard>();
-  output_ = dummy_output_.get();
+  ignore_ = std::make_unique<TrajectoryIgnore>();
+  output_ = nullptr;
 }
 
-void TrajectorySelector::add(uint32_t id, TrajectorySender * input)
+void TrajectorySelector::add_input(TrajectorySender * input, uint32_t id)
 {
   const auto [iter, success] = inputs_.insert({id, input});
   if (!success) {
-    throw std::runtime_error("Trajectory ID already exists: " + std::to_string(id));
+    throw std::runtime_error("trajectory input already exists: " + std::to_string(id));
   }
-  input->set_output(output_);
+  input->set_output(ignore_.get());
+}
+
+void TrajectorySelector::set_output(TrajectoryReceiver * output)
+{
+  if (output_) {
+    throw std::runtime_error("trajectory output already exists");
+  }
+  output_ = output;
 }
 
 }  // namespace autoware::trajectory_gate

@@ -27,11 +27,12 @@ class TrajectorySelector
 {
 public:
   TrajectorySelector();
-  void add(uint32_t id, TrajectorySender * input);
+  void add_input(TrajectorySender * input, uint32_t id);
+  void set_output(TrajectoryReceiver * output);
 
 private:
   std::unordered_map<uint32_t, TrajectorySender *> inputs_;
-  std::unique_ptr<TrajectoryReceiver> dummy_output_;
+  std::unique_ptr<TrajectoryReceiver> ignore_;
   TrajectoryReceiver * output_;
 };
 
