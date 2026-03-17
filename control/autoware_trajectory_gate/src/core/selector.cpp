@@ -31,11 +31,15 @@ TrajectorySelector::TrajectorySelector()
   output_ = nullptr;
 }
 
-void TrajectorySelector::add_input(TrajectorySender * input, uint32_t id)
+void TrajectorySelector::add_input(TrajectorySender * input, uint32_t source_id)
 {
-  const auto [iter, success] = inputs_.insert({id, input});
+  if (source_id == invalid_source_id) {
+    throw std::runtime_error("trajectory input has an invalid source id");
+  }
+
+  const auto [iter, success] = inputs_.insert({source_id, input});
   if (!success) {
-    throw std::runtime_error("trajectory input already exists: " + std::to_string(id));
+    throw std::runtime_error("trajectory input already exists: " + std::to_string(source_id));
   }
   input->set_output(ignore_.get());
 }
@@ -46,6 +50,24 @@ void TrajectorySelector::set_output(TrajectoryReceiver * output)
     throw std::runtime_error("trajectory output already exists");
   }
   output_ = output;
+}
+
+bool TrajectorySelector::select(uint32_t target_id)
+{
+  for (const auto & [source_id, input] : inputs_) {
+    input->set_output(target_id == source_id ? output_ : ignore_.get());
+  }
+  return inputs_.count(target_id);  // Use contains function after C++20.
+}
+
+uint32_t TrajectorySelector::source() const
+{
+  for (const auto & [source_id, input] : inputs_) {
+    if (input->has_output()) {
+      return source_id;
+    }
+  }
+  return invalid_source_id;
 }
 
 }  // namespace autoware::trajectory_gate
