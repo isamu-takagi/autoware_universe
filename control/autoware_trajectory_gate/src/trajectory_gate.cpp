@@ -46,11 +46,15 @@ TrajectoryGate::TrajectoryGate(const rclcpp::NodeOptions & options)
 
   diag_.setHardwareID("none");
 
+  pub_source_ =
+    create_publisher<TrajectorySource>("~/source/status", rclcpp::QoS(1).transient_local());
+  sub_source_ = create_subscription<TrajectorySource>(
+    "~/source/select", rclcpp::QoS(1), std::bind(&TrajectoryGate::on_select_source, this, _1));
+
   // Create input streams.
-  {
+  for (const auto id : {100, 200, 300}) {
     using autoware_utils_diagnostics::TimeoutDiag;
-    const auto name = "main";
-    const auto id = 100;
+    const auto name = "id" + std::to_string(id);
 
     TimeoutDiag::Params param;
     param.warn_duration_ = 1.0;
@@ -155,6 +159,15 @@ TrajectoryGate::TrajectoryGate(const rclcpp::NodeOptions & options)
   const auto period = rclcpp::Rate(declare_parameter<double>("rate")).period();
   timer_ = rclcpp::create_timer(this, get_clock(), period, [this]() { on_timer(); });
   */
+}
+
+void TrajectoryGate::on_select_source(const TrajectorySource & req)
+{
+  selector_.select(req.data);
+
+  TrajectorySource msg;
+  msg.data = selector_.source();
+  pub_source_->publish(msg);
 }
 
 /*

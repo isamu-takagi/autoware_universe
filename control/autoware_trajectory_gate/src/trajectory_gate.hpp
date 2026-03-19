@@ -21,6 +21,8 @@
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+#include <std_msgs/msg/u_int32.hpp>
+
 #include <memory>
 #include <vector>
 
@@ -48,11 +50,18 @@ public:
   explicit TrajectoryGate(const rclcpp::NodeOptions & options);
 
 private:
+  using TrajectorySource = std_msgs::msg::UInt32;
+
   diagnostic_updater::Updater diag_;
 
   TrajectorySelector selector_;
   std::vector<std::unique_ptr<TrajectorySender>> subscriptions_;
   std::vector<std::unique_ptr<TrajectoryReceiver>> receivers_;
+
+  rclcpp::Publisher<TrajectorySource>::SharedPtr pub_source_;
+  rclcpp::Subscription<TrajectorySource>::SharedPtr sub_source_;
+
+  void on_select_source(const TrajectorySource & msg);
 
   /*
     static constexpr uint16_t unknown = autoware::command_mode_types::sources::unknown;
