@@ -14,9 +14,6 @@
 
 #include "system_mode_decider.hpp"
 
-#include <memory>
-#include <utility>
-
 namespace autoware::system_mode_decider
 {
 

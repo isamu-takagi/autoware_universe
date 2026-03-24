@@ -6,6 +6,7 @@ autoware_package()
 
 ament_auto_add_library(${PROJECT_NAME} SHARED
   "src/system_mode_decider.cpp"
+  "src/core/status.cpp"
 )
 target_include_directories(${PROJECT_NAME} PRIVATE "src")
 

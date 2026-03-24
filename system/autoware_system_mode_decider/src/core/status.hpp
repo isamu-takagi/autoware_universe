@@ -12,23 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SYSTEM_MODE_DECIDER_HPP_
-#define SYSTEM_MODE_DECIDER_HPP_
+#ifndef CORE__STATUS_HPP_
+#define CORE__STATUS_HPP_
 
-#include <diagnostic_updater/diagnostic_updater.hpp>
+#include <rclcpp/time.hpp>
 
 namespace autoware::system_mode_decider
 {
 
-class SystemModeDecider : public rclcpp::Node
+class SystemModeStatus
 {
 public:
-  explicit SystemModeDecider(const rclcpp::NodeOptions & options);
+  SystemModeStatus() = default;
 
 private:
-  diagnostic_updater::Updater diag_;
+  rclcpp::Time stamp_;
+  bool status_;
+};
+
+class SystemModeStatusAaaa
+{
+public:
+  SystemModeStatus available;
+  SystemModeStatus sustainable;
+  SystemModeStatus ready;
 };
 
 }  // namespace autoware::system_mode_decider
 
-#endif  // SYSTEM_MODE_DECIDER_HPP_
+#endif  // CORE__STATUS_HPP_
