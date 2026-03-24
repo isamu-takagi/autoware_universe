@@ -29,6 +29,7 @@ TrajectorySelector::TrajectorySelector()
 {
   ignore_ = std::make_unique<TrajectoryIgnore>();
   output_ = nullptr;
+  current_source_id_ = invalid_source_id;
 }
 
 void TrajectorySelector::add_input(TrajectorySender * input, uint32_t source_id)
@@ -54,20 +55,23 @@ void TrajectorySelector::set_output(TrajectoryReceiver * output)
 
 bool TrajectorySelector::select(uint32_t target_id)
 {
-  for (const auto & [source_id, input] : inputs_) {
-    input->set_output(target_id == source_id ? output_ : ignore_.get());
+  if (current_source_id_ != invalid_source_id) {
+    inputs_.at(current_source_id_)->set_output(ignore_.get());
+    current_source_id_ = invalid_source_id;
   }
-  return inputs_.count(target_id);  // Use contains function after C++20.
+
+  const auto iter = inputs_.find(target_id);
+  if (iter == inputs_.end()) {
+    return false;
+  }
+  iter->second->set_output(output_);
+  current_source_id_ = target_id;
+  return true;
 }
 
 uint32_t TrajectorySelector::source() const
 {
-  for (const auto & [source_id, input] : inputs_) {
-    if (input->has_output()) {
-      return source_id;
-    }
-  }
-  return invalid_source_id;
+  return current_source_id_;
 }
 
 }  // namespace autoware::trajectory_gate

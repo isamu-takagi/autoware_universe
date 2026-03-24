@@ -62,6 +62,7 @@ private:
   rclcpp::Subscription<TrajectorySource>::SharedPtr sub_source_;
 
   void on_select_source(const TrajectorySource & msg);
+  void notify_source() const;
 
   /*
     static constexpr uint16_t unknown = autoware::command_mode_types::sources::unknown;

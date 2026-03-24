@@ -22,11 +22,6 @@ void TrajectorySender::set_output(TrajectoryReceiver * output)
   output_ = output;
 }
 
-bool TrajectorySender::has_output() const
-{
-  return static_cast<bool>(output_);
-}
-
 void TrajectorySender::send(const Trajectory & msg)
 {
   output_->receive(msg);

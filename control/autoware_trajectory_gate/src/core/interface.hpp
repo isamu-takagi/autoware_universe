@@ -34,7 +34,6 @@ class TrajectorySender
 public:
   virtual ~TrajectorySender() = default;
   void set_output(TrajectoryReceiver * output);
-  bool has_output() const;
 
 protected:
   void send(const Trajectory & msg);

@@ -81,6 +81,8 @@ TrajectoryGate::TrajectoryGate(const rclcpp::NodeOptions & options)
     receivers_.push_back(std::move(publisher));
   }
 
+  notify_source();
+
   /*
   // Create ROS interface.
   pub_status_ =
@@ -163,8 +165,16 @@ TrajectoryGate::TrajectoryGate(const rclcpp::NodeOptions & options)
 
 void TrajectoryGate::on_select_source(const TrajectorySource & req)
 {
-  selector_.select(req.data);
+  const auto success = selector_.select(req.data);
+  notify_source();
 
+  const auto result = success ? "succeeded" : "failed";
+  const auto source = std::to_string(req.data);
+  RCLCPP_INFO_STREAM(get_logger(), "source select " << result << " (" << source << ")");
+}
+
+void TrajectoryGate::notify_source() const
+{
   TrajectorySource msg;
   msg.data = selector_.source();
   pub_source_->publish(msg);
