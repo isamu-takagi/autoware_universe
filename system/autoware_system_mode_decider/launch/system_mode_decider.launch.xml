@@ -1,0 +1,13 @@
+<launch>
+  <arg name="config" default="$(find-pkg-share autoware_system_mode_decider)/config/default.param.yaml"/>
+  <!-- <arg name="output/control" default="/control/command/control_cmd"/> -->
+
+  <!-- Enabled if "main" is listed in config input_names -->
+  <!-- <arg name="inputs/main/control" default="/control/trajectory_follower/control_cmd"/> -->
+
+  <node pkg="autoware_system_mode_decider" exec="trajectory_gate_node">
+    <param from="$(var config)"/>
+    <!-- <remap from="~/output/control" to="$(var output/control)"/> -->
+    <!-- <remap from="~/inputs/main/control" to="$(var inputs/main/control)"/> -->
+  </node>
+</launch>
