@@ -41,6 +41,13 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
 
 void SystemModeDecider::on_timer_init()
 {
+  // const auto period = rclcpp::Rate(10.0).period();
+  // timer_->cancel();
+  // timer_ = rclcpp::create_timer(this, get_clock(), period, [this]() { on_timer_main(); });
+}
+
+void SystemModeDecider::on_timer_main()
+{
 }
 
 void SystemModeDecider::on_trajectory_source(const TrajectorySource & msg)

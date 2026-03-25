@@ -32,6 +32,9 @@ class Decider
 {
 public:
   explicit Decider(GateStatus initial_status);
+  void update_trajectory_source(uint32_t id);
+  void update_command_source(uint32_t id);
+  void update_vehicle_source(uint32_t id);
 
 private:
   GateStatus request_;
