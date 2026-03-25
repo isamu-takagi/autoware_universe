@@ -25,13 +25,37 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
 
   diag_.setHardwareID("none");
 
+  sub_trajectory_source_ = create_subscription<TrajectorySource>(
+    "~/trajectory/source", rclcpp::QoS(1).transient_local(),
+    std::bind(&SystemModeDecider::on_trajectory_source, this, _1));
+  sub_command_source_ = create_subscription<CommandSource>(
+    "~/command/source", rclcpp::QoS(1).transient_local(),
+    std::bind(&SystemModeDecider::on_command_source, this, _1));
+  sub_vehicle_source_ = create_subscription<VehicleSource>(
+    "~/vehicle/source", rclcpp::QoS(1).volatile(),
+    std::bind(&SystemModeDecider::on_vehicle_source, this, _1));
+
   const auto period = rclcpp::Rate(1.0).period();
-  timer_ = rclcpp::create_timer(this, get_clock(), period, [this]() { on_timer_main(); });
+  timer_ = rclcpp::create_timer(this, get_clock(), period, [this]() { on_timer_init(); });
 }
 
 void SystemModeDecider::on_timer_init()
 {
-  RCLCPP_INFO_STREAM(get_logger(), "on_timer_init");
+}
+
+void SystemModeDecider::on_trajectory_source(const TrajectorySource & msg)
+{
+  RCLCPP_INFO_STREAM(get_logger(), "on_trajectory_source: " << msg.source);
+}
+
+void SystemModeDecider::on_command_source(const CommandSource & msg)
+{
+  RCLCPP_INFO_STREAM(get_logger(), "on_command_source: " << msg.source);
+}
+
+void SystemModeDecider::on_vehicle_source(const VehicleSource & msg)
+{
+  RCLCPP_INFO_STREAM(get_logger(), "on_vehicle_source: " << static_cast<int>(msg.mode));
 }
 
 }  // namespace autoware::system_mode_decider
