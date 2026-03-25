@@ -14,7 +14,16 @@
 
 #include "status.hpp"
 
+#include <vector>
+
 namespace autoware::system_mode_decider
 {
+
+SystemModeStatus::SystemModeStatus(const std::vector<uint32_t> & ids)
+{
+  for (const auto & id : ids) {
+    items_.emplace(id, SystemModeStatusItem());
+  }
+}
 
 }  // namespace autoware::system_mode_decider

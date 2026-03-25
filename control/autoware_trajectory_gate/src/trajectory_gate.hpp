@@ -21,7 +21,7 @@
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include <std_msgs/msg/u_int32.hpp>
+#include <autoware_system_mode_msgs/msg/trajectory_source.hpp>
 
 #include <memory>
 #include <vector>
@@ -50,7 +50,7 @@ public:
   explicit TrajectoryGate(const rclcpp::NodeOptions & options);
 
 private:
-  using TrajectorySource = std_msgs::msg::UInt32;
+  using TrajectorySource = autoware_system_mode_msgs::msg::TrajectorySource;
 
   diagnostic_updater::Updater diag_;
 

@@ -15,7 +15,13 @@
 #ifndef SYSTEM_MODE_DECIDER_HPP_
 #define SYSTEM_MODE_DECIDER_HPP_
 
+#include "type/types.hpp"
+
 #include <diagnostic_updater/diagnostic_updater.hpp>
+
+#include <autoware_system_mode_msgs/msg/trajectory_source.hpp>
+#include <autoware_vehicle_msgs/msg/control_mode_report.hpp>
+#include <tier4_system_msgs/msg/command_source_status.hpp>
 
 namespace autoware::system_mode_decider
 {
@@ -26,7 +32,22 @@ public:
   explicit SystemModeDecider(const rclcpp::NodeOptions & options);
 
 private:
+  using TrajectorySource = autoware_system_mode_msgs::msg::TrajectorySource;
+  using CommandSource = tier4_system_msgs::msg::CommandSourceStatus;
+  using VehicleSource = autoware_vehicle_msgs::msg::ControlModeReport;
+
   diagnostic_updater::Updater diag_;
+  rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::Subscription<TrajectorySource>::SharedPtr sub_trajectory_source_;
+  rclcpp::Subscription<CommandSource>::SharedPtr sub_command_source_;
+  rclcpp::Subscription<VehicleSource>::SharedPtr sub_vehicle_source_;
+
+  void on_timer_init();
+  void on_timer_main();
+
+  void on_trajectory_source(const TrajectorySource & msg);
+  void on_command_source(const CommandSource & msg);
+  void on_vehicle_source(const VehicleSource & msg);
 };
 
 }  // namespace autoware::system_mode_decider

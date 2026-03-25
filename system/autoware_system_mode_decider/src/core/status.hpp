@@ -17,25 +17,28 @@
 
 #include <rclcpp/time.hpp>
 
+#include <optional>
+#include <unordered_map>
+#include <vector>
+
 namespace autoware::system_mode_decider
 {
+
+class SystemModeStatusItem
+{
+public:
+private:
+  std::optional<rclcpp::Time> stamp_ = std::nullopt;
+  bool status_ = false;
+};
 
 class SystemModeStatus
 {
 public:
-  SystemModeStatus() = default;
+  explicit SystemModeStatus(const std::vector<uint32_t> & ids);
 
 private:
-  rclcpp::Time stamp_;
-  bool status_;
-};
-
-class SystemModeStatusAaaa
-{
-public:
-  SystemModeStatus available;
-  SystemModeStatus sustainable;
-  SystemModeStatus ready;
+  std::unordered_map<uint32_t, SystemModeStatusItem> items_;
 };
 
 }  // namespace autoware::system_mode_decider

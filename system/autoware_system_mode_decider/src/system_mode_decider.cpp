@@ -24,6 +24,14 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
   using std::placeholders::_2;
 
   diag_.setHardwareID("none");
+
+  const auto period = rclcpp::Rate(1.0).period();
+  timer_ = rclcpp::create_timer(this, get_clock(), period, [this]() { on_timer_main(); });
+}
+
+void SystemModeDecider::on_timer_init()
+{
+  RCLCPP_INFO_STREAM(get_logger(), "on_timer_init");
 }
 
 }  // namespace autoware::system_mode_decider

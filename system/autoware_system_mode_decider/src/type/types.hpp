@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CORE__DECIDER_HPP_
-#define CORE__DECIDER_HPP_
+#ifndef TYPE__TYPES_HPP_
+#define TYPE__TYPES_HPP_
 
 #include <cstdint>
 
@@ -22,23 +22,11 @@ namespace autoware::system_mode_decider
 
 struct GateStatus
 {
-  static constexpr uint32_t invalid = 0;
   uint32_t trajectory;
   uint32_t command;
   uint32_t vehicle;
 };
 
-class Decider
-{
-public:
-  explicit Decider(GateStatus initial_status);
-
-private:
-  GateStatus request_;
-  GateStatus target_;
-  GateStatus actual_;
-};
-
 }  // namespace autoware::system_mode_decider
 
-#endif  // CORE__DECIDER_HPP_
+#endif  // TYPE__TYPES_HPP_

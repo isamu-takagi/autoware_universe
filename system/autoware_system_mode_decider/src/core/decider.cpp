@@ -17,4 +17,9 @@
 namespace autoware::system_mode_decider
 {
 
+Decider::Decider(GateStatus initial_status)
+{
+  request_ = initial_status;
+}
+
 }  // namespace autoware::system_mode_decider
