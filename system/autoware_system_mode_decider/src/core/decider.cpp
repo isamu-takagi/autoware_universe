@@ -17,4 +17,24 @@
 namespace autoware::system_mode_decider
 {
 
+bool Decider::ready() const
+{
+  return false;
+}
+
+void Decider::update_trajectory_source(uint32_t id)
+{
+  (void)id;
+}
+
+void Decider::update_command_source(uint32_t id)
+{
+  (void)id;
+}
+
+void Decider::update_vehicle_source(uint32_t id)
+{
+  (void)id;
+}
+
 }  // namespace autoware::system_mode_decider
