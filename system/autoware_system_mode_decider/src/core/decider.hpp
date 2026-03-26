@@ -15,23 +15,15 @@
 #ifndef CORE__DECIDER_HPP_
 #define CORE__DECIDER_HPP_
 
-#include <cstdint>
+#include "type/modes.hpp"
 
 namespace autoware::system_mode_decider
 {
 
-struct GateStatus
-{
-  static constexpr uint32_t invalid = 0;
-  uint32_t trajectory;
-  uint32_t command;
-  uint32_t vehicle;
-};
-
 class Decider
 {
 public:
-  explicit Decider(GateStatus initial_status);
+  bool ready() const;
   void update_trajectory_source(uint32_t id);
   void update_command_source(uint32_t id);
   void update_vehicle_source(uint32_t id);

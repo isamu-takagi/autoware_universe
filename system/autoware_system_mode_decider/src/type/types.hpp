@@ -15,16 +15,33 @@
 #ifndef TYPE__TYPES_HPP_
 #define TYPE__TYPES_HPP_
 
-#include <cstdint>
+#include <rclcpp/time.hpp>
 
 namespace autoware::system_mode_decider
 {
 
-struct GateStatus
+template <typename Type, typename Time = rclcpp::Time>
+class TimerValue
 {
-  uint32_t trajectory;
-  uint32_t command;
-  uint32_t vehicle;
+public:
+  TimerValue() { timeout_ = true; }
+
+  void update(const Type & value, const Time & stamp)
+  {
+    timeout_ = false;
+    value_ = value;
+    stamp_ = stamp;
+  }
+
+  void update(const Time & stamp, const double timeout) { stamp_ = stamp; }
+
+  Type value() const { return value_; }
+  Time stamp() const { return stamp_; }
+
+private:
+  bool timeout_;
+  Type value_;
+  Time stamp_;
 };
 
 }  // namespace autoware::system_mode_decider

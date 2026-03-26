@@ -12,9 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "decider.hpp"
+#ifndef TYPE__MODES_HPP_
+#define TYPE__MODES_HPP_
+
+#include <cstdint>
 
 namespace autoware::system_mode_decider
 {
 
+struct ModeStatus
+{
+  uint32_t autoware;
+  uint32_t platform;
+};
+
+struct GateStatus
+{
+  uint32_t trajectory;
+  uint32_t command;
+  uint32_t vehicle;
+};
+
 }  // namespace autoware::system_mode_decider
+
+#endif  // TYPE__MODES_HPP_

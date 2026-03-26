@@ -15,6 +15,7 @@
 #ifndef SYSTEM_MODE_DECIDER_HPP_
 #define SYSTEM_MODE_DECIDER_HPP_
 
+#include "core/decider.hpp"
 #include "type/types.hpp"
 
 #include <diagnostic_updater/diagnostic_updater.hpp>
@@ -22,6 +23,8 @@
 #include <autoware_system_mode_msgs/msg/trajectory_source.hpp>
 #include <autoware_vehicle_msgs/msg/control_mode_report.hpp>
 #include <tier4_system_msgs/msg/command_source_status.hpp>
+
+#include <memory>
 
 namespace autoware::system_mode_decider
 {
@@ -41,6 +44,8 @@ private:
   rclcpp::Subscription<TrajectorySource>::SharedPtr sub_trajectory_source_;
   rclcpp::Subscription<CommandSource>::SharedPtr sub_command_source_;
   rclcpp::Subscription<VehicleSource>::SharedPtr sub_vehicle_source_;
+
+  std::unique_ptr<Decider> decider_;
 
   void on_timer_init();
   void on_timer_main();
