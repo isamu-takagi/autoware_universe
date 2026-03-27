@@ -15,23 +15,40 @@
 #ifndef CORE__DECIDER_HPP_
 #define CORE__DECIDER_HPP_
 
+#include "core/task.hpp"
 #include "type/modes.hpp"
+
+#include <queue>
 
 namespace autoware::system_mode_decider
 {
 
+class DeciderLogic
+{
+public:
+  DeciderLogic();
+};
+
 class Decider
 {
 public:
+  Decider();
   bool ready() const;
   void update_trajectory_source(uint32_t id);
   void update_command_source(uint32_t id);
   void update_vehicle_source(uint32_t id);
+  void update();
+
+  void change_autoware_mode(uint32_t id);
+  void change_platform_mode(uint32_t id);
 
 private:
+  uint8_t init_flag_ = 0;
   GateStatus request_;
   GateStatus target_;
   GateStatus actual_;
+
+  std::queue<Task> tasks_;
 };
 
 }  // namespace autoware::system_mode_decider
