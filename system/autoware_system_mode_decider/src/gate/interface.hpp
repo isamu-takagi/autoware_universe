@@ -15,9 +15,9 @@
 #ifndef GATE__INTERFACE_HPP_
 #define GATE__INTERFACE_HPP_
 
-#include "type/types.hpp"
+#include <rclcpp/time.hpp>
 
-#include <optional>
+#include <functional>
 
 namespace autoware::system_mode_decider
 {
@@ -25,7 +25,10 @@ namespace autoware::system_mode_decider
 class GateInterface
 {
 public:
-  std::optional<GateStatus> status() const;
+  using Callback = std::function<void(uint32_t)>;
+  virtual ~GateInterface() = default;
+  virtual uint32_t request(const rclcpp::Time & stamp) = 0;
+  virtual void register_callback(Callback callback) = 0;
 };
 
 }  // namespace autoware::system_mode_decider

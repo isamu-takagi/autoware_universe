@@ -21,8 +21,8 @@ namespace autoware::system_mode_decider
 
 Decider::Decider()
 {
-  tasks_.push(TrajectorySwitch(100));
-  tasks_.push(CommandSwitch(11));
+  // tasks_.push(Task{TaskType::kTrajectory, 100});
+  // tasks_.push(Task{TaskType::kCommand, 11});
 }
 
 bool Decider::ready() const
@@ -51,6 +51,24 @@ void Decider::update_vehicle_source(uint32_t id)
 void Decider::update()
 {
   std::printf("%d %d %d\n", actual_.trajectory, actual_.command, actual_.vehicle);
+
+  if (tasks_.empty()) {
+    return;
+  }
+
+  const auto & task = tasks_.front();
+  if (task.finished()) {
+    tasks_.pop();
+    return;
+  }
+
+  // タスク実行
+  // 未実行：変更要求を実行して「要求中」に遷移
+  // 要求中：タイムアウトしたら「再決定」を発火？
+
+  // ステータス
+  // 要求中：タスクを完了して削除
+  // その他：オーバーライド検出
 }
 
 void Decider::change_autoware_mode(uint32_t id)

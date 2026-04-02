@@ -15,11 +15,29 @@
 #ifndef CORE__TASK_HPP_
 #define CORE__TASK_HPP_
 
+#include "gate/trajectory.hpp"
+
 namespace autoware::system_mode_decider
 {
 
 class Task
 {
+public:
+  virtual ~Task() = default;
+  virtual void execute() = 0;
+  virtual bool finished() const = 0;
+};
+
+class SetTrajectoryGate : public Task
+{
+public:
+  SetTrajectoryGate(uint32_t id, TrajectoryGate * gate);
+  void execute() override;
+  bool finished() const override;
+
+private:
+  uint32_t id_;
+  TrajectoryGate * gate_;
 };
 
 }  // namespace autoware::system_mode_decider
