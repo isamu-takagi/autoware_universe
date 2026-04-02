@@ -53,6 +53,10 @@ private:
   void on_trajectory_source(const TrajectorySource & msg);
   void on_command_source(const CommandSource & msg);
   void on_vehicle_source(const VehicleSource & msg);
+
+  // For initialization.
+  int init_flag_ = 0;
+  bool ready() const { return init_flag_ == 0x07; }
 };
 
 }  // namespace autoware::system_mode_decider

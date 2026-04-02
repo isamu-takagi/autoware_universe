@@ -12,25 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GATE__TRAJECTORY_HPP_
-#define GATE__TRAJECTORY_HPP_
+#ifndef TYPE__GATE_HPP_
+#define TYPE__GATE_HPP_
 
-#include <autoware_system_mode_msgs/msg/trajectory_source.hpp>
+#include <cstdint>
 
 namespace autoware::system_mode_decider
 {
 
-class TrajectoryGate
-{
-public:
-  TrajectoryGate() = default;
+enum class GateType {
+  kTrajectoryGate,
+  kCommandGate,
+  kCommandFilter,
+  kVehicleDriver,
+};
 
-private:
-  using TrajectorySource = autoware_system_mode_msgs::msg::TrajectorySource;
-  rclcpp::Subscription<TrajectorySource>::SharedPtr sub_source_;
-  rclcpp::Publisher<TrajectorySource>::SharedPtr pub_source_;
+struct GateStatus
+{
+  GateType type;
+  uint32_t id;
 };
 
 }  // namespace autoware::system_mode_decider
 
-#endif  // GATE__TRAJECTORY_HPP_
+#endif  // TYPE__GATE_HPP_

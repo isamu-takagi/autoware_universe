@@ -45,7 +45,7 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
 
 void SystemModeDecider::on_timer_init()
 {
-  if (!decider_->ready()) return;
+  if (!ready()) return;
   RCLCPP_INFO_STREAM(get_logger(), "SystemModeDecider is ready.");
 
   const auto period = rclcpp::Rate(10.0).period();
@@ -60,17 +60,20 @@ void SystemModeDecider::on_timer_main()
 
 void SystemModeDecider::on_trajectory_source(const TrajectorySource & msg)
 {
-  decider_->update_trajectory_source(msg.source);
+  init_flag_ |= 0x01;
+  decider_->notify_gate_status(GateStatus{GateType::kTrajectoryGate, msg.source});
 }
 
 void SystemModeDecider::on_command_source(const CommandSource & msg)
 {
-  decider_->update_command_source(msg.source);
+  init_flag_ |= 0x02;
+  decider_->notify_gate_status(GateStatus{GateType::kCommandGate, msg.source});
 }
 
 void SystemModeDecider::on_vehicle_source(const VehicleSource & msg)
 {
-  decider_->update_vehicle_source(msg.mode);
+  init_flag_ |= 0x04;
+  decider_->notify_gate_status(GateStatus{GateType::kVehicleDriver, msg.mode});
 }
 
 }  // namespace autoware::system_mode_decider

@@ -31,13 +31,6 @@ struct ModeStatus
   uint32_t platform;
 };
 
-struct GateStatus
-{
-  uint32_t trajectory;
-  uint32_t command;
-  uint32_t vehicle;
-};
-
 }  // namespace autoware::system_mode_decider
 
 #endif  // TYPE__MODES_HPP_
