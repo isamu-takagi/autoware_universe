@@ -12,41 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CORE__DECIDER_HPP_
-#define CORE__DECIDER_HPP_
+#ifndef TYPE__INTERFACE_HPP_
+#define TYPE__INTERFACE_HPP_
 
-#include "core/task.hpp"
 #include "type/gate.hpp"
-#include "type/interface.hpp"
-
-#include <memory>
-#include <queue>
 
 namespace autoware::system_mode_decider
 {
 
-class DeciderLogic
+class Interface
 {
 public:
-  DeciderLogic();
-};
-
-class Decider
-{
-public:
-  explicit Decider(std::unique_ptr<Interface> && interface);
-  void update();
-  void notify_gate_status(const GateStatus & status);
-
-  void change_autoware_mode(uint32_t id);
-  void change_platform_mode(uint32_t id);
-
-private:
-  Task none_task_ = Task{GateStatus{GateType::kInvalid, 0}};
-  std::queue<Task> tasks_;
-  std::unique_ptr<Interface> interface_;
+  virtual ~Interface() = default;
+  virtual void change_gate_status(const GateStatus & status) = 0;
 };
 
 }  // namespace autoware::system_mode_decider
 
-#endif  // CORE__DECIDER_HPP_
+#endif  // TYPE__INTERFACE_HPP_

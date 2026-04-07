@@ -59,6 +59,13 @@ private:
   bool ready() const { return init_flag_ == 0x07; }
 };
 
+class RosInterface : public Interface
+{
+public:
+  explicit RosInterface(rclcpp::Node * node);
+  void change_gate_status(const GateStatus & status) override;
+};
+
 }  // namespace autoware::system_mode_decider
 
 #endif  // SYSTEM_MODE_DECIDER_HPP_

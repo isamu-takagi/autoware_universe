@@ -26,8 +26,7 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
   using std::placeholders::_2;
 
   diag_.setHardwareID("none");
-
-  decider_ = std::make_unique<Decider>();
+  decider_ = std::make_unique<Decider>(std::make_unique<RosInterface>(this));
 
   sub_trajectory_source_ = create_subscription<TrajectorySource>(
     "~/trajectory/source", rclcpp::QoS(1).transient_local(),
@@ -74,6 +73,16 @@ void SystemModeDecider::on_vehicle_source(const VehicleSource & msg)
 {
   init_flag_ |= 0x04;
   decider_->notify_gate_status(GateStatus{GateType::kVehicleDriver, msg.mode});
+}
+
+RosInterface::RosInterface(rclcpp::Node * node)
+{
+  (void)node;
+}
+
+void RosInterface::change_gate_status(const GateStatus & status)
+{
+  (void)status;
 }
 
 }  // namespace autoware::system_mode_decider

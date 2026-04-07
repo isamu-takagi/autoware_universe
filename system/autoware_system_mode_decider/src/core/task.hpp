@@ -15,7 +15,7 @@
 #ifndef CORE__TASK_HPP_
 #define CORE__TASK_HPP_
 
-#include <cstdint>
+#include "type/gate.hpp"
 
 namespace autoware::system_mode_decider
 {
@@ -23,21 +23,11 @@ namespace autoware::system_mode_decider
 class Task
 {
 public:
-  virtual ~Task() = default;
-  virtual void execute() = 0;
-  virtual bool finished() const = 0;
-};
-
-class SetTrajectorySource : public Task
-{
-public:
-  SetTrajectorySource(uint32_t id, void * interface);
-  void execute() override;
-  bool finished() const override;
+  explicit Task(const GateStatus & target) : target_(target) {}
+  bool expects(const GateStatus & status);
 
 private:
-  uint32_t id_;
-  void * interface_;
+  GateStatus target_;
 };
 
 }  // namespace autoware::system_mode_decider
