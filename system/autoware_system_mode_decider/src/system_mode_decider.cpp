@@ -38,6 +38,10 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
     "~/vehicle/source/status", rclcpp::QoS(1).durability_volatile(),
     std::bind(&SystemModeDecider::on_vehicle_source, this, _1));
 
+  srv_operation_mode_ = create_service<ChangeOperationMode>(
+    "~/system/change_operation_mode",
+    std::bind(&SystemModeDecider::on_change_operation_mode, this, _1, _2));
+
   const auto period = rclcpp::Rate(1.0).period();
   timer_ = rclcpp::create_timer(this, get_clock(), period, [this]() { on_timer_init(); });
 }
@@ -73,6 +77,13 @@ void SystemModeDecider::on_vehicle_source(const VehicleSource & msg)
 {
   init_flag_ |= 0x04;
   decider_->notify_gate_status(GateStatus{GateType::kVehicleDriver, msg.mode});
+}
+
+void SystemModeDecider::on_change_operation_mode(
+  ChangeOperationMode::Request::SharedPtr req, ChangeOperationMode::Response::SharedPtr res)
+{
+  decider_->change_autoware_mode(AutowareMode{req->mode});
+  res->status.success = true;
 }
 
 RosInterface::RosInterface(rclcpp::Node * node) : node_(node)

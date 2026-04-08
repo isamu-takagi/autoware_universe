@@ -23,6 +23,7 @@
 #include <autoware_system_mode_msgs/msg/trajectory_source.hpp>
 #include <autoware_vehicle_msgs/msg/control_mode_report.hpp>
 #include <tier4_system_msgs/msg/command_source_status.hpp>
+#include <tier4_system_msgs/srv/change_operation_mode.hpp>
 #include <tier4_system_msgs/srv/select_command_source.hpp>
 
 #include <memory>
@@ -39,14 +40,14 @@ private:
   using TrajectorySource = autoware_system_mode_msgs::msg::TrajectorySource;
   using CommandSource = tier4_system_msgs::msg::CommandSourceStatus;
   using VehicleSource = autoware_vehicle_msgs::msg::ControlModeReport;
+  using ChangeOperationMode = tier4_system_msgs::srv::ChangeOperationMode;
 
   diagnostic_updater::Updater diag_;
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Subscription<TrajectorySource>::SharedPtr sub_trajectory_source_;
   rclcpp::Subscription<CommandSource>::SharedPtr sub_command_source_;
   rclcpp::Subscription<VehicleSource>::SharedPtr sub_vehicle_source_;
-
-  std::unique_ptr<Decider> decider_;
+  rclcpp::Service<ChangeOperationMode>::SharedPtr srv_operation_mode_;
 
   void on_timer_init();
   void on_timer_main();
@@ -54,6 +55,10 @@ private:
   void on_trajectory_source(const TrajectorySource & msg);
   void on_command_source(const CommandSource & msg);
   void on_vehicle_source(const VehicleSource & msg);
+  void on_change_operation_mode(
+    ChangeOperationMode::Request::SharedPtr req, ChangeOperationMode::Response::SharedPtr res);
+
+  std::unique_ptr<Decider> decider_;
 
   // For initialization.
   int init_flag_ = 0;

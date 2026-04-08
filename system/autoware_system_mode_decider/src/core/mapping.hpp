@@ -12,48 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CORE__DECIDER_HPP_
-#define CORE__DECIDER_HPP_
+#ifndef CORE__MAPPING_HPP_
+#define CORE__MAPPING_HPP_
 
-#include "core/mapping.hpp"
-#include "core/task.hpp"
 #include "type/gate.hpp"
-#include "type/interface.hpp"
 #include "type/mode.hpp"
 
-#include <memory>
-#include <queue>
 #include <unordered_map>
+#include <vector>
 
 namespace autoware::system_mode_decider
 {
 
-class DeciderLogic
+class ModeMapping
 {
 public:
-  DeciderLogic();
-};
-
-class Decider
-{
-public:
-  explicit Decider(std::unique_ptr<Interface> && interface);
-  void update();
-  void notify_gate_status(const GateStatus & status);
-
-  void change_autoware_mode(const AutowareMode & mode);
-  void change_platform_mode(const PlatformMode & mode);
+  ModeMapping();
+  const auto & from(AutowareMode mode) const { return autoware_.at(mode.id); }
 
 private:
-  Task none_task_ = Task{GateStatus{GateType::kInvalid, 0}};
-  std::queue<Task> tasks_;
-  std::unique_ptr<Interface> interface_;
-  std::unordered_map<GateType, uint32_t> actual_gate_status_;
-
-  SystemMode target_;
-  ModeMapping mapping_;
+  std::unordered_map<uint32_t, std::vector<GateStatus>> autoware_;
 };
 
 }  // namespace autoware::system_mode_decider
 
-#endif  // CORE__DECIDER_HPP_
+#endif  // CORE__MAPPING_HPP_
