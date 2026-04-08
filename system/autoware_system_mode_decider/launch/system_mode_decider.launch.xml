@@ -7,8 +7,10 @@
 
   <node pkg="autoware_system_mode_decider" exec="system_mode_decider_node">
     <param from="$(var config)"/>
-    <remap from="~/trajectory/source" to="/planning/trajectory_gate/source/status"/>
-    <remap from="~/command/source" to="/control/control_command_gate/source/status"/>
-    <remap from="~/vehicle/source" to="/vehicle/status/control_mode"/>
+    <remap from="~/trajectory/source/status" to="/planning/trajectory_gate/source/status"/>
+    <remap from="~/trajectory/source/select" to="/planning/trajectory_gate/source/select"/>
+    <remap from="~/command/source/status" to="/control/control_command_gate/source/status"/>
+    <remap from="~/command/source/select" to="/control/control_command_gate/source/select"/>
+    <remap from="~/vehicle/source/status" to="/vehicle/status/control_mode"/>
   </node>
 </launch>

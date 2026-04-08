@@ -17,7 +17,7 @@
 #include <utility>
 
 //
-#include <cstdio>
+#include <rclcpp/logging.hpp>
 
 namespace autoware::system_mode_decider
 {
@@ -35,11 +35,11 @@ void Decider::update()
   // std::printf("%d %d %d\n", actual_.trajectory, actual_.command, actual_.vehicle);
 
   Task & task = tasks_.empty() ? none_task_ : tasks_.front();
-  (void)task;
-
-  // タスク実行
-  // 未実行：変更要求を実行して「要求中」に遷移
-  // 要求中：タイムアウトしたら「再決定」を発火？
+  task.execute(*interface_);
+  if (task.timeout(*interface_)) {
+    tasks_.pop();
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("Decider"), "timeout");
+  }
 }
 
 void Decider::notify_gate_status(const GateStatus & status)
@@ -49,6 +49,7 @@ void Decider::notify_gate_status(const GateStatus & status)
   if (task.expects(status)) {
     tasks_.pop();
     // update();
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("Decider"), "complete");
   } else {
     // Override detected !!
   }
@@ -56,12 +57,12 @@ void Decider::notify_gate_status(const GateStatus & status)
 
 void Decider::change_autoware_mode(uint32_t id)
 {
-  std::printf("Change Autoware mode to %d\n", id);
+  RCLCPP_INFO(rclcpp::get_logger("Decider"), "Change Autoware mode to %d", id);
 }
 
 void Decider::change_platform_mode(uint32_t id)
 {
-  std::printf("Change Platform mode to %d\n", id);
+  RCLCPP_INFO(rclcpp::get_logger("Decider"), "Change Platform mode to %d", id);
 }
 
 }  // namespace autoware::system_mode_decider

@@ -16,6 +16,11 @@
 #define CORE__TASK_HPP_
 
 #include "type/gate.hpp"
+#include "type/interface.hpp"
+
+#include <rclcpp/time.hpp>
+
+#include <optional>
 
 namespace autoware::system_mode_decider
 {
@@ -24,10 +29,13 @@ class Task
 {
 public:
   explicit Task(const GateStatus & target) : target_(target) {}
-  bool expects(const GateStatus & status);
+  void execute(Interface & interface);
+  bool timeout(Interface & interface);
+  bool expects(const GateStatus & status) const;
 
 private:
   GateStatus target_;
+  std::optional<rclcpp::Time> stamp_;
 };
 
 }  // namespace autoware::system_mode_decider

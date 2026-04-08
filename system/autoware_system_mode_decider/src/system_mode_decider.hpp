@@ -23,6 +23,7 @@
 #include <autoware_system_mode_msgs/msg/trajectory_source.hpp>
 #include <autoware_vehicle_msgs/msg/control_mode_report.hpp>
 #include <tier4_system_msgs/msg/command_source_status.hpp>
+#include <tier4_system_msgs/srv/select_command_source.hpp>
 
 #include <memory>
 
@@ -63,7 +64,18 @@ class RosInterface : public Interface
 {
 public:
   explicit RosInterface(rclcpp::Node * node);
+  rclcpp::Time now() const override;
   void change_gate_status(const GateStatus & status) override;
+
+private:
+  using TrajectorySource = autoware_system_mode_msgs::msg::TrajectorySource;
+  using SelectCommandSource = tier4_system_msgs::srv::SelectCommandSource;
+  rclcpp::Node * node_;
+  rclcpp::Publisher<TrajectorySource>::SharedPtr pub_trajectory_select_;
+  rclcpp::Client<SelectCommandSource>::SharedPtr cli_command_select_;
+
+  void change_trajectory_source(uint32_t id);
+  void change_command_source(uint32_t id);
 };
 
 }  // namespace autoware::system_mode_decider

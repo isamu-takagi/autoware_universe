@@ -29,13 +29,13 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
   decider_ = std::make_unique<Decider>(std::make_unique<RosInterface>(this));
 
   sub_trajectory_source_ = create_subscription<TrajectorySource>(
-    "~/trajectory/source", rclcpp::QoS(1).transient_local(),
+    "~/trajectory/source/status", rclcpp::QoS(1).transient_local(),
     std::bind(&SystemModeDecider::on_trajectory_source, this, _1));
   sub_command_source_ = create_subscription<CommandSource>(
-    "~/command/source", rclcpp::QoS(1).transient_local(),
+    "~/command/source/status", rclcpp::QoS(1).transient_local(),
     std::bind(&SystemModeDecider::on_command_source, this, _1));
   sub_vehicle_source_ = create_subscription<VehicleSource>(
-    "~/vehicle/source", rclcpp::QoS(1).durability_volatile(),
+    "~/vehicle/source/status", rclcpp::QoS(1).durability_volatile(),
     std::bind(&SystemModeDecider::on_vehicle_source, this, _1));
 
   const auto period = rclcpp::Rate(1.0).period();
@@ -75,14 +75,61 @@ void SystemModeDecider::on_vehicle_source(const VehicleSource & msg)
   decider_->notify_gate_status(GateStatus{GateType::kVehicleDriver, msg.mode});
 }
 
-RosInterface::RosInterface(rclcpp::Node * node)
+RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
 {
-  (void)node;
+  pub_trajectory_select_ =
+    node->create_publisher<TrajectorySource>("~/trajectory/source/select", rclcpp::QoS(1));
+  cli_command_select_ = node->create_client<SelectCommandSource>("~/command/source/select");
+}
+
+rclcpp::Time RosInterface::now() const
+{
+  return node_->now();
 }
 
 void RosInterface::change_gate_status(const GateStatus & status)
 {
-  (void)status;
+  const auto type_name = [](GateType type) {
+    switch (type) {
+      case GateType::kInvalid:
+        return "Invalid";
+      case GateType::kTrajectoryGate:
+        return "TrajectoryGate";
+      case GateType::kCommandGate:
+        return "CommandGate";
+      case GateType::kCommandFilter:
+        return "CommandFilter";
+      case GateType::kVehicleDriver:
+        return "VehicleDriver";
+      default:
+        return "Unknown";
+    }
+  };
+  RCLCPP_INFO_STREAM(
+    node_->get_logger(), "Change gate status: " << type_name(status.type) << ", " << status.id);
+
+  switch (status.type) {
+    case GateType::kTrajectoryGate:
+      return change_trajectory_source(status.id);
+    case GateType::kCommandGate:
+      return change_command_source(status.id);
+    default:
+      return;
+  }
+}
+
+void RosInterface::change_trajectory_source(uint32_t id)
+{
+  TrajectorySource msg;
+  msg.source = id;
+  pub_trajectory_select_->publish(msg);
+}
+
+void RosInterface::change_command_source(uint32_t id)
+{
+  const auto request = std::make_shared<SelectCommandSource::Request>();
+  request->source = id;
+  cli_command_select_->async_send_request(request);
 }
 
 }  // namespace autoware::system_mode_decider

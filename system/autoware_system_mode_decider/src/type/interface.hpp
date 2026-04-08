@@ -17,6 +17,8 @@
 
 #include "type/gate.hpp"
 
+#include <rclcpp/time.hpp>
+
 namespace autoware::system_mode_decider
 {
 
@@ -24,6 +26,7 @@ class Interface
 {
 public:
   virtual ~Interface() = default;
+  virtual rclcpp::Time now() const = 0;
   virtual void change_gate_status(const GateStatus & status) = 0;
 };
 
