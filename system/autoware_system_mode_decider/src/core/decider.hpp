@@ -21,6 +21,9 @@
 #include "type/interface.hpp"
 #include "type/mode.hpp"
 
+#include <autoware_system_mode_decider/plugin.hpp>
+#include <pluginlib/class_loader.hpp>
+
 #include <memory>
 #include <queue>
 #include <unordered_map>
@@ -50,6 +53,7 @@ private:
   std::unique_ptr<Interface> interface_;
   std::unordered_map<GateType, uint32_t> actual_gate_status_;
 
+  pluginlib::ClassLoader<Plugin> loader_;
   SystemMode target_;
   ModeMapping mapping_;
 };

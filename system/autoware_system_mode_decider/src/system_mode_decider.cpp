@@ -119,14 +119,13 @@ void RosInterface::change_gate_status(const GateStatus & status)
   RCLCPP_INFO_STREAM(
     node_->get_logger(), "Change gate status: " << type_name(status.type) << ", " << status.id);
 
+  // clang-format off
   switch (status.type) {
-    case GateType::kTrajectoryGate:
-      return change_trajectory_source(status.id);
-    case GateType::kCommandGate:
-      return change_command_source(status.id);
-    default:
-      return;
+    case GateType::kTrajectoryGate: return change_trajectory_source(status.id);
+    case GateType::kCommandGate:    return change_command_source(status.id);
+    default:                        return;
   }
+  // clang-format on
 }
 
 void RosInterface::change_trajectory_source(uint32_t id)

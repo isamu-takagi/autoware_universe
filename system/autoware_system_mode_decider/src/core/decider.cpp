@@ -22,7 +22,8 @@
 namespace autoware::system_mode_decider
 {
 
-Decider::Decider(std::unique_ptr<Interface> && interface)
+Decider::Decider(std::unique_ptr<Interface> && interface),
+  loader_("autoware_command_mode_decider", "autoware::command_mode_decider::DeciderPlugin")
 {
   interface_ = std::move(interface);
 }
