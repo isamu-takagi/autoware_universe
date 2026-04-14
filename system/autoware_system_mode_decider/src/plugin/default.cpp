@@ -12,18 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef AUTOWARE_SYSTEM_MODE_DECIDER__PLUGIN_HPP_
-#define AUTOWARE_SYSTEM_MODE_DECIDER__PLUGIN_HPP_
+#include "default.hpp"
 
 namespace autoware::system_mode_decider
 {
 
-class Plugin
-{
-public:
-  virtual ~Plugin() = default;
-};
-
 }  // namespace autoware::system_mode_decider
 
-#endif  // AUTOWARE_SYSTEM_MODE_DECIDER__PLUGIN_HPP_
+#include <pluginlib/class_list_macros.hpp>
+PLUGINLIB_EXPORT_CLASS(
+  autoware::system_mode_decider::DefaultPlugin, autoware::system_mode_decider::Plugin)

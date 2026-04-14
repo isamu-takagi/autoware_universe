@@ -14,6 +14,7 @@
 
 #include "decider.hpp"
 
+#include <memory>
 #include <utility>
 
 //
@@ -22,10 +23,10 @@
 namespace autoware::system_mode_decider
 {
 
-Decider::Decider(std::unique_ptr<Interface> && interface),
-  loader_("autoware_command_mode_decider", "autoware::command_mode_decider::DeciderPlugin")
+Decider::Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin)
 {
   interface_ = std::move(interface);
+  plugin_ = plugin;
 }
 
 void Decider::update()

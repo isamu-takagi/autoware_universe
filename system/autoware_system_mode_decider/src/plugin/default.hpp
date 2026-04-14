@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef AUTOWARE_SYSTEM_MODE_DECIDER__PLUGIN_HPP_
-#define AUTOWARE_SYSTEM_MODE_DECIDER__PLUGIN_HPP_
+#ifndef PLUGIN__DEFAULT_HPP_
+#define PLUGIN__DEFAULT_HPP_
+
+#include <autoware_system_mode_decider/plugin.hpp>
 
 namespace autoware::system_mode_decider
 {
 
-class Plugin
+class DefaultPlugin : public Plugin
 {
 public:
-  virtual ~Plugin() = default;
 };
 
 }  // namespace autoware::system_mode_decider
 
-#endif  // AUTOWARE_SYSTEM_MODE_DECIDER__PLUGIN_HPP_
+#endif  // PLUGIN__DEFAULT_HPP_

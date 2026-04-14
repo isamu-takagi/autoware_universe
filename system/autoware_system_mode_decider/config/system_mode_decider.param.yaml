@@ -1,3 +1,4 @@
 /**:
   ros__parameters:
     rate: 10.0
+    plugin: "autoware::system_mode_decider::DefaultPlugin"

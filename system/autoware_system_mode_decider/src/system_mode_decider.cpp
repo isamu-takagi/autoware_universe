@@ -15,18 +15,27 @@
 #include "system_mode_decider.hpp"
 
 #include <memory>
+#include <string>
 
 namespace autoware::system_mode_decider
 {
 
 SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
-: Node("system_mode_decider", options), diag_(this, 0.1)
+: Node("system_mode_decider", options),
+  diag_(this, 0.1),
+  loader_("autoware_system_mode_decider", "autoware::system_mode_decider::Plugin")
 {
   using std::placeholders::_1;
   using std::placeholders::_2;
 
   diag_.setHardwareID("none");
-  decider_ = std::make_unique<Decider>(std::make_unique<RosInterface>(this));
+
+  const auto plugin_name = declare_parameter<std::string>("plugin");
+  if (!loader_.isClassAvailable(plugin_name)) {
+    throw std::invalid_argument("unknown plugin: " + plugin_name);
+  }
+  const auto plugin = loader_.createSharedInstance(plugin_name);
+  decider_ = std::make_unique<Decider>(std::make_unique<RosInterface>(this), plugin);
 
   sub_trajectory_source_ = create_subscription<TrajectorySource>(
     "~/trajectory/source/status", rclcpp::QoS(1).transient_local(),

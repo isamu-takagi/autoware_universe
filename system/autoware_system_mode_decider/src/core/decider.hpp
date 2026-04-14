@@ -22,7 +22,6 @@
 #include "type/mode.hpp"
 
 #include <autoware_system_mode_decider/plugin.hpp>
-#include <pluginlib/class_loader.hpp>
 
 #include <memory>
 #include <queue>
@@ -40,7 +39,7 @@ public:
 class Decider
 {
 public:
-  explicit Decider(std::unique_ptr<Interface> && interface);
+  Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin);
   void update();
   void notify_gate_status(const GateStatus & status);
 
@@ -51,9 +50,9 @@ private:
   Task none_task_ = Task{GateStatus{GateType::kInvalid, 0}};
   std::queue<Task> tasks_;
   std::unique_ptr<Interface> interface_;
+  std::shared_ptr<Plugin> plugin_;
   std::unordered_map<GateType, uint32_t> actual_gate_status_;
 
-  pluginlib::ClassLoader<Plugin> loader_;
   SystemMode target_;
   ModeMapping mapping_;
 };

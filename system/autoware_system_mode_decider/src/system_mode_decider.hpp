@@ -18,7 +18,9 @@
 #include "core/decider.hpp"
 #include "type/types.hpp"
 
+#include <autoware_system_mode_decider/plugin.hpp>
 #include <diagnostic_updater/diagnostic_updater.hpp>
+#include <pluginlib/class_loader.hpp>
 
 #include <autoware_system_mode_msgs/msg/trajectory_source.hpp>
 #include <autoware_vehicle_msgs/msg/control_mode_report.hpp>
@@ -58,6 +60,7 @@ private:
   void on_change_operation_mode(
     ChangeOperationMode::Request::SharedPtr req, ChangeOperationMode::Response::SharedPtr res);
 
+  pluginlib::ClassLoader<Plugin> loader_;
   std::unique_ptr<Decider> decider_;
 
   // For initialization.
