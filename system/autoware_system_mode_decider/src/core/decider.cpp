@@ -14,6 +14,7 @@
 
 #include "decider.hpp"
 
+#include <memory>
 #include <utility>
 
 //
@@ -22,12 +23,10 @@
 namespace autoware::system_mode_decider
 {
 
-Decider::Decider(std::unique_ptr<Interface> && interface)
+Decider::Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin)
 {
   interface_ = std::move(interface);
-
-  tasks_.push(Task{GateStatus{GateType::kTrajectoryGate, 100}});
-  tasks_.push(Task{GateStatus{GateType::kCommandGate, 11}});
+  plugin_ = plugin;
 }
 
 void Decider::update()
@@ -44,6 +43,8 @@ void Decider::update()
 
 void Decider::notify_gate_status(const GateStatus & status)
 {
+  actual_gate_status_[status.type] = status.id;
+
   Task & task = tasks_.empty() ? none_task_ : tasks_.front();
 
   if (task.expects(status)) {
@@ -55,14 +56,18 @@ void Decider::notify_gate_status(const GateStatus & status)
   }
 }
 
-void Decider::change_autoware_mode(uint32_t id)
+void Decider::change_autoware_mode(const AutowareMode & mode)
 {
-  RCLCPP_INFO(rclcpp::get_logger("Decider"), "Change Autoware mode to %d", id);
+  RCLCPP_INFO(rclcpp::get_logger("Decider"), "Change Autoware mode to %d", mode.id);
+
+  for (const auto & status : mapping_.from(mode)) {
+    tasks_.push(Task(status));
+  }
 }
 
-void Decider::change_platform_mode(uint32_t id)
+void Decider::change_platform_mode(const PlatformMode & mode)
 {
-  RCLCPP_INFO(rclcpp::get_logger("Decider"), "Change Platform mode to %d", id);
+  RCLCPP_INFO(rclcpp::get_logger("Decider"), "Change Platform mode to %d", mode.id);
 }
 
 }  // namespace autoware::system_mode_decider

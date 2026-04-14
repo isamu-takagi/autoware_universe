@@ -12,25 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TYPE__MODES_HPP_
-#define TYPE__MODES_HPP_
-
-#include <cstdint>
+#include "mapping.hpp"
 
 namespace autoware::system_mode_decider
 {
 
-struct AutowareMode
+ModeMapping::ModeMapping()
 {
-  uint32_t id;
-};
+  // Stop mode
+  autoware_[0] = {};
+  autoware_[0].emplace_back(GateStatus{GateType::kCommandGate, 11});
 
-struct ModeStatus
-{
-  uint32_t autoware;
-  uint32_t platform;
-};
+  // Auto mode
+  autoware_[1] = {};
+  autoware_[1].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
+  autoware_[1].emplace_back(GateStatus{GateType::kCommandGate, 12});
+}
 
 }  // namespace autoware::system_mode_decider
-
-#endif  // TYPE__MODES_HPP_

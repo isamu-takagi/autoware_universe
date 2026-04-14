@@ -15,18 +15,27 @@
 #include "system_mode_decider.hpp"
 
 #include <memory>
+#include <string>
 
 namespace autoware::system_mode_decider
 {
 
 SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
-: Node("system_mode_decider", options), diag_(this, 0.1)
+: Node("system_mode_decider", options),
+  diag_(this, 0.1),
+  loader_("autoware_system_mode_decider", "autoware::system_mode_decider::Plugin")
 {
   using std::placeholders::_1;
   using std::placeholders::_2;
 
   diag_.setHardwareID("none");
-  decider_ = std::make_unique<Decider>(std::make_unique<RosInterface>(this));
+
+  const auto plugin_name = declare_parameter<std::string>("plugin");
+  if (!loader_.isClassAvailable(plugin_name)) {
+    throw std::invalid_argument("unknown plugin: " + plugin_name);
+  }
+  const auto plugin = loader_.createSharedInstance(plugin_name);
+  decider_ = std::make_unique<Decider>(std::make_unique<RosInterface>(this), plugin);
 
   sub_trajectory_source_ = create_subscription<TrajectorySource>(
     "~/trajectory/source/status", rclcpp::QoS(1).transient_local(),
@@ -37,6 +46,10 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
   sub_vehicle_source_ = create_subscription<VehicleSource>(
     "~/vehicle/source/status", rclcpp::QoS(1).durability_volatile(),
     std::bind(&SystemModeDecider::on_vehicle_source, this, _1));
+
+  srv_operation_mode_ = create_service<ChangeOperationMode>(
+    "~/system/change_operation_mode",
+    std::bind(&SystemModeDecider::on_change_operation_mode, this, _1, _2));
 
   const auto period = rclcpp::Rate(1.0).period();
   timer_ = rclcpp::create_timer(this, get_clock(), period, [this]() { on_timer_init(); });
@@ -75,6 +88,13 @@ void SystemModeDecider::on_vehicle_source(const VehicleSource & msg)
   decider_->notify_gate_status(GateStatus{GateType::kVehicleDriver, msg.mode});
 }
 
+void SystemModeDecider::on_change_operation_mode(
+  ChangeOperationMode::Request::SharedPtr req, ChangeOperationMode::Response::SharedPtr res)
+{
+  decider_->change_autoware_mode(AutowareMode{req->mode});
+  res->status.success = true;
+}
+
 RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
 {
   pub_trajectory_select_ =
@@ -108,14 +128,13 @@ void RosInterface::change_gate_status(const GateStatus & status)
   RCLCPP_INFO_STREAM(
     node_->get_logger(), "Change gate status: " << type_name(status.type) << ", " << status.id);
 
+  // clang-format off
   switch (status.type) {
-    case GateType::kTrajectoryGate:
-      return change_trajectory_source(status.id);
-    case GateType::kCommandGate:
-      return change_command_source(status.id);
-    default:
-      return;
+    case GateType::kTrajectoryGate: return change_trajectory_source(status.id);
+    case GateType::kCommandGate:    return change_command_source(status.id);
+    default:                        return;
   }
+  // clang-format on
 }
 
 void RosInterface::change_trajectory_source(uint32_t id)
