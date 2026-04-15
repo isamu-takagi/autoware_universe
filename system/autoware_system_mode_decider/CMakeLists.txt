@@ -9,7 +9,6 @@ ament_auto_add_library(${PROJECT_NAME}_common SHARED
   "src/core/decider.cpp"
   "src/core/status.cpp"
   "src/core/task.cpp"
-  "src/core/mapping.cpp"
 )
 target_include_directories(${PROJECT_NAME}_common PRIVATE
   "src"

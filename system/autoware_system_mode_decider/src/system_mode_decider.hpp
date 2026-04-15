@@ -16,7 +16,6 @@
 #define SYSTEM_MODE_DECIDER_HPP_
 
 #include "core/decider.hpp"
-#include "type/types.hpp"
 
 #include <autoware_system_mode_decider/plugin.hpp>
 #include <diagnostic_updater/diagnostic_updater.hpp>

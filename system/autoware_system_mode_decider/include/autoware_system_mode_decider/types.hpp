@@ -12,21 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "mapping.hpp"
+#ifndef AUTOWARE_SYSTEM_MODE_DECIDER__TYPES_HPP_
+#define AUTOWARE_SYSTEM_MODE_DECIDER__TYPES_HPP_
+
+#include <cstdint>
+#include <unordered_map>
+#include <vector>
 
 namespace autoware::system_mode_decider
 {
 
-ModeMapping::ModeMapping()
-{
-  // Stop mode
-  autoware_[0] = {};
-  autoware_[0].emplace_back(GateStatus{GateType::kCommandGate, 11});
+enum class GateType {
+  kInvalid,
+  kTrajectoryGate,
+  kCommandGate,
+  kCommandFilter,
+  kVehicleDriver,
+};
 
-  // Auto mode
-  autoware_[1] = {};
-  autoware_[1].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
-  autoware_[1].emplace_back(GateStatus{GateType::kCommandGate, 12});
-}
+struct GateStatus
+{
+  GateType type;
+  uint32_t id;
+};
+
+struct AutowareMode
+{
+  uint32_t id;
+};
+
+struct PlatformMode
+{
+  uint32_t id;
+};
+
+using ModeMapping = std::unordered_map<uint32_t, std::vector<GateStatus>>;
 
 }  // namespace autoware::system_mode_decider
+
+#endif  // AUTOWARE_SYSTEM_MODE_DECIDER__TYPES_HPP_

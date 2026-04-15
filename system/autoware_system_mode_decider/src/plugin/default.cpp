@@ -17,6 +17,27 @@
 namespace autoware::system_mode_decider
 {
 
+AutowareMode DefaultPlugin::decide()
+{
+  return AutowareMode{0};
+};
+
+ModeMapping DefaultPlugin::mapping() const
+{
+  ModeMapping mapping;
+
+  // Stop mode
+  mapping[0] = {};
+  mapping[0].emplace_back(GateStatus{GateType::kCommandGate, 11});
+
+  // Auto mode
+  mapping[1] = {};
+  mapping[1].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
+  mapping[1].emplace_back(GateStatus{GateType::kCommandGate, 12});
+
+  return mapping;
+}
+
 }  // namespace autoware::system_mode_decider
 
 #include <pluginlib/class_list_macros.hpp>

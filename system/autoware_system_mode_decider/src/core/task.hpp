@@ -15,7 +15,6 @@
 #ifndef CORE__TASK_HPP_
 #define CORE__TASK_HPP_
 
-#include "type/gate.hpp"
 #include "type/interface.hpp"
 
 #include <rclcpp/time.hpp>

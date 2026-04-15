@@ -15,8 +15,7 @@
 #ifndef TYPE__INTERFACE_HPP_
 #define TYPE__INTERFACE_HPP_
 
-#include "type/gate.hpp"
-
+#include <autoware_system_mode_decider/types.hpp>
 #include <rclcpp/time.hpp>
 
 namespace autoware::system_mode_decider

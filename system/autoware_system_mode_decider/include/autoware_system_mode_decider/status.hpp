@@ -15,6 +15,8 @@
 #ifndef AUTOWARE_SYSTEM_MODE_DECIDER__STATUS_HPP_
 #define AUTOWARE_SYSTEM_MODE_DECIDER__STATUS_HPP_
 
+#include "types.hpp"
+
 #include <unordered_map>
 #include <vector>
 

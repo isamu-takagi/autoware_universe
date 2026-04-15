@@ -15,6 +15,8 @@
 #ifndef AUTOWARE_SYSTEM_MODE_DECIDER__PLUGIN_HPP_
 #define AUTOWARE_SYSTEM_MODE_DECIDER__PLUGIN_HPP_
 
+#include "status.hpp"
+
 namespace autoware::system_mode_decider
 {
 
@@ -22,6 +24,8 @@ class Plugin
 {
 public:
   virtual ~Plugin() = default;
+  virtual AutowareMode decide() = 0;
+  virtual ModeMapping mapping() const = 0;
 };
 
 }  // namespace autoware::system_mode_decider

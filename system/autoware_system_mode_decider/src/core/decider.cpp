@@ -27,6 +27,7 @@ Decider::Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin
 {
   interface_ = std::move(interface);
   plugin_ = plugin;
+  mapping_ = plugin_->mapping();
 }
 
 void Decider::update()
@@ -60,7 +61,7 @@ void Decider::change_autoware_mode(const AutowareMode & mode)
 {
   RCLCPP_INFO(rclcpp::get_logger("Decider"), "Change Autoware mode to %d", mode.id);
 
-  for (const auto & status : mapping_.from(mode)) {
+  for (const auto & status : mapping_.at(mode.id)) {
     tasks_.push(Task(status));
   }
 }

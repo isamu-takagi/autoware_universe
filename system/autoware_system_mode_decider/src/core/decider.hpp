@@ -15,11 +15,8 @@
 #ifndef CORE__DECIDER_HPP_
 #define CORE__DECIDER_HPP_
 
-#include "core/mapping.hpp"
 #include "core/task.hpp"
-#include "type/gate.hpp"
 #include "type/interface.hpp"
-#include "type/mode.hpp"
 
 #include <autoware_system_mode_decider/plugin.hpp>
 
@@ -53,7 +50,6 @@ private:
   std::shared_ptr<Plugin> plugin_;
   std::unordered_map<GateType, uint32_t> actual_gate_status_;
 
-  SystemMode target_;
   ModeMapping mapping_;
 };
 
