@@ -17,26 +17,16 @@
 
 #include "types.hpp"
 
-#include <unordered_map>
-#include <vector>
-
 namespace autoware::system_mode_decider
 {
-
-struct SystemModeStatusItem
-{
-  bool sustainable = false;
-  bool available = false;
-  bool ready = false;
-  bool complete = false;
-};
 
 class SystemModeStatus
 {
 public:
   virtual ~SystemModeStatus() = default;
-  virtual SystemModeStatusItem get(uint32_t mode) const = 0;
-  virtual std::vector<uint32_t> get_available_modes(uint32_t current) const = 0;
+  virtual bool is_available(const AutowareMode & mode) const = 0;
+  virtual bool is_stable(const AutowareMode & mode) const = 0;
+  virtual bool is_continuable(const AutowareMode & mode) const = 0;
 };
 
 }  // namespace autoware::system_mode_decider

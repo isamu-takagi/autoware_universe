@@ -15,6 +15,7 @@
 #ifndef CORE__STATUS_HPP_
 #define CORE__STATUS_HPP_
 
+#include <autoware_system_mode_decider/status.hpp>
 #include <rclcpp/time.hpp>
 
 #include <optional>
@@ -24,21 +25,36 @@
 namespace autoware::system_mode_decider
 {
 
-class SystemModeStatusItem
+class TimeoutStatus
 {
 public:
+  bool timeout() const;
+  bool status() const;
+  void update(const rclcpp::Time & now, bool status);
+  void update(const rclcpp::Time & now, double timeout);
+
 private:
   std::optional<rclcpp::Time> stamp_ = std::nullopt;
-  bool status_ = false;
+  bool value_ = false;
 };
 
-class SystemModeStatus
+class SystemModeStatusStore : public SystemModeStatus
 {
 public:
-  explicit SystemModeStatus(const std::vector<uint32_t> & ids);
+  explicit SystemModeStatusStore(const std::vector<AutowareMode> & modes);
+  void update(const rclcpp::Time & now, double timeout);
+  TimeoutStatus & available(const AutowareMode & mode);
+  TimeoutStatus & stable(const AutowareMode & mode);
+  TimeoutStatus & continuable(const AutowareMode & mode);
+
+  bool is_available(const AutowareMode & mode) const override;
+  bool is_stable(const AutowareMode & mode) const override;
+  bool is_continuable(const AutowareMode & mode) const override;
 
 private:
-  std::unordered_map<uint32_t, SystemModeStatusItem> items_;
+  std::unordered_map<uint32_t, TimeoutStatus> available_;
+  std::unordered_map<uint32_t, TimeoutStatus> stable_;
+  std::unordered_map<uint32_t, TimeoutStatus> continuable_;
 };
 
 }  // namespace autoware::system_mode_decider

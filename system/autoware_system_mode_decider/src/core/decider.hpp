@@ -39,11 +39,15 @@ public:
   Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin);
   void update();
   void notify_gate_status(const GateStatus & status);
-
-  void change_autoware_mode(const AutowareMode & mode);
-  void change_platform_mode(const PlatformMode & mode);
+  void notify_mode_available(const AutowareMode & mode, bool status);
+  void notify_mode_stable(const AutowareMode & mode, bool status);
+  void notify_mode_continuable(const AutowareMode & mode, bool status);
+  void request_autoware_mode(const AutowareMode & mode);
 
 private:
+  void update_autoware_mode(const AutowareMode & mode);
+  void update_platform_mode(const PlatformMode & mode);
+
   Task none_task_ = Task{GateStatus{GateType::kInvalid, 0}};
   std::queue<Task> tasks_;
   std::unique_ptr<Interface> interface_;

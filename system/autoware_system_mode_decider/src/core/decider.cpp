@@ -14,11 +14,11 @@
 
 #include "decider.hpp"
 
-#include <memory>
-#include <utility>
-
-//
 #include <rclcpp/logging.hpp>
+
+#include <memory>
+#include <queue>
+#include <utility>
 
 namespace autoware::system_mode_decider
 {
@@ -35,10 +35,10 @@ Decider::Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin
 
 void Decider::update()
 {
+  // Check frequently mode change.
   const auto mode = plugin_->decide();
   if (autoware_.id != mode.id) {
-    RCLCPP_INFO_STREAM(rclcpp::get_logger("Decider"), "change autoware mode: " << mode.id);
-    autoware_ = mode;
+    update_autoware_mode(mode);
   }
 
   Task & task = tasks_.empty() ? none_task_ : tasks_.front();
@@ -64,18 +64,29 @@ void Decider::notify_gate_status(const GateStatus & status)
   }
 }
 
-void Decider::change_autoware_mode(const AutowareMode & mode)
+void Decider::update_autoware_mode(const AutowareMode & mode)
 {
-  RCLCPP_INFO(rclcpp::get_logger("Decider"), "Change Autoware mode to %d", mode.id);
+  RCLCPP_INFO_STREAM(
+    rclcpp::get_logger("Decider"), "Change Autoware Mode: " << autoware_.id << " -> " << mode.id);
+  autoware_ = mode;
 
+  std::queue<Task> tasks;
   for (const auto & status : mapping_.at(mode.id)) {
-    tasks_.push(Task(status));
+    tasks.push(Task(status));
   }
+  tasks_.swap(tasks);
 }
 
-void Decider::change_platform_mode(const PlatformMode & mode)
+void Decider::update_platform_mode(const PlatformMode & mode)
 {
-  RCLCPP_INFO(rclcpp::get_logger("Decider"), "Change Platform mode to %d", mode.id);
+  RCLCPP_INFO_STREAM(
+    rclcpp::get_logger("Decider"), "Change Platform Mode: " << platform_.id << " -> " << mode.id);
+  platform_ = mode;
+}
+
+void Decider::request_autoware_mode(const AutowareMode & mode)
+{
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("Decider"), "Request Autoware Mode: " << mode.id);
 }
 
 }  // namespace autoware::system_mode_decider

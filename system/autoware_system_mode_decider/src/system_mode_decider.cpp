@@ -91,7 +91,7 @@ void SystemModeDecider::on_vehicle_source(const VehicleSource & msg)
 void SystemModeDecider::on_change_operation_mode(
   ChangeOperationMode::Request::SharedPtr req, ChangeOperationMode::Response::SharedPtr res)
 {
-  decider_->change_autoware_mode(AutowareMode{req->mode});
+  decider_->request_autoware_mode(AutowareMode{req->mode});
   res->status.success = true;
 }
 
