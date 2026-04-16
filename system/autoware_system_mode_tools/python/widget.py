@@ -26,10 +26,14 @@ class MainWidget(QtWidgets.QWidget):
         self.status_trajectory = TrajectoryGateDisplay(node)
         self.status_command = CommandGateDisplay(node)
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self.status_trajectory)
         layout.addWidget(self.status_command)
         self.setLayout(layout)
+
+
+class DrivingModeControl(QtWidgets.QLabel):
+    pass
 
 
 class TrajectoryGateDisplay(QtWidgets.QLabel):

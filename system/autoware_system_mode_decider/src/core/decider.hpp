@@ -15,6 +15,7 @@
 #ifndef CORE__DECIDER_HPP_
 #define CORE__DECIDER_HPP_
 
+#include "core/status.hpp"
 #include "core/task.hpp"
 #include "type/interface.hpp"
 
@@ -37,11 +38,9 @@ class Decider
 {
 public:
   Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin);
+  SystemModeStatusStore & access_status() const;
   void update();
   void notify_gate_status(const GateStatus & status);
-  void notify_mode_available(const AutowareMode & mode, bool status);
-  void notify_mode_stable(const AutowareMode & mode, bool status);
-  void notify_mode_continuable(const AutowareMode & mode, bool status);
   void request_autoware_mode(const AutowareMode & mode);
 
 private:

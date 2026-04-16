@@ -21,6 +21,7 @@
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <pluginlib/class_loader.hpp>
 
+#include <autoware_system_mode_msgs/msg/system_mode_status.hpp>
 #include <autoware_system_mode_msgs/msg/trajectory_source.hpp>
 #include <autoware_vehicle_msgs/msg/control_mode_report.hpp>
 #include <tier4_system_msgs/msg/command_source_status.hpp>
@@ -38,6 +39,7 @@ public:
   explicit SystemModeDecider(const rclcpp::NodeOptions & options);
 
 private:
+  using SystemModeStatus = autoware_system_mode_msgs::msg::SystemModeStatus;
   using TrajectorySource = autoware_system_mode_msgs::msg::TrajectorySource;
   using CommandSource = tier4_system_msgs::msg::CommandSourceStatus;
   using VehicleSource = autoware_vehicle_msgs::msg::ControlModeReport;
@@ -45,6 +47,7 @@ private:
 
   diagnostic_updater::Updater diag_;
   rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::Subscription<SystemModeStatus>::SharedPtr sub_system_mode_status_;
   rclcpp::Subscription<TrajectorySource>::SharedPtr sub_trajectory_source_;
   rclcpp::Subscription<CommandSource>::SharedPtr sub_command_source_;
   rclcpp::Subscription<VehicleSource>::SharedPtr sub_vehicle_source_;
@@ -53,6 +56,7 @@ private:
   void on_timer_init();
   void on_timer_main();
 
+  void on_system_mode_status(const SystemModeStatus & msg);
   void on_trajectory_source(const TrajectorySource & msg);
   void on_command_source(const CommandSource & msg);
   void on_vehicle_source(const VehicleSource & msg);

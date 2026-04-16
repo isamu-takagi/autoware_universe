@@ -37,6 +37,9 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
   const auto plugin = loader_.createSharedInstance(plugin_name);
   decider_ = std::make_unique<Decider>(std::make_unique<RosInterface>(this), plugin);
 
+  sub_system_mode_status_ = create_subscription<SystemModeStatus>(
+    "~/system/mode/status", rclcpp::QoS(1),
+    std::bind(&SystemModeDecider::on_system_mode_status, this, _1));
   sub_trajectory_source_ = create_subscription<TrajectorySource>(
     "~/trajectory/source/status", rclcpp::QoS(1).transient_local(),
     std::bind(&SystemModeDecider::on_trajectory_source, this, _1));
@@ -68,6 +71,29 @@ void SystemModeDecider::on_timer_init()
 void SystemModeDecider::on_timer_main()
 {
   decider_->update();
+}
+
+void SystemModeDecider::on_system_mode_status(const SystemModeStatus & msg)
+{
+  using SystemModeStatusItem = autoware_system_mode_msgs::msg::SystemModeStatusItem;
+  SystemModeStatusStore & store = decider_->access_status();
+
+  for (const auto & item : msg.items) {
+    switch (item.type) {
+      case SystemModeStatusItem::AVAILABLE:
+        store.available(AutowareMode{item.mode}).update(msg.stamp, item.status);
+        break;
+      case SystemModeStatusItem::STABLE:
+        store.stable(AutowareMode{item.mode}).update(msg.stamp, item.status);
+        break;
+      case SystemModeStatusItem::CONTINUABLE:
+        store.continuable(AutowareMode{item.mode}).update(msg.stamp, item.status);
+        break;
+      default:
+        RCLCPP_WARN_STREAM(get_logger(), "unknown mode status type: " << item.type);
+        break;
+    }
+  }
 }
 
 void SystemModeDecider::on_trajectory_source(const TrajectorySource & msg)
