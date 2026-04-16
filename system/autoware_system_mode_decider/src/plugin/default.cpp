@@ -19,7 +19,7 @@ namespace autoware::system_mode_decider
 
 AutowareMode DefaultPlugin::decide()
 {
-  return AutowareMode{0};
+  return AutowareMode{2};
 };
 
 ModeMapping DefaultPlugin::mapping() const
@@ -27,13 +27,13 @@ ModeMapping DefaultPlugin::mapping() const
   ModeMapping mapping;
 
   // Stop mode
-  mapping[0] = {};
-  mapping[0].emplace_back(GateStatus{GateType::kCommandGate, 11});
+  mapping[1] = {};
+  mapping[1].emplace_back(GateStatus{GateType::kCommandGate, 11});
 
   // Auto mode
-  mapping[1] = {};
-  mapping[1].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
-  mapping[1].emplace_back(GateStatus{GateType::kCommandGate, 12});
+  mapping[2] = {};
+  mapping[2].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
+  mapping[2].emplace_back(GateStatus{GateType::kCommandGate, 12});
 
   return mapping;
 }

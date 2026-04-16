@@ -28,11 +28,18 @@ Decider::Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin
   interface_ = std::move(interface);
   plugin_ = plugin;
   mapping_ = plugin_->mapping();
+
+  autoware_ = AutowareMode{0};  // unknown mode
+  platform_ = PlatformMode{0};  // unknown mode
 }
 
 void Decider::update()
 {
-  // std::printf("%d %d %d\n", actual_.trajectory, actual_.command, actual_.vehicle);
+  const auto mode = plugin_->decide();
+  if (autoware_.id != mode.id) {
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("Decider"), "change autoware mode: " << mode.id);
+    autoware_ = mode;
+  }
 
   Task & task = tasks_.empty() ? none_task_ : tasks_.front();
   task.execute(*interface_);

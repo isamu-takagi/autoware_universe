@@ -51,6 +51,8 @@ private:
   std::unordered_map<GateType, uint32_t> actual_gate_status_;
 
   ModeMapping mapping_;
+  AutowareMode autoware_;
+  PlatformMode platform_;
 };
 
 }  // namespace autoware::system_mode_decider
