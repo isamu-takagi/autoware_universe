@@ -14,11 +14,21 @@
 
 #include "default.hpp"
 
+// DEBUG
+#include <rclcpp/logging.hpp>
+
 namespace autoware::system_mode_decider
 {
 
-AutowareMode DefaultPlugin::decide()
+AutowareMode DefaultPlugin::decide(const SystemModeStatus & status)
 {
+  const auto modes = {AutowareMode{1}, AutowareMode{2}};
+  for (const auto & mode : modes) {
+    RCLCPP_INFO_STREAM(
+      rclcpp::get_logger("DefaultPlugin"),
+      "mode: " << mode.id << ", available: " << status.is_available(mode) << ", stable: "
+               << status.is_stable(mode) << ", continuable: " << status.is_continuable(mode));
+  }
   return AutowareMode{2};
 };
 

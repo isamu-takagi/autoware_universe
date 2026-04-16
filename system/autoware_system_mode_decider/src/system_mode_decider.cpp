@@ -38,7 +38,7 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
   decider_ = std::make_unique<Decider>(std::make_unique<RosInterface>(this), plugin);
 
   sub_system_mode_status_ = create_subscription<SystemModeStatus>(
-    "~/system/mode/status", rclcpp::QoS(1),
+    "~/system/driving_mode/status", rclcpp::QoS(1),
     std::bind(&SystemModeDecider::on_system_mode_status, this, _1));
   sub_trajectory_source_ = create_subscription<TrajectorySource>(
     "~/trajectory/source/status", rclcpp::QoS(1).transient_local(),

@@ -38,7 +38,7 @@ class Decider
 {
 public:
   Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin);
-  SystemModeStatusStore & access_status() const;
+  SystemModeStatusStore & access_status();
   void update();
   void notify_gate_status(const GateStatus & status);
   void request_autoware_mode(const AutowareMode & mode);
@@ -47,13 +47,15 @@ private:
   void update_autoware_mode(const AutowareMode & mode);
   void update_platform_mode(const PlatformMode & mode);
 
-  Task none_task_ = Task{GateStatus{GateType::kInvalid, 0}};
-  std::queue<Task> tasks_;
   std::unique_ptr<Interface> interface_;
   std::shared_ptr<Plugin> plugin_;
+  ModeMapping mapping_;
+  SystemModeStatusStore driving_mode_status_;
+
+  Task none_task_ = Task{GateStatus{GateType::kInvalid, 0}};
+  std::queue<Task> tasks_;
   std::unordered_map<GateType, uint32_t> actual_gate_status_;
 
-  ModeMapping mapping_;
   AutowareMode autoware_;
   PlatformMode platform_;
 };

@@ -19,24 +19,42 @@
 #include <memory>
 #include <queue>
 #include <utility>
+#include <vector>
 
 namespace autoware::system_mode_decider
 {
 
+std::vector<AutowareMode> modes_from_mapping(const ModeMapping & mapping)
+{
+  std::vector<AutowareMode> modes;
+  for (const auto & [mode_id, _] : mapping) {
+    modes.emplace_back(AutowareMode{mode_id});
+  }
+  return modes;
+}
+
 Decider::Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin)
+: mapping_(plugin->mapping()), driving_mode_status_(modes_from_mapping(mapping_))
 {
   interface_ = std::move(interface);
   plugin_ = plugin;
-  mapping_ = plugin_->mapping();
 
   autoware_ = AutowareMode{0};  // unknown mode
   platform_ = PlatformMode{0};  // unknown mode
 }
 
+SystemModeStatusStore & Decider::access_status()
+{
+  return driving_mode_status_;
+}
+
 void Decider::update()
 {
-  // Check frequently mode change.
-  const auto mode = plugin_->decide();
+  // Detect status timeout.
+  driving_mode_status_.update(interface_->now(), 1.0);
+
+  // TODO(isamu-takagi): Check frequently mode change.
+  const auto mode = plugin_->decide(driving_mode_status_);
   if (autoware_.id != mode.id) {
     update_autoware_mode(mode);
   }

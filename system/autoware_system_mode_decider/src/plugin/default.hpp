@@ -23,7 +23,7 @@ namespace autoware::system_mode_decider
 class DefaultPlugin : public Plugin
 {
 public:
-  AutowareMode decide() override;
+  AutowareMode decide(const SystemModeStatus & status) override;
   ModeMapping mapping() const override;
 };
 

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from autoware_system_mode_msgs.msg import SystemModeStatus
+from autoware_system_mode_msgs.msg import SystemModeStatusItem
 from autoware_system_mode_msgs.msg import TrajectorySource
 from python_qt_binding import QtWidgets
 from tier4_system_msgs.msg import CommandSourceStatus
@@ -42,7 +43,8 @@ class MainWidget(QtWidgets.QWidget):
 class DrivingModeControl(QtWidgets.QWidget):
     def __init__(self, node, modes):
         super().__init__()
-        self.buttons = {}
+        self.clock = node.get_clock()
+        self.status = {}
 
         self.create_widget(modes)
         self.timer = node.create_timer(0.5, self.on_timer)
@@ -56,11 +58,12 @@ class DrivingModeControl(QtWidgets.QWidget):
     def on_timer(self):
         self.publish()
 
-    def on_clicked(self, mode, status):
-        self.publish()
-
     def publish(self):
-        msg = SystemModeStatus()
+        items = []
+        for (mode, category), status in self.status.items():
+            if status is not None:
+                items.append(SystemModeStatusItem(mode=mode, type=category, status=status))
+        msg = SystemModeStatus(stamp=self.clock.now().to_msg(), items=items)
         self.publisher.publish(msg)
 
     def create_widget(self, modes):
@@ -70,18 +73,24 @@ class DrivingModeControl(QtWidgets.QWidget):
             layout.addWidget(QtWidgets.QLabel(f"{name} ({mode})"), row, 0)
             self.create_button(mode, layout, row)
 
+    def set_status(self, mode, category, status):
+        self.status[(mode, category)] = status
+        self.publish()
+
     def create_button(self, mode, layout, row):
         button_none = QtWidgets.QPushButton("None")
         button_true = QtWidgets.QPushButton("True")
         button_false = QtWidgets.QPushButton("False")
         button_group = QtWidgets.QButtonGroup(self)
+        kind = SystemModeStatusItem.AVAILABLE
+        button_none.clicked.connect(lambda: self.set_status(mode, kind, None))
+        button_true.clicked.connect(lambda: self.set_status(mode, kind, True))
+        button_false.clicked.connect(lambda: self.set_status(mode, kind, False))
         buttons = [button_none, button_true, button_false]
         for col, button in enumerate(buttons, start=1):
             button_group.addButton(button)
             button.setCheckable(True)
-            button.clicked.connect(self.on_clicked)
             layout.addWidget(button, row, col)
-        self.buttons[mode] = buttons
 
 
 class TrajectoryGateDisplay(QtWidgets.QLabel):
