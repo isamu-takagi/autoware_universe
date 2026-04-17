@@ -113,6 +113,8 @@ void Decider::change_operation_mode(const OperationMode & operation_mode)
 {
   const auto mode = plugin_->from_operation_mode(operation_mode);
   RCLCPP_INFO_STREAM(logger, "Change Operation Mode: " << mode.id);
+
+  current_modes_.operation_mode = operation_mode;
 }
 
 }  // namespace autoware::system_mode_decider

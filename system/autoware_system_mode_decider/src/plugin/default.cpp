@@ -14,6 +14,7 @@
 
 #include "default.hpp"
 
+#include <string>
 #include <vector>
 
 // DEBUG
@@ -22,10 +23,22 @@
 namespace autoware::system_mode_decider
 {
 
+const auto logger = rclcpp::get_logger("DefaultPlugin");
+
+void print_modes(const std::string & title, const std::vector<AutowareMode> & modes)
+{
+  std::string text;
+  for (const auto & mode : modes) {
+    text = text + " " + std::to_string(mode.id);
+  }
+  RCLCPP_INFO_STREAM(logger, title << ":" << text);
+}
+
 AutowareMode DefaultPlugin::decide(const CurrentModes & modes, const SystemModeStatus & status)
 {
   std::vector<AutowareMode> candidates;
   candidates.push_back(from_operation_mode(modes.operation_mode));
+  print_modes("Candidates", candidates);
 
   std::vector<AutowareMode> availables;
   for (const auto & mode : candidates) {
@@ -35,12 +48,8 @@ AutowareMode DefaultPlugin::decide(const CurrentModes & modes, const SystemModeS
       if (status.is_continuable(mode)) availables.push_back(mode);
     }
   }
-
-  RCLCPP_INFO_STREAM(rclcpp::get_logger("DefaultPlugin"), "Available modes:");
-  for (const auto & mode : availables) {
-    RCLCPP_INFO_STREAM(rclcpp::get_logger("DefaultPlugin"), "  - " << mode.id);
-  }
-  return AutowareMode{102};
+  print_modes("Availables", availables);
+  return availables.empty() ? AutowareMode{0} : availables.front();
 };
 
 ModeMapping DefaultPlugin::mapping() const
