@@ -26,8 +26,8 @@ class MainWidget(QtWidgets.QWidget):
     def __init__(self, node):
         super().__init__()
         modes = [
-            (1, "Stop"),
-            (2, "Autonomous"),
+            (101, "Stop"),
+            (102, "Autonomous"),
         ]
         self.modes_control = DrivingModeControl(node, modes)
         self.status_trajectory = TrajectoryGateDisplay(node)
@@ -70,7 +70,7 @@ class DrivingModeControl(QtWidgets.QWidget):
         layout = QtWidgets.QGridLayout()
         layout.setSpacing(0)
         layout.setRowStretch(len(modes) + 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Mode"), 0, 0)
+        layout.addWidget(QtWidgets.QLabel("Autoware Mode"), 0, 0)
         layout.addWidget(QtWidgets.QLabel("Available"), 0, 1, 1, 3)
         layout.addWidget(QtWidgets.QLabel("Continuable"), 0, 4, 1, 3)
         self.setLayout(layout)

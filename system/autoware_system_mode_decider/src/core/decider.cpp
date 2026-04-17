@@ -109,9 +109,10 @@ void Decider::update_platform_mode(const PlatformMode & mode)
   RCLCPP_INFO_STREAM(logger, "Change Platform Mode: " << prev.id << " -> " << mode.id);
 }
 
-void Decider::request_autoware_mode(const AutowareMode & mode)
+void Decider::change_operation_mode(const OperationMode & operation_mode)
 {
-  RCLCPP_INFO_STREAM(logger, "Request Autoware Mode: " << mode.id);
+  const auto mode = plugin_->from_operation_mode(operation_mode);
+  RCLCPP_INFO_STREAM(logger, "Change Operation Mode: " << mode.id);
 }
 
 }  // namespace autoware::system_mode_decider

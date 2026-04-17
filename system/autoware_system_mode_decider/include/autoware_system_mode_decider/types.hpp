@@ -37,6 +37,7 @@ struct GateStatus
 };
 
 enum class OperationMode {
+  kUnknown,
   kStop,
   kAutonomous,
   kLocal,

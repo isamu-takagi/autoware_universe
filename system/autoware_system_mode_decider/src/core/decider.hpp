@@ -41,7 +41,7 @@ public:
   SystemModeStatusStore & access_status();
   void update();
   void notify_gate_status(const GateStatus & status);
-  void request_autoware_mode(const AutowareMode & mode);
+  void change_operation_mode(const OperationMode & operation_mode);
 
 private:
   void update_autoware_mode(const AutowareMode & mode);

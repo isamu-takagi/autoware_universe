@@ -23,9 +23,9 @@
 
 #include <autoware_system_mode_msgs/msg/system_mode_status.hpp>
 #include <autoware_system_mode_msgs/msg/trajectory_source.hpp>
+#include <autoware_system_msgs/srv/change_operation_mode.hpp>
 #include <autoware_vehicle_msgs/msg/control_mode_report.hpp>
 #include <tier4_system_msgs/msg/command_source_status.hpp>
-#include <tier4_system_msgs/srv/change_operation_mode.hpp>
 #include <tier4_system_msgs/srv/select_command_source.hpp>
 
 #include <memory>
@@ -43,7 +43,7 @@ private:
   using TrajectorySource = autoware_system_mode_msgs::msg::TrajectorySource;
   using CommandSource = tier4_system_msgs::msg::CommandSourceStatus;
   using VehicleSource = autoware_vehicle_msgs::msg::ControlModeReport;
-  using ChangeOperationMode = tier4_system_msgs::srv::ChangeOperationMode;
+  using ChangeOperationMode = autoware_system_msgs::srv::ChangeOperationMode;
 
   diagnostic_updater::Updater diag_;
   rclcpp::TimerBase::SharedPtr timer_;

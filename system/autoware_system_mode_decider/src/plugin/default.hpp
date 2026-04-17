@@ -25,9 +25,7 @@ class DefaultPlugin : public Plugin
 public:
   AutowareMode decide(const CurrentModes & modes, const SystemModeStatus & status) override;
   ModeMapping mapping() const override;
-
-private:
-  AutowareMode from_operation_mode(const OperationMode & operation_mode) const;
+  AutowareMode from_operation_mode(const OperationMode & operation_mode) const override;
 };
 
 }  // namespace autoware::system_mode_decider

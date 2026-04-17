@@ -40,7 +40,7 @@ AutowareMode DefaultPlugin::decide(const CurrentModes & modes, const SystemModeS
   for (const auto & mode : availables) {
     RCLCPP_INFO_STREAM(rclcpp::get_logger("DefaultPlugin"), "  - " << mode.id);
   }
-  return AutowareMode{2};
+  return AutowareMode{102};
 };
 
 ModeMapping DefaultPlugin::mapping() const
@@ -48,13 +48,13 @@ ModeMapping DefaultPlugin::mapping() const
   ModeMapping mapping;
 
   // Stop mode
-  mapping[1] = {};
-  mapping[1].emplace_back(GateStatus{GateType::kCommandGate, 11});
+  mapping[101] = {};
+  mapping[101].emplace_back(GateStatus{GateType::kCommandGate, 11});
 
   // Auto mode
-  mapping[2] = {};
-  mapping[2].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
-  mapping[2].emplace_back(GateStatus{GateType::kCommandGate, 12});
+  mapping[102] = {};
+  mapping[102].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
+  mapping[102].emplace_back(GateStatus{GateType::kCommandGate, 12});
 
   return mapping;
 }
@@ -63,10 +63,10 @@ AutowareMode DefaultPlugin::from_operation_mode(const OperationMode & operation_
 {
   // clang-format off
   switch (operation_mode) {
-    case OperationMode::kStop:       return AutowareMode{1};
-    case OperationMode::kAutonomous: return AutowareMode{2};
-    case OperationMode::kLocal:      return AutowareMode{3};
-    case OperationMode::kRemote:     return AutowareMode{4};
+    case OperationMode::kStop:       return AutowareMode{101};
+    case OperationMode::kAutonomous: return AutowareMode{102};
+    case OperationMode::kLocal:      return AutowareMode{103};
+    case OperationMode::kRemote:     return AutowareMode{104};
     default:                         return AutowareMode{0};
   }
   // clang-format on
