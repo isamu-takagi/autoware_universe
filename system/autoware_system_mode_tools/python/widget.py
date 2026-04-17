@@ -68,29 +68,34 @@ class DrivingModeControl(QtWidgets.QWidget):
 
     def create_widget(self, modes):
         layout = QtWidgets.QGridLayout()
+        layout.setSpacing(0)
+        layout.setRowStretch(len(modes) + 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Mode"), 0, 0)
+        layout.addWidget(QtWidgets.QLabel("Available"), 0, 1, 1, 3)
+        layout.addWidget(QtWidgets.QLabel("Continuable"), 0, 4, 1, 3)
         self.setLayout(layout)
-        for row, (mode, name) in enumerate(modes):
+        for row, (mode, name) in enumerate(modes, start=1):
             layout.addWidget(QtWidgets.QLabel(f"{name} ({mode})"), row, 0)
-            self.create_button(mode, layout, row)
+            self.create_button(SystemModeStatusItem.AVAILABLE, mode, layout, row, 1)
+            self.create_button(SystemModeStatusItem.CONTINUABLE, mode, layout, row, 4)
 
     def set_status(self, mode, category, status):
         self.status[(mode, category)] = status
         self.publish()
 
-    def create_button(self, mode, layout, row):
+    def create_button(self, category, mode, layout, row, col):
         button_none = QtWidgets.QPushButton("None")
         button_true = QtWidgets.QPushButton("True")
         button_false = QtWidgets.QPushButton("False")
         button_group = QtWidgets.QButtonGroup(self)
-        kind = SystemModeStatusItem.AVAILABLE
-        button_none.clicked.connect(lambda: self.set_status(mode, kind, None))
-        button_true.clicked.connect(lambda: self.set_status(mode, kind, True))
-        button_false.clicked.connect(lambda: self.set_status(mode, kind, False))
+        button_none.clicked.connect(lambda: self.set_status(mode, category, None))
+        button_true.clicked.connect(lambda: self.set_status(mode, category, True))
+        button_false.clicked.connect(lambda: self.set_status(mode, category, False))
         buttons = [button_none, button_true, button_false]
-        for col, button in enumerate(buttons, start=1):
+        for index, button in enumerate(buttons):
             button_group.addButton(button)
             button.setCheckable(True)
-            layout.addWidget(button, row, col)
+            layout.addWidget(button, row, col + index)
 
 
 class TrajectoryGateDisplay(QtWidgets.QLabel):

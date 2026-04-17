@@ -36,6 +36,24 @@ struct GateStatus
   uint32_t id;
 };
 
+enum class OperationMode {
+  kStop,
+  kAutonomous,
+  kLocal,
+  kRemote,
+};
+
+enum class AutowareControl {
+  kUnknown,
+  kEnable,
+  kDisable,
+};
+
+enum class MrmRequest {
+  kNone,
+  kDelegate,
+};
+
 struct AutowareMode
 {
   uint32_t id;
@@ -44,6 +62,15 @@ struct AutowareMode
 struct PlatformMode
 {
   uint32_t id;
+};
+
+struct CurrentModes
+{
+  OperationMode operation_mode;      // request
+  AutowareControl autoware_control;  // request
+  MrmRequest mrm_request;            // request
+  AutowareMode autoware_mode;        // current
+  PlatformMode platform_mode;        // current
 };
 
 using ModeMapping = std::unordered_map<uint32_t, std::vector<GateStatus>>;
