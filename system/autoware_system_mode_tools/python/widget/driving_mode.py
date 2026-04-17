@@ -12,32 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 from autoware_system_mode_msgs.msg import SystemModeStatus
 from autoware_system_mode_msgs.msg import SystemModeStatusItem
-from autoware_system_mode_msgs.msg import TrajectorySource
+from autoware_system_mode_tools.utils import default_qos
+from python_qt_binding import QtCore
 from python_qt_binding import QtWidgets
-from tier4_system_msgs.msg import CommandSourceStatus
-
-from .utils import default_qos
-from .utils import durable_qos
 
 
-class MainWidget(QtWidgets.QWidget):
-    def __init__(self, node):
-        super().__init__()
-        modes = [
-            (101, "Stop"),
-            (102, "Autonomous"),
-        ]
-        self.modes_control = DrivingModeControl(node, modes)
-        self.status_trajectory = TrajectoryGateDisplay(node)
-        self.status_command = CommandGateDisplay(node)
-
-        layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.modes_control)
-        layout.addWidget(self.status_trajectory)
-        layout.addWidget(self.status_command)
-        self.setLayout(layout)
+def centered_label(text):
+    label = QtWidgets.QLabel(text)
+    label.setAlignment(QtCore.Qt.AlignCenter)
+    return label
 
 
 class DrivingModeControl(QtWidgets.QWidget):
@@ -71,8 +57,8 @@ class DrivingModeControl(QtWidgets.QWidget):
         layout.setSpacing(0)
         layout.setRowStretch(len(modes) + 1, 1)
         layout.addWidget(QtWidgets.QLabel("Autoware Mode"), 0, 0)
-        layout.addWidget(QtWidgets.QLabel("Available"), 0, 1, 1, 3)
-        layout.addWidget(QtWidgets.QLabel("Continuable"), 0, 4, 1, 3)
+        layout.addWidget(centered_label("Available"), 0, 1, 1, 3)
+        layout.addWidget(centered_label("Continuable"), 0, 4, 1, 3)
         self.setLayout(layout)
         for row, (mode, name) in enumerate(modes, start=1):
             layout.addWidget(QtWidgets.QLabel(f"{name} ({mode})"), row, 0)
@@ -96,30 +82,3 @@ class DrivingModeControl(QtWidgets.QWidget):
             button_group.addButton(button)
             button.setCheckable(True)
             layout.addWidget(button, row, col + index)
-
-
-class TrajectoryGateDisplay(QtWidgets.QLabel):
-    def __init__(self, node):
-        super().__init__("Trajectory: N/A")
-        self.subscription = node.create_subscription(
-            TrajectorySource, "/planning/trajectory_gate/source/status", self.on_msg, durable_qos(1)
-        )
-
-    def on_msg(self, msg):
-        print(msg.source)
-        self.setText(f"Trajectory: {msg.source}")
-
-
-class CommandGateDisplay(QtWidgets.QLabel):
-    def __init__(self, node):
-        super().__init__("Command: N/A")
-        self.subscription = node.create_subscription(
-            CommandSourceStatus,
-            "/control/control_command_gate/source/status",
-            self.on_msg,
-            durable_qos(1),
-        )
-
-    def on_msg(self, msg):
-        print(msg.source)
-        self.setText(f"Command: {msg.source}")
