@@ -24,8 +24,9 @@ class Plugin
 {
 public:
   virtual ~Plugin() = default;
-  virtual AutowareMode decide(const SystemModeStatus & status) = 0;
+  virtual AutowareMode decide(const CurrentModes & modes, const SystemModeStatus & status) = 0;
   virtual ModeMapping mapping() const = 0;
+  virtual AutowareMode from_operation_mode(const OperationMode & operation_mode) const = 0;
 };
 
 }  // namespace autoware::system_mode_decider

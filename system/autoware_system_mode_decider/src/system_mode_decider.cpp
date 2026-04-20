@@ -117,7 +117,19 @@ void SystemModeDecider::on_vehicle_source(const VehicleSource & msg)
 void SystemModeDecider::on_change_operation_mode(
   ChangeOperationMode::Request::SharedPtr req, ChangeOperationMode::Response::SharedPtr res)
 {
-  decider_->request_autoware_mode(AutowareMode{req->mode});
+  // clang-format off
+  const auto convert = [](const ChangeOperationMode::Request & req) {
+    switch (req.mode) {
+      case ChangeOperationMode::Request::STOP:       return OperationMode::kStop;
+      case ChangeOperationMode::Request::AUTONOMOUS: return OperationMode::kAutonomous;
+      case ChangeOperationMode::Request::LOCAL:      return OperationMode::kLocal;
+      case ChangeOperationMode::Request::REMOTE:     return OperationMode::kRemote;
+      default:                                       return OperationMode::kUnknown;
+    }
+  };
+  // clang-format on
+
+  decider_->change_operation_mode(convert(*req));
   res->status.success = true;
 }
 

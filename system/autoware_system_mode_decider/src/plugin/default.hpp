@@ -23,8 +23,9 @@ namespace autoware::system_mode_decider
 class DefaultPlugin : public Plugin
 {
 public:
-  AutowareMode decide(const SystemModeStatus & status) override;
+  AutowareMode decide(const CurrentModes & modes, const SystemModeStatus & status) override;
   ModeMapping mapping() const override;
+  AutowareMode from_operation_mode(const OperationMode & operation_mode) const override;
 };
 
 }  // namespace autoware::system_mode_decider

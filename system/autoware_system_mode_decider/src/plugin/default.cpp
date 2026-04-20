@@ -14,22 +14,42 @@
 
 #include "default.hpp"
 
+#include <string>
+#include <vector>
+
 // DEBUG
 #include <rclcpp/logging.hpp>
 
 namespace autoware::system_mode_decider
 {
 
-AutowareMode DefaultPlugin::decide(const SystemModeStatus & status)
+const auto logger = rclcpp::get_logger("DefaultPlugin");
+
+void print_modes(const std::string & title, const std::vector<AutowareMode> & modes)
 {
-  const auto modes = {AutowareMode{1}, AutowareMode{2}};
+  std::string text;
   for (const auto & mode : modes) {
-    RCLCPP_INFO_STREAM(
-      rclcpp::get_logger("DefaultPlugin"),
-      "mode: " << mode.id << ", available: " << status.is_available(mode) << ", stable: "
-               << status.is_stable(mode) << ", continuable: " << status.is_continuable(mode));
+    text = text + " " + std::to_string(mode.id);
   }
-  return AutowareMode{2};
+  RCLCPP_INFO_STREAM(logger, title << ":" << text);
+}
+
+AutowareMode DefaultPlugin::decide(const CurrentModes & modes, const SystemModeStatus & status)
+{
+  std::vector<AutowareMode> candidates;
+  candidates.push_back(from_operation_mode(modes.operation_mode));
+  print_modes("Candidates", candidates);
+
+  std::vector<AutowareMode> availables;
+  for (const auto & mode : candidates) {
+    if (mode.id != modes.autoware_mode.id) {
+      if (status.is_available(mode)) availables.push_back(mode);
+    } else {
+      if (status.is_continuable(mode)) availables.push_back(mode);
+    }
+  }
+  print_modes("Availables", availables);
+  return availables.empty() ? AutowareMode{0} : availables.front();
 };
 
 ModeMapping DefaultPlugin::mapping() const
@@ -37,15 +57,28 @@ ModeMapping DefaultPlugin::mapping() const
   ModeMapping mapping;
 
   // Stop mode
-  mapping[1] = {};
-  mapping[1].emplace_back(GateStatus{GateType::kCommandGate, 11});
+  mapping[101] = {};
+  mapping[101].emplace_back(GateStatus{GateType::kCommandGate, 11});
 
   // Auto mode
-  mapping[2] = {};
-  mapping[2].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
-  mapping[2].emplace_back(GateStatus{GateType::kCommandGate, 12});
+  mapping[102] = {};
+  mapping[102].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
+  mapping[102].emplace_back(GateStatus{GateType::kCommandGate, 12});
 
   return mapping;
+}
+
+AutowareMode DefaultPlugin::from_operation_mode(const OperationMode & operation_mode) const
+{
+  // clang-format off
+  switch (operation_mode) {
+    case OperationMode::kStop:       return AutowareMode{101};
+    case OperationMode::kAutonomous: return AutowareMode{102};
+    case OperationMode::kLocal:      return AutowareMode{103};
+    case OperationMode::kRemote:     return AutowareMode{104};
+    default:                         return AutowareMode{0};
+  }
+  // clang-format on
 }
 
 }  // namespace autoware::system_mode_decider

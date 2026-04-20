@@ -41,7 +41,7 @@ public:
   SystemModeStatusStore & access_status();
   void update();
   void notify_gate_status(const GateStatus & status);
-  void request_autoware_mode(const AutowareMode & mode);
+  void change_operation_mode(const OperationMode & operation_mode);
 
 private:
   void update_autoware_mode(const AutowareMode & mode);
@@ -51,13 +51,11 @@ private:
   std::shared_ptr<Plugin> plugin_;
   ModeMapping mapping_;
   SystemModeStatusStore driving_mode_status_;
+  CurrentModes current_modes_;
 
   Task none_task_ = Task{GateStatus{GateType::kInvalid, 0}};
   std::queue<Task> tasks_;
   std::unordered_map<GateType, uint32_t> actual_gate_status_;
-
-  AutowareMode autoware_;
-  PlatformMode platform_;
 };
 
 }  // namespace autoware::system_mode_decider

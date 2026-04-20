@@ -24,6 +24,8 @@
 namespace autoware::system_mode_decider
 {
 
+const auto logger = rclcpp::get_logger("Decider");
+
 std::vector<AutowareMode> modes_from_mapping(const ModeMapping & mapping)
 {
   std::vector<AutowareMode> modes;
@@ -39,8 +41,11 @@ Decider::Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin
   interface_ = std::move(interface);
   plugin_ = plugin;
 
-  autoware_ = AutowareMode{0};  // unknown mode
-  platform_ = PlatformMode{0};  // unknown mode
+  current_modes_.operation_mode = OperationMode::kStop;
+  current_modes_.autoware_control = AutowareControl::kUnknown;
+  current_modes_.mrm_request = MrmRequest::kNone;
+  current_modes_.autoware_mode = AutowareMode{0};  // unknown mode
+  current_modes_.platform_mode = PlatformMode{0};  // unknown mode
 }
 
 SystemModeStatusStore & Decider::access_status()
@@ -54,16 +59,14 @@ void Decider::update()
   driving_mode_status_.update(interface_->now(), 1.0);
 
   // TODO(isamu-takagi): Check frequently mode change.
-  const auto mode = plugin_->decide(driving_mode_status_);
-  if (autoware_.id != mode.id) {
-    update_autoware_mode(mode);
-  }
+  const auto mode = plugin_->decide(current_modes_, driving_mode_status_);
+  update_autoware_mode(mode);
 
   Task & task = tasks_.empty() ? none_task_ : tasks_.front();
   task.execute(*interface_);
   if (task.timeout(*interface_)) {
     tasks_.pop();
-    RCLCPP_INFO_STREAM(rclcpp::get_logger("Decider"), "timeout");
+    RCLCPP_INFO_STREAM(logger, "timeout");
   }
 }
 
@@ -76,7 +79,7 @@ void Decider::notify_gate_status(const GateStatus & status)
   if (task.expects(status)) {
     tasks_.pop();
     // update();
-    RCLCPP_INFO_STREAM(rclcpp::get_logger("Decider"), "complete");
+    RCLCPP_INFO_STREAM(logger, "complete");
   } else {
     // Override detected !!
   }
@@ -84,9 +87,11 @@ void Decider::notify_gate_status(const GateStatus & status)
 
 void Decider::update_autoware_mode(const AutowareMode & mode)
 {
-  RCLCPP_INFO_STREAM(
-    rclcpp::get_logger("Decider"), "Change Autoware Mode: " << autoware_.id << " -> " << mode.id);
-  autoware_ = mode;
+  AutowareMode & prev = current_modes_.autoware_mode;
+
+  if (prev.id == mode.id) return;
+  prev = mode;
+  RCLCPP_INFO_STREAM(logger, "Change Autoware Mode: " << prev.id << " -> " << mode.id);
 
   std::queue<Task> tasks;
   for (const auto & status : mapping_.at(mode.id)) {
@@ -97,14 +102,19 @@ void Decider::update_autoware_mode(const AutowareMode & mode)
 
 void Decider::update_platform_mode(const PlatformMode & mode)
 {
-  RCLCPP_INFO_STREAM(
-    rclcpp::get_logger("Decider"), "Change Platform Mode: " << platform_.id << " -> " << mode.id);
-  platform_ = mode;
+  PlatformMode & prev = current_modes_.platform_mode;
+
+  if (prev.id == mode.id) return;
+  prev = mode;
+  RCLCPP_INFO_STREAM(logger, "Change Platform Mode: " << prev.id << " -> " << mode.id);
 }
 
-void Decider::request_autoware_mode(const AutowareMode & mode)
+void Decider::change_operation_mode(const OperationMode & operation_mode)
 {
-  RCLCPP_INFO_STREAM(rclcpp::get_logger("Decider"), "Request Autoware Mode: " << mode.id);
+  const auto mode = plugin_->from_operation_mode(operation_mode);
+  RCLCPP_INFO_STREAM(logger, "Change Operation Mode: " << mode.id);
+
+  current_modes_.operation_mode = operation_mode;
 }
 
 }  // namespace autoware::system_mode_decider
