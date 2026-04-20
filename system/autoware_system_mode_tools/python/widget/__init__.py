@@ -25,8 +25,12 @@ class MainWidget(QtWidgets.QWidget):
     def __init__(self, node):
         super().__init__()
         modes = [
-            (101, "Stop"),
-            (102, "Autonomous"),
+            (1001, "Stop"),
+            (1002, "Autonomous"),
+            (1003, "Local"),
+            (1004, "Remote"),
+            (2001, "Emergency"),
+            (2002, "Comfortable"),
         ]
         self.operation_mode_control = OperationModeControl(node, modes)
         self.modes_control = DrivingModeControl(node, modes)

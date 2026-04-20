@@ -38,23 +38,26 @@ private:
   bool value_ = false;
 };
 
+struct SystemModeStatusData
+{
+  TimeoutStatus available;
+  TimeoutStatus stable;
+  TimeoutStatus continuable;
+};
+
 class SystemModeStatusStore : public SystemModeStatus
 {
 public:
   explicit SystemModeStatusStore(const std::vector<AutowareMode> & modes);
   void update(const rclcpp::Time & now, double timeout);
-  TimeoutStatus & available(const AutowareMode & mode);
-  TimeoutStatus & stable(const AutowareMode & mode);
-  TimeoutStatus & continuable(const AutowareMode & mode);
+  SystemModeStatusData * data(const AutowareMode & mode);
 
   bool is_available(const AutowareMode & mode) const override;
   bool is_stable(const AutowareMode & mode) const override;
   bool is_continuable(const AutowareMode & mode) const override;
 
 private:
-  std::unordered_map<uint32_t, TimeoutStatus> available_;
-  std::unordered_map<uint32_t, TimeoutStatus> stable_;
-  std::unordered_map<uint32_t, TimeoutStatus> continuable_;
+  std::unordered_map<uint32_t, SystemModeStatusData> modes_;
 };
 
 }  // namespace autoware::system_mode_decider

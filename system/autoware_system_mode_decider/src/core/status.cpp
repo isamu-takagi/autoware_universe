@@ -46,50 +46,41 @@ void TimeoutStatus::update(const rclcpp::Time & now, double timeout)
 SystemModeStatusStore::SystemModeStatusStore(const std::vector<AutowareMode> & modes)
 {
   for (const auto & mode : modes) {
-    available_[mode.id] = TimeoutStatus();
-    stable_[mode.id] = TimeoutStatus();
-    continuable_[mode.id] = TimeoutStatus();
+    modes_[mode.id] = SystemModeStatusData();
   }
 }
 
 void SystemModeStatusStore::update(const rclcpp::Time & now, double timeout)
 {
-  for (auto & [id, status] : available_) status.update(now, timeout);
-  for (auto & [id, status] : stable_) status.update(now, timeout);
-  for (auto & [id, status] : continuable_) status.update(now, timeout);
+  for (auto & [id, status] : modes_) {
+    status.available.update(now, timeout);
+    status.stable.update(now, timeout);
+    status.continuable.update(now, timeout);
+  }
 }
 
-TimeoutStatus & SystemModeStatusStore::available(const AutowareMode & mode)
+SystemModeStatusData * SystemModeStatusStore::data(const AutowareMode & mode)
 {
-  return available_.at(mode.id);
-}
-
-TimeoutStatus & SystemModeStatusStore::stable(const AutowareMode & mode)
-{
-  return stable_.at(mode.id);
-}
-
-TimeoutStatus & SystemModeStatusStore::continuable(const AutowareMode & mode)
-{
-  return continuable_.at(mode.id);
+  const auto iter = modes_.find(mode.id);
+  return iter == modes_.end() ? nullptr : &iter->second;
 }
 
 bool SystemModeStatusStore::is_available(const AutowareMode & mode) const
 {
-  const auto iter = available_.find(mode.id);
-  return iter == available_.end() ? false : iter->second.status();
+  const auto iter = modes_.find(mode.id);
+  return iter == modes_.end() ? false : iter->second.available.status();
 }
 
 bool SystemModeStatusStore::is_stable(const AutowareMode & mode) const
 {
-  const auto iter = stable_.find(mode.id);
-  return iter == stable_.end() ? false : iter->second.status();
+  const auto iter = modes_.find(mode.id);
+  return iter == modes_.end() ? false : iter->second.stable.status();
 }
 
 bool SystemModeStatusStore::is_continuable(const AutowareMode & mode) const
 {
-  const auto iter = continuable_.find(mode.id);
-  return iter == continuable_.end() ? false : iter->second.status();
+  const auto iter = modes_.find(mode.id);
+  return iter == modes_.end() ? false : iter->second.continuable.status();
 }
 
 }  // namespace autoware::system_mode_decider

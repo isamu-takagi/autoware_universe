@@ -61,9 +61,9 @@ void Decider::update()
   // TODO(isamu-takagi): Check frequently mode change.
   update_autoware_mode(plugin_->decide(current_modes_, driving_mode_status_));
 
-  Task & task = tasks_.empty() ? none_task_ : tasks_.front();
-  task.execute(*interface_);
-  if (task.timeout(*interface_)) {
+  Task * task = tasks_.empty() ? none_task_.get() : tasks_.front().get();
+  task->execute(*interface_);
+  if (task->timeout(*interface_)) {
     tasks_.pop();
     RCLCPP_INFO_STREAM(logger, "timeout");
   }
@@ -73,9 +73,9 @@ void Decider::notify_gate_status(const GateStatus & status)
 {
   actual_gate_status_[status.type] = status.id;
 
-  Task & task = tasks_.empty() ? none_task_ : tasks_.front();
+  Task * task = tasks_.empty() ? none_task_.get() : tasks_.front().get();
 
-  if (task.expects(status)) {
+  if (task->expects(status)) {
     tasks_.pop();
     // update();
     RCLCPP_INFO_STREAM(logger, "complete");
@@ -95,9 +95,9 @@ void Decider::update_autoware_mode(const AutowareMode & mode)
   RCLCPP_INFO_STREAM(logger, "Change Autoware Mode: " << prev.id << " -> " << mode.id);
   prev = mode;
 
-  std::queue<Task> tasks;
+  std::queue<std::unique_ptr<Task>> tasks;
   for (const auto & status : mapping_.at(mode.id)) {
-    tasks.push(Task(status));
+    tasks.push(std::make_unique<GateTask>(status));
   }
   tasks_.swap(tasks);
 }

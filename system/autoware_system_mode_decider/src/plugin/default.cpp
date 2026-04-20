@@ -24,6 +24,13 @@ namespace autoware::system_mode_decider
 {
 
 const auto logger = rclcpp::get_logger("DefaultPlugin");
+constexpr auto StopMode = AutowareMode{1001};
+constexpr auto AutonomousMode = AutowareMode{1002};
+constexpr auto LocalMode = AutowareMode{1003};
+constexpr auto RemoteMode = AutowareMode{1004};
+constexpr auto EmergencyStop = AutowareMode{2001};
+constexpr auto ComfortableStop = AutowareMode{2002};
+constexpr auto UnknownMode = AutowareMode{0};
 
 void print_modes(const std::string & title, const std::vector<AutowareMode> & modes)
 {
@@ -38,6 +45,8 @@ AutowareMode DefaultPlugin::decide(const CurrentModes & modes, const SystemModeS
 {
   std::vector<AutowareMode> candidates;
   candidates.push_back(from_operation_mode(modes.operation_mode));
+  candidates.push_back(EmergencyStop);
+  candidates.push_back(ComfortableStop);
   print_modes("Candidates", candidates);
 
   std::vector<AutowareMode> availables;
@@ -49,21 +58,27 @@ AutowareMode DefaultPlugin::decide(const CurrentModes & modes, const SystemModeS
     }
   }
   print_modes("Availables", availables);
-  return availables.empty() ? AutowareMode{0} : availables.front();
+  return availables.empty() ? EmergencyStop : availables.front();
 };
 
 ModeMapping DefaultPlugin::mapping() const
 {
   ModeMapping mapping;
 
-  // Stop mode
-  mapping[101] = {};
-  mapping[101].emplace_back(GateStatus{GateType::kCommandGate, 11});
+  mapping[StopMode.id] = {};
+  mapping[StopMode.id].emplace_back(GateStatus{GateType::kCommandGate, 11});
 
-  // Auto mode
-  mapping[102] = {};
-  mapping[102].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
-  mapping[102].emplace_back(GateStatus{GateType::kCommandGate, 12});
+  mapping[AutonomousMode.id] = {};
+  mapping[AutonomousMode.id].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
+  mapping[AutonomousMode.id].emplace_back(GateStatus{GateType::kCommandGate, 12});
+
+  mapping[LocalMode.id] = {};
+
+  mapping[RemoteMode.id] = {};
+
+  mapping[EmergencyStop.id] = {};
+
+  mapping[ComfortableStop.id] = {};
 
   return mapping;
 }
@@ -72,11 +87,11 @@ AutowareMode DefaultPlugin::from_operation_mode(const OperationMode & operation_
 {
   // clang-format off
   switch (operation_mode) {
-    case OperationMode::kStop:       return AutowareMode{101};
-    case OperationMode::kAutonomous: return AutowareMode{102};
-    case OperationMode::kLocal:      return AutowareMode{103};
-    case OperationMode::kRemote:     return AutowareMode{104};
-    default:                         return AutowareMode{0};
+    case OperationMode::kStop:       return StopMode;
+    case OperationMode::kAutonomous: return AutonomousMode;
+    case OperationMode::kLocal:      return LocalMode;
+    case OperationMode::kRemote:     return RemoteMode;
+    default:                         return UnknownMode;
   }
   // clang-format on
 }

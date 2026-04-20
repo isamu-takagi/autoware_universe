@@ -17,21 +17,35 @@
 namespace autoware::system_mode_decider
 {
 
-void Task::execute(Interface & interface)
+void NoneTask::execute(Interface &)
 {
-  if (target_.type == GateType::kInvalid) return;
+  // Do nothing
+}
+
+bool NoneTask::timeout(Interface &)
+{
+  return false;
+}
+
+bool NoneTask::expects(const GateStatus &) const
+{
+  return false;
+}
+
+void GateTask::execute(Interface & interface)
+{
   if (stamp_) return;
   stamp_ = interface.now();
   interface.change_gate_status(target_);
 }
 
-bool Task::timeout(Interface & interface)
+bool GateTask::timeout(Interface & interface)
 {
   if (!stamp_) return false;
   return 3.0 < (interface.now() - stamp_.value()).seconds();
 }
 
-bool Task::expects(const GateStatus & status) const
+bool GateTask::expects(const GateStatus & status) const
 {
   return target_.type == status.type && target_.id == status.id;
 }

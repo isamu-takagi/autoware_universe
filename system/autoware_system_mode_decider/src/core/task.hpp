@@ -27,10 +27,27 @@ namespace autoware::system_mode_decider
 class Task
 {
 public:
-  explicit Task(const GateStatus & target) : target_(target) {}
-  void execute(Interface & interface);
-  bool timeout(Interface & interface);
-  bool expects(const GateStatus & status) const;
+  virtual ~Task() = default;
+  virtual void execute(Interface & interface) = 0;
+  virtual bool timeout(Interface & interface) = 0;
+  virtual bool expects(const GateStatus & status) const = 0;
+};
+
+class NoneTask : public Task
+{
+public:
+  void execute(Interface & interface) override;
+  bool timeout(Interface & interface) override;
+  bool expects(const GateStatus & status) const override;
+};
+
+class GateTask : public Task
+{
+public:
+  explicit GateTask(const GateStatus & target) : target_(target) {}
+  void execute(Interface & interface) override;
+  bool timeout(Interface & interface) override;
+  bool expects(const GateStatus & status) const override;
 
 private:
   GateStatus target_;

@@ -76,21 +76,24 @@ void SystemModeDecider::on_timer_main()
 void SystemModeDecider::on_system_mode_status(const SystemModeStatus & msg)
 {
   using SystemModeStatusItem = autoware_system_mode_msgs::msg::SystemModeStatusItem;
-  SystemModeStatusStore & store = decider_->access_status();
-
   for (const auto & item : msg.items) {
+    SystemModeStatusData * data = decider_->access_status().data(AutowareMode{item.mode});
+    if (!data) {
+      RCLCPP_WARN_STREAM(get_logger(), "unknown status mode: " << item.mode);
+      continue;
+    }
     switch (item.type) {
       case SystemModeStatusItem::AVAILABLE:
-        store.available(AutowareMode{item.mode}).update(msg.stamp, item.status);
+        data->available.update(msg.stamp, item.status);
         break;
       case SystemModeStatusItem::STABLE:
-        store.stable(AutowareMode{item.mode}).update(msg.stamp, item.status);
+        data->stable.update(msg.stamp, item.status);
         break;
       case SystemModeStatusItem::CONTINUABLE:
-        store.continuable(AutowareMode{item.mode}).update(msg.stamp, item.status);
+        data->continuable.update(msg.stamp, item.status);
         break;
       default:
-        RCLCPP_WARN_STREAM(get_logger(), "unknown mode status type: " << item.type);
+        RCLCPP_WARN_STREAM(get_logger(), "unknown status type: " << item.type);
         break;
     }
   }
@@ -149,8 +152,6 @@ void RosInterface::change_gate_status(const GateStatus & status)
 {
   const auto type_name = [](GateType type) {
     switch (type) {
-      case GateType::kInvalid:
-        return "Invalid";
       case GateType::kTrajectoryGate:
         return "TrajectoryGate";
       case GateType::kCommandGate:

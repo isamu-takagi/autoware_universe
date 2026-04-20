@@ -23,7 +23,6 @@ namespace autoware::system_mode_decider
 {
 
 enum class GateType {
-  kInvalid,
   kTrajectoryGate,
   kCommandGate,
   kCommandFilter,

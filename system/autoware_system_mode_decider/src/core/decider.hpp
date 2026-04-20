@@ -53,8 +53,8 @@ private:
   SystemModeStatusStore driving_mode_status_;
   CurrentModes current_modes_;
 
-  Task none_task_ = Task{GateStatus{GateType::kInvalid, 0}};
-  std::queue<Task> tasks_;
+  std::unique_ptr<NoneTask> none_task_ = std::make_unique<NoneTask>();
+  std::queue<std::unique_ptr<Task>> tasks_;
   std::unordered_map<GateType, uint32_t> actual_gate_status_;
 };
 
