@@ -60,10 +60,13 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
 
 void SystemModeDecider::on_timer_init()
 {
-  if (!ready()) return;
+  if (init_flag_ != 0x07) return;
+  if (!decider_->access_status().is_ready()) return;
+
   RCLCPP_INFO_STREAM(get_logger(), "SystemModeDecider is ready.");
 
-  const auto period = rclcpp::Rate(10.0).period();
+  // const auto period = rclcpp::Rate(10.0).period();
+  const auto period = rclcpp::Rate(2.0).period();
   timer_->cancel();
   timer_ = rclcpp::create_timer(this, get_clock(), period, [this]() { on_timer_main(); });
 }

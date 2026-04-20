@@ -77,7 +77,7 @@ struct CurrentModes
 };
 
 using AutowareModeSet = std::unordered_set<AutowareMode>;
-using ModeMapping = std::unordered_map<uint32_t, std::vector<GateStatus>>;
+using ModeMapping = std::unordered_map<AutowareMode, std::vector<GateStatus>>;
 
 }  // namespace autoware::system_mode_decider
 

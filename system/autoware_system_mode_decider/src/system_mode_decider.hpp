@@ -68,7 +68,6 @@ private:
 
   // For initialization.
   int init_flag_ = 0;
-  bool ready() const { return init_flag_ == 0x07; }
 };
 
 class RosInterface : public Interface

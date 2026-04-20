@@ -62,20 +62,28 @@ ModeMapping DefaultPlugin::mapping() const
 {
   ModeMapping mapping;
 
-  mapping[StopMode.id] = {};
-  mapping[StopMode.id].emplace_back(GateStatus{GateType::kCommandGate, 11});
+  mapping[StopMode] = {};
+  mapping[StopMode].emplace_back(GateStatus{GateType::kCommandGate, 11});
 
-  mapping[AutonomousMode.id] = {};
-  mapping[AutonomousMode.id].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
-  mapping[AutonomousMode.id].emplace_back(GateStatus{GateType::kCommandGate, 12});
+  mapping[AutonomousMode] = {};
+  mapping[AutonomousMode].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
+  mapping[AutonomousMode].emplace_back(GateStatus{GateType::kCommandGate, 12});
 
-  mapping[LocalMode.id] = {};
+  mapping[LocalMode] = {};
+  mapping[LocalMode].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
+  mapping[LocalMode].emplace_back(GateStatus{GateType::kCommandGate, 12});
 
-  mapping[RemoteMode.id] = {};
+  mapping[RemoteMode] = {};
+  mapping[RemoteMode].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
+  mapping[RemoteMode].emplace_back(GateStatus{GateType::kCommandGate, 12});
 
-  mapping[EmergencyStop.id] = {};
+  mapping[EmergencyStop] = {};
+  mapping[EmergencyStop].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
+  mapping[EmergencyStop].emplace_back(GateStatus{GateType::kCommandGate, 12});
 
-  mapping[ComfortableStop.id] = {};
+  mapping[ComfortableStop] = {};
+  mapping[ComfortableStop].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
+  mapping[ComfortableStop].emplace_back(GateStatus{GateType::kCommandGate, 12});
 
   return mapping;
 }

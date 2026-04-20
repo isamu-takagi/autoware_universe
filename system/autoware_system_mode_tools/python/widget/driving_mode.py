@@ -57,13 +57,15 @@ class DrivingModeControl(QtWidgets.QWidget):
         layout.setSpacing(0)
         layout.setRowStretch(len(modes) + 1, 1)
         layout.addWidget(QtWidgets.QLabel("Autoware Mode"), 0, 0)
-        layout.addWidget(centered_label("Available"), 0, 1, 1, 3)
-        layout.addWidget(centered_label("Continuable"), 0, 4, 1, 3)
+        layout.addWidget(centered_label("Continuable"), 0, 1, 1, 3)
+        layout.addWidget(centered_label("Available"), 0, 4, 1, 3)
+        layout.addWidget(centered_label("Stable"), 0, 7, 1, 3)
         self.setLayout(layout)
         for row, (mode, name) in enumerate(modes, start=1):
             layout.addWidget(QtWidgets.QLabel(f"{name} ({mode})"), row, 0)
-            self.create_button(SystemModeStatusItem.AVAILABLE, mode, layout, row, 1)
-            self.create_button(SystemModeStatusItem.CONTINUABLE, mode, layout, row, 4)
+            self.create_button(SystemModeStatusItem.CONTINUABLE, mode, layout, row, 1)
+            self.create_button(SystemModeStatusItem.AVAILABLE, mode, layout, row, 4)
+            self.create_button(SystemModeStatusItem.STABLE, mode, layout, row, 7)
 
     def set_status(self, mode, category, status):
         self.status[(mode, category)] = status

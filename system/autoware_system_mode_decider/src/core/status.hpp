@@ -52,6 +52,7 @@ public:
   void update(const rclcpp::Time & now, double timeout);
   SystemModeStatusData * data(const AutowareMode & mode);
 
+  bool is_ready() const;
   bool is_available(const AutowareMode & mode) const override;
   bool is_stable(const AutowareMode & mode) const override;
   bool is_continuable(const AutowareMode & mode) const override;

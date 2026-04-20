@@ -65,6 +65,16 @@ SystemModeStatusData * SystemModeStatusStore::data(const AutowareMode & mode)
   return iter == modes_.end() ? nullptr : &iter->second;
 }
 
+bool SystemModeStatusStore::is_ready() const
+{
+  for (const auto & [id, status] : modes_) {
+    if (status.available.timeout()) return false;
+    if (status.stable.timeout()) return false;
+    if (status.continuable.timeout()) return false;
+  }
+  return true;
+}
+
 bool SystemModeStatusStore::is_available(const AutowareMode & mode) const
 {
   const auto iter = modes_.find(mode.id);
