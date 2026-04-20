@@ -59,8 +59,7 @@ void Decider::update()
   driving_mode_status_.update(interface_->now(), 1.0);
 
   // TODO(isamu-takagi): Check frequently mode change.
-  const auto mode = plugin_->decide(current_modes_, driving_mode_status_);
-  update_autoware_mode(mode);
+  update_autoware_mode(plugin_->decide(current_modes_, driving_mode_status_));
 
   Task & task = tasks_.empty() ? none_task_ : tasks_.front();
   task.execute(*interface_);
@@ -88,10 +87,13 @@ void Decider::notify_gate_status(const GateStatus & status)
 void Decider::update_autoware_mode(const AutowareMode & mode)
 {
   AutowareMode & prev = current_modes_.autoware_mode;
-
+  if (mapping_.count(mode.id) == 0) {
+    RCLCPP_ERROR_STREAM(logger, "decision logic returns unknown mode: " << mode.id);
+    return;
+  }
   if (prev.id == mode.id) return;
-  prev = mode;
   RCLCPP_INFO_STREAM(logger, "Change Autoware Mode: " << prev.id << " -> " << mode.id);
+  prev = mode;
 
   std::queue<Task> tasks;
   for (const auto & status : mapping_.at(mode.id)) {

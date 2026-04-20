@@ -27,7 +27,6 @@ class TrajectoryGateDisplay(QtWidgets.QLabel):
         )
 
     def on_msg(self, msg):
-        print(msg.source)
         self.setText(f"Trajectory: {msg.source}")
 
 
@@ -42,5 +41,4 @@ class CommandGateDisplay(QtWidgets.QLabel):
         )
 
     def on_msg(self, msg):
-        print(msg.source)
         self.setText(f"Command: {msg.source}")

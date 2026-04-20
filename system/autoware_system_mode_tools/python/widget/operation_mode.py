@@ -33,14 +33,15 @@ class OperationModeControl(QtWidgets.QWidget):
             (ChangeOperationMode.Request.LOCAL, "Local"),
             (ChangeOperationMode.Request.REMOTE, "Remote"),
         ]
+        self.result = QtWidgets.QLabel("response")
+        self.result.setAlignment(QtCore.Qt.AlignCenter)
+        self.result.setStyleSheet("border: 1px solid black;")
         layout = QtWidgets.QGridLayout()
         layout.setSpacing(0)
         for col, (mode, name) in enumerate(modes, start=0):
             button = QtWidgets.QPushButton(name)
             button.clicked.connect(lambda _, m=mode: self.change_mode(m))
             layout.addWidget(button, 0, col)
-        self.result = QtWidgets.QLabel("response")
-        self.result.setAlignment(QtCore.Qt.AlignCenter)
         layout.addWidget(self.result, 1, 0, 1, len(modes))
         self.setLayout(layout)
 
