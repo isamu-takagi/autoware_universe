@@ -24,6 +24,7 @@
 #include <memory>
 #include <queue>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace autoware::system_mode_decider
 {
@@ -52,6 +53,7 @@ private:
   ModeMapping mapping_;
   SystemModeStatusStore driving_mode_status_;
   CurrentModes current_modes_;
+  std::unordered_set<AutowareMode> temporary_unavailable_modes_;
 
   std::unique_ptr<NoneTask> none_task_ = std::make_unique<NoneTask>();
   std::queue<std::unique_ptr<Task>> tasks_;

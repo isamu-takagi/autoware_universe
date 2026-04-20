@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace autoware::system_mode_decider
@@ -57,11 +58,13 @@ enum class MrmRequest {
 struct AutowareMode
 {
   uint32_t id;
+  bool operator==(const AutowareMode & another) const { return id == another.id; }
 };
 
 struct PlatformMode
 {
   uint32_t id;
+  bool operator==(const PlatformMode & another) const { return id == another.id; }
 };
 
 struct CurrentModes
@@ -73,8 +76,32 @@ struct CurrentModes
   PlatformMode platform_mode;        // current
 };
 
+using AutowareModeSet = std::unordered_set<AutowareMode>;
 using ModeMapping = std::unordered_map<uint32_t, std::vector<GateStatus>>;
 
 }  // namespace autoware::system_mode_decider
+
+namespace std
+{
+
+template <>
+struct hash<autoware::system_mode_decider::AutowareMode>
+{
+  size_t operator()(const autoware::system_mode_decider::AutowareMode & k) const
+  {
+    return hash<uint32_t>{}(k.id);
+  }
+};
+
+template <>
+struct hash<autoware::system_mode_decider::PlatformMode>
+{
+  size_t operator()(const autoware::system_mode_decider::PlatformMode & k) const
+  {
+    return hash<uint32_t>{}(k.id);
+  }
+};
+
+}  // namespace std
 
 #endif  // AUTOWARE_SYSTEM_MODE_DECIDER__TYPES_HPP_

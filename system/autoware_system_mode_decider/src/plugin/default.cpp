@@ -41,24 +41,21 @@ void print_modes(const std::string & title, const std::vector<AutowareMode> & mo
   RCLCPP_INFO_STREAM(logger, title << ":" << text);
 }
 
-AutowareMode DefaultPlugin::decide(const CurrentModes & modes, const SystemModeStatus & status)
+AutowareMode DefaultPlugin::decide(const CurrentModes & modes, const AutowareModeSet & availables)
 {
   std::vector<AutowareMode> candidates;
   candidates.push_back(from_operation_mode(modes.operation_mode));
   candidates.push_back(EmergencyStop);
   candidates.push_back(ComfortableStop);
-  print_modes("Candidates", candidates);
+  // print_modes("Candidates", candidates);
 
-  std::vector<AutowareMode> availables;
+  std::vector<AutowareMode> result;
   for (const auto & mode : candidates) {
-    if (mode.id != modes.autoware_mode.id) {
-      if (status.is_available(mode)) availables.push_back(mode);
-    } else {
-      if (status.is_continuable(mode)) availables.push_back(mode);
-    }
+    if (availables.count(mode)) result.push_back(mode);
   }
-  print_modes("Availables", availables);
-  return availables.empty() ? EmergencyStop : availables.front();
+
+  // print_modes("Availables", result);
+  return result.empty() ? EmergencyStop : result.front();
 };
 
 ModeMapping DefaultPlugin::mapping() const

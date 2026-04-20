@@ -58,8 +58,20 @@ void Decider::update()
   // Detect status timeout.
   driving_mode_status_.update(interface_->now(), 1.0);
 
+  // List available modes.
+  AutowareModeSet availables;
+  for (const auto & mode : modes_from_mapping(mapping_)) {
+    if (temporary_unavailable_modes_.count(mode) == 0) {
+      if (mode.id != current_modes_.autoware_mode.id) {
+        if (driving_mode_status_.is_available(mode)) availables.insert(mode);
+      } else {
+        if (driving_mode_status_.is_continuable(mode)) availables.insert(mode);
+      }
+    }
+  }
+
   // TODO(isamu-takagi): Check frequently mode change.
-  update_autoware_mode(plugin_->decide(current_modes_, driving_mode_status_));
+  update_autoware_mode(plugin_->decide(current_modes_, availables));
 
   Task * task = tasks_.empty() ? none_task_.get() : tasks_.front().get();
   task->execute(*interface_);
@@ -114,9 +126,13 @@ void Decider::update_platform_mode(const PlatformMode & mode)
 void Decider::change_operation_mode(const OperationMode & operation_mode)
 {
   const auto mode = plugin_->from_operation_mode(operation_mode);
-  RCLCPP_INFO_STREAM(logger, "Change Operation Mode: " << mode.id);
 
-  current_modes_.operation_mode = operation_mode;
+  if (driving_mode_status_.is_available(mode)) {
+    RCLCPP_INFO_STREAM(logger, "change operation mode: " << mode.id);
+    current_modes_.operation_mode = operation_mode;
+  } else {
+    RCLCPP_WARN_STREAM(logger, "reject operation mode: " << mode.id);
+  }
 }
 
 }  // namespace autoware::system_mode_decider

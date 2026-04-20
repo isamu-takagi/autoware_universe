@@ -46,7 +46,7 @@ void TimeoutStatus::update(const rclcpp::Time & now, double timeout)
 SystemModeStatusStore::SystemModeStatusStore(const std::vector<AutowareMode> & modes)
 {
   for (const auto & mode : modes) {
-    modes_[mode.id] = SystemModeStatusData();
+    modes_[mode.id] = SystemModeStatusData{};
   }
 }
 
