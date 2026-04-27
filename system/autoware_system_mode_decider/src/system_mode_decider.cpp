@@ -53,6 +53,9 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
   srv_operation_mode_ = create_service<ChangeOperationMode>(
     "~/system/change_operation_mode",
     std::bind(&SystemModeDecider::on_change_operation_mode, this, _1, _2));
+  srv_autoware_control_ = create_service<ChangeAutowareControl>(
+    "~/system/change_autoware_control",
+    std::bind(&SystemModeDecider::on_change_autoware_control, this, _1, _2));
 
   const auto period = rclcpp::Rate(1.0).period();
   timer_ = rclcpp::create_timer(this, get_clock(), period, [this]() { on_timer_init(); });
@@ -136,6 +139,13 @@ void SystemModeDecider::on_change_operation_mode(
   // clang-format on
 
   decider_->change_operation_mode(convert(*req));
+  res->status.success = true;
+}
+
+void SystemModeDecider::on_change_autoware_control(
+  ChangeAutowareControl::Request::SharedPtr req, ChangeAutowareControl::Response::SharedPtr res)
+{
+  RCLCPP_INFO_STREAM(get_logger(), "Change Autoware Control: " << req->autoware_control);
   res->status.success = true;
 }
 

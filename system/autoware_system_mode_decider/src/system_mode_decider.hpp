@@ -23,6 +23,7 @@
 
 #include <autoware_system_mode_msgs/msg/system_mode_status.hpp>
 #include <autoware_system_mode_msgs/msg/trajectory_source.hpp>
+#include <autoware_system_msgs/srv/change_autoware_control.hpp>
 #include <autoware_system_msgs/srv/change_operation_mode.hpp>
 #include <autoware_vehicle_msgs/msg/control_mode_report.hpp>
 #include <tier4_system_msgs/msg/command_source_status.hpp>
@@ -44,6 +45,7 @@ private:
   using CommandSource = tier4_system_msgs::msg::CommandSourceStatus;
   using VehicleSource = autoware_vehicle_msgs::msg::ControlModeReport;
   using ChangeOperationMode = autoware_system_msgs::srv::ChangeOperationMode;
+  using ChangeAutowareControl = autoware_system_msgs::srv::ChangeAutowareControl;
 
   diagnostic_updater::Updater diag_;
   rclcpp::TimerBase::SharedPtr timer_;
@@ -52,7 +54,7 @@ private:
   rclcpp::Subscription<CommandSource>::SharedPtr sub_command_source_;
   rclcpp::Subscription<VehicleSource>::SharedPtr sub_vehicle_source_;
   rclcpp::Service<ChangeOperationMode>::SharedPtr srv_operation_mode_;
-
+  rclcpp::Service<ChangeAutowareControl>::SharedPtr srv_autoware_control_;
   void on_timer_init();
   void on_timer_main();
 
@@ -62,6 +64,8 @@ private:
   void on_vehicle_source(const VehicleSource & msg);
   void on_change_operation_mode(
     ChangeOperationMode::Request::SharedPtr req, ChangeOperationMode::Response::SharedPtr res);
+  void on_change_autoware_control(
+    ChangeAutowareControl::Request::SharedPtr req, ChangeAutowareControl::Response::SharedPtr res);
 
   pluginlib::ClassLoader<Plugin> loader_;
   std::unique_ptr<Decider> decider_;
