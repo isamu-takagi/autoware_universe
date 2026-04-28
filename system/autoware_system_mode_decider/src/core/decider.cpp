@@ -99,6 +99,7 @@ void Decider::execute_tasks()
         temporary_unavailable_modes_.insert(current_modes_.autoware_mode);
         return;
       case TaskResult::kRunning:
+        RCLCPP_WARN_STREAM(logger, tasks_.front()->describe() << ": running");
         return;
       default:
         throw std::logic_error("invalid task result");
@@ -184,21 +185,30 @@ void Decider::change_operation_mode(const OperationMode & operation_mode)
 
 void Decider::change_autoware_control(const AutowareControl & autoware_control)
 {
+  // If disable, request the manual mode immediately.
   if (autoware_control == AutowareControl::kDisable) {
+    RCLCPP_WARN_STREAM(logger, "accept autoware control disable");
+    current_modes_.autoware_control = autoware_control;
+    interface_->change_platform_mode(PlatformMode::kManual);
     return;
   }
 
-  if (autoware_control == AutowareControl::kEnable) {
+  if (autoware_control != AutowareControl::kEnable) {
     return;
   }
 
   // The check target is the normal behavior, operation mode. MRM is not included.
   if (!driving_mode_status_->is_available(current_modes_.operation_autoware_mode)) {
-    RCLCPP_WARN_STREAM(logger, "reject autoware control change");
+    RCLCPP_WARN_STREAM(logger, "reject autoware control enable");
+    return;
   }
 
   RCLCPP_INFO_STREAM(logger, "accept autoware control change");
   current_modes_.autoware_control = autoware_control;
+
+  std::queue<std::unique_ptr<Task>> tasks;
+  tasks.push(std::make_unique<PlatformModeTask>(PlatformMode::kAutoware));
+  tasks_.swap(tasks);
 }
 
 }  // namespace autoware::system_mode_decider

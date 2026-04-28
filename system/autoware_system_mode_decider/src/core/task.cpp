@@ -69,8 +69,15 @@ std::string CommandSourceTask::describe() const
 
 TaskResult PlatformModeTask::execute(Interface & interface, GateStatus & gates)
 {
-  (void)interface;
-  (void)gates;
+  if (gates.status.platform_mode == target_) {
+    return TaskResult::kFinished;
+  }
+  if (stamp_) {
+    const auto duration = (interface.now() - stamp_.value()).seconds();
+    return timeout < duration ? TaskResult::kTimeout : TaskResult::kRunning;
+  }
+  stamp_ = interface.now();
+  interface.change_platform_mode(target_);
   return TaskResult::kRunning;
 }
 

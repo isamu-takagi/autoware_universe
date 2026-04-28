@@ -149,6 +149,7 @@ void SystemModeDecider::on_change_operation_mode(
   };
   // clang-format on
 
+  // TODO(isamu-takagi): error handling
   decider_->change_operation_mode(convert(*req));
   res->status.success = true;
 }
@@ -156,7 +157,12 @@ void SystemModeDecider::on_change_operation_mode(
 void SystemModeDecider::on_change_autoware_control(
   ChangeAutowareControl::Request::SharedPtr req, ChangeAutowareControl::Response::SharedPtr res)
 {
-  RCLCPP_INFO_STREAM(get_logger(), "Change Autoware Control: " << req->autoware_control);
+  const auto convert = [](const ChangeAutowareControl::Request & req) {
+    return req.autoware_control ? AutowareControl::kEnable : AutowareControl::kDisable;
+  };
+
+  // TODO(isamu-takagi): error handling
+  decider_->change_autoware_control(convert(*req));
   res->status.success = true;
 }
 

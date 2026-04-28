@@ -93,6 +93,7 @@ public:
   std::string describe() const override;
 
 private:
+  static constexpr double timeout = 3.0;
   PlatformMode target_;
   std::optional<rclcpp::Time> stamp_;
 };
