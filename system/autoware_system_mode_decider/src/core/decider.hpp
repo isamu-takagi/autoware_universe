@@ -43,6 +43,7 @@ public:
   void update();
   void notify_gate_status(const GateStatus & status);
   void change_operation_mode(const OperationMode & operation_mode);
+  void change_autoware_control(const AutowareControl & autoware_control);
 
 private:
   void update_autoware_mode(const AutowareMode & mode);

@@ -144,6 +144,30 @@ void Decider::change_operation_mode(const OperationMode & operation_mode)
 {
   const auto mode = plugin_->from_operation_mode(operation_mode);
 
+  // TODO(isamu-takagi): Implement background mode change.
+  // if (current_modes_.autoware_control == AutowareControl::kDisable) {
+  // }
+
+  if (driving_mode_status_.is_available(mode)) {
+    RCLCPP_INFO_STREAM(logger, "change operation mode: " << mode.id);
+    current_modes_.operation_mode = operation_mode;
+  } else {
+    RCLCPP_WARN_STREAM(logger, "reject operation mode: " << mode.id);
+  }
+}
+
+void Decider::change_autoware_control(const AutowareControl & autoware_control)
+{
+  current_modes_.autoware_control = autoware_control;
+
+  if (autoware_control == AutowareControl::kDisable) {
+    return;
+  }
+
+  if (autoware_control == AutowareControl::kEnable) {
+    return;
+  }
+
   if (driving_mode_status_.is_available(mode)) {
     RCLCPP_INFO_STREAM(logger, "change operation mode: " << mode.id);
     current_modes_.operation_mode = operation_mode;
