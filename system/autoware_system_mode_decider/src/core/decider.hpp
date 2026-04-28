@@ -15,6 +15,7 @@
 #ifndef CORE__DECIDER_HPP_
 #define CORE__DECIDER_HPP_
 
+#include "core/config.hpp"
 #include "core/status.hpp"
 #include "core/task.hpp"
 #include "type/interface.hpp"
@@ -49,14 +50,14 @@ private:
 
   std::unique_ptr<Interface> interface_;
   std::shared_ptr<Plugin> plugin_;
-  DrivingModeConfig driving_mode_config_;
-  SystemModeStatusStore driving_mode_status_;
+  std::unique_ptr<DrivingModeConfig> driving_mode_config_;
+  std::unique_ptr<SystemModeStatusStore> driving_mode_status_;
   CurrentModes current_modes_;
   std::unordered_set<AutowareMode> temporary_unavailable_modes_;
 
   std::unique_ptr<NoneTask> none_task_ = std::make_unique<NoneTask>();
   std::queue<std::unique_ptr<Task>> tasks_;
-  GateStatusTemp gates_;
+  GateStatus gates_;
 };
 
 }  // namespace autoware::system_mode_decider

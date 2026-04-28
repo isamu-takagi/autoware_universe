@@ -18,30 +18,24 @@
 #include "types.hpp"
 
 #include <optional>
-#include <vector>
 
 namespace autoware::system_mode_decider
 {
 
-class DrivingModeConfig
+struct DrivingModeConfigInterface
 {
-public:
   struct Gates
   {
     std::optional<TrajectorySource> trajectory_source;
     std::optional<CommandSource> command_source;
   };
 
-  void define_autoware_mode(const AutowareMode & mode);
-  void define_trajectory_source(const TrajectorySource & source);
-  void define_command_source(const CommandSource & source);
-  void bind_gates(const AutowareMode & mode, const Gates & gates);
-  void bind_operation_mode(const AutowareMode & mode, const OperationMode & operation_mode);
-
-  std::vector<AutowareMode> autoware_modes() const;
-  bool exists(const AutowareMode & mode) const;
-  Gates gates(const AutowareMode & mode) const;
-  AutowareMode from_operation_mode(const OperationMode & operation_mode) const;
+  virtual ~DrivingModeConfigInterface() = default;
+  virtual void define_autoware_mode(const AutowareMode & mode) = 0;
+  virtual void define_trajectory_source(const TrajectorySource & source) = 0;
+  virtual void define_command_source(const CommandSource & source) = 0;
+  virtual void bind_gates(const AutowareMode & mode, const Gates & gates) = 0;
+  virtual void bind_operation_mode(const AutowareMode & mode, const OperationMode & operation) = 0;
 };
 
 }  // namespace autoware::system_mode_decider

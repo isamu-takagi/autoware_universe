@@ -172,46 +172,24 @@ rclcpp::Time RosInterface::now() const
   return node_->now();
 }
 
-void RosInterface::change_gate_status(const GateStatus & status)
-{
-  const auto type_name = [](GateType type) {
-    switch (type) {
-      case GateType::kTrajectoryGate:
-        return "TrajectoryGate";
-      case GateType::kCommandGate:
-        return "CommandGate";
-      case GateType::kCommandFilter:
-        return "CommandFilter";
-      case GateType::kVehicleDriver:
-        return "VehicleDriver";
-      default:
-        return "Unknown";
-    }
-  };
-  RCLCPP_INFO_STREAM(
-    node_->get_logger(), "Change gate status: " << type_name(status.type) << ", " << status.id);
-
-  // clang-format off
-  switch (status.type) {
-    case GateType::kTrajectoryGate: return change_trajectory_source(status.id);
-    case GateType::kCommandGate:    return change_command_source(status.id);
-    default:                        return;
-  }
-  // clang-format on
-}
-
-void RosInterface::change_trajectory_source(uint32_t id)
+void RosInterface::change_trajectory_source(const TrajectorySource & source)
 {
   TrajectorySourceMsg msg;
-  msg.source = id;
+  msg.source = source.id;
   pub_trajectory_select_->publish(msg);
 }
 
-void RosInterface::change_command_source(uint32_t id)
+void RosInterface::change_command_source(const CommandSource & source)
 {
   const auto request = std::make_shared<SelectCommandSource::Request>();
-  request->source = id;
+  request->source = source.id;
   cli_command_select_->async_send_request(request);
+}
+
+void RosInterface::change_platform_mode(const PlatformMode & mode)
+{
+  (void)mode;
+  // TODO(isamu-takagi): Implement platform mode change.
 }
 
 }  // namespace autoware::system_mode_decider

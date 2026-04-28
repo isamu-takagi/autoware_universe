@@ -26,7 +26,9 @@ class Interface
 public:
   virtual ~Interface() = default;
   virtual rclcpp::Time now() const = 0;
-  virtual void change_gate_status(const GateStatus & status) = 0;
+  virtual void change_trajectory_source(const TrajectorySource & source) = 0;
+  virtual void change_command_source(const CommandSource & source) = 0;
+  virtual void change_platform_mode(const PlatformMode & mode) = 0;
 };
 
 }  // namespace autoware::system_mode_decider

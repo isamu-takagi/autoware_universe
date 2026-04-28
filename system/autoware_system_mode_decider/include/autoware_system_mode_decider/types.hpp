@@ -23,19 +23,6 @@
 namespace autoware::system_mode_decider
 {
 
-enum class GateType {
-  kTrajectoryGate,
-  kCommandGate,
-  kCommandFilter,
-  kVehicleDriver,
-};
-
-struct GateStatus
-{
-  GateType type;
-  uint32_t id;
-};
-
 struct TrajectorySource
 {
   uint32_t id;
@@ -59,10 +46,10 @@ struct AutowareMode
 
 enum class PlatformMode {
   kUnknown,
-  kManual,
   kAutoware,
   kAutowareSteering,
   kAutowareVelocity,
+  kManual,
 };
 
 enum class OperationMode {
@@ -93,7 +80,6 @@ struct CurrentModes
 };
 
 using AutowareModeSet = std::unordered_set<AutowareMode>;
-using ModeMapping = std::unordered_map<AutowareMode, std::vector<GateStatus>>;
 
 }  // namespace autoware::system_mode_decider
 
@@ -103,9 +89,27 @@ namespace std
 template <>
 struct hash<autoware::system_mode_decider::AutowareMode>
 {
-  size_t operator()(const autoware::system_mode_decider::AutowareMode & k) const
+  size_t operator()(const autoware::system_mode_decider::AutowareMode & mode) const
   {
-    return hash<uint32_t>{}(k.id);
+    return hash<uint32_t>{}(mode.id);
+  }
+};
+
+template <>
+struct hash<autoware::system_mode_decider::TrajectorySource>
+{
+  size_t operator()(const autoware::system_mode_decider::TrajectorySource & source) const
+  {
+    return hash<uint32_t>{}(source.id);
+  }
+};
+
+template <>
+struct hash<autoware::system_mode_decider::CommandSource>
+{
+  size_t operator()(const autoware::system_mode_decider::CommandSource & source) const
+  {
+    return hash<uint32_t>{}(source.id);
   }
 };
 

@@ -26,7 +26,7 @@ class Plugin
 public:
   virtual ~Plugin() = default;
   virtual AutowareMode decide(const CurrentModes & status, const AutowareModeSet & availables) = 0;
-  virtual DrivingModeConfig config() const = 0;
+  virtual void setup(DrivingModeConfigInterface & config) const = 0;
 };
 
 }  // namespace autoware::system_mode_decider

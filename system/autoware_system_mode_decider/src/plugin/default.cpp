@@ -64,10 +64,8 @@ AutowareMode DefaultPlugin::decide(const CurrentModes & modes, const AutowareMod
   return result.empty() ? EmergencyStop : result.front();
 };
 
-DrivingModeConfig DefaultPlugin::config() const
+void DefaultPlugin::setup(DrivingModeConfigInterface & config) const
 {
-  DrivingModeConfig config;
-
   config.define_autoware_mode(StopMode);
   config.define_autoware_mode(AutonomousMode);
   config.define_autoware_mode(LocalMode);
@@ -94,8 +92,6 @@ DrivingModeConfig DefaultPlugin::config() const
   config.bind_operation_mode(AutonomousMode, OperationMode::kAutonomous);
   config.bind_operation_mode(LocalMode, OperationMode::kLocal);
   config.bind_operation_mode(RemoteMode, OperationMode::kRemote);
-
-  return config;
 }
 
 }  // namespace autoware::system_mode_decider

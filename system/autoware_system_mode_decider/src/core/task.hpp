@@ -31,7 +31,7 @@ struct GateStatusItem
   PlatformMode platform_mode;
 };
 
-struct GateStatusTemp
+struct GateStatus
 {
   GateStatusItem status;
   GateStatusItem expect;
@@ -47,20 +47,20 @@ class Task
 {
 public:
   virtual ~Task() = default;
-  virtual TaskResult execute(Interface & interface, GateStatusTemp & gates) = 0;
+  virtual TaskResult execute(Interface & interface, GateStatus & gates) = 0;
 };
 
 class NoneTask : public Task
 {
 public:
-  TaskResult execute(Interface & interface, GateStatusTemp & gates) override;
+  TaskResult execute(Interface & interface, GateStatus & gates) override;
 };
 
 class TrajectorySourceTask : public Task
 {
 public:
   explicit TrajectorySourceTask(const TrajectorySource & target) : target_(target) {}
-  TaskResult execute(Interface & interface, GateStatusTemp & gates) override;
+  TaskResult execute(Interface & interface, GateStatus & gates) override;
 
 private:
   TrajectorySource target_;
@@ -71,21 +71,21 @@ class CommandSourceTask : public Task
 {
 public:
   explicit CommandSourceTask(const CommandSource & target) : target_(target) {}
-  TaskResult execute(Interface & interface, GateStatusTemp & gates) override;
+  TaskResult execute(Interface & interface, GateStatus & gates) override;
 
 private:
   CommandSource target_;
   std::optional<rclcpp::Time> stamp_;
 };
 
-class VehicleControlModeTask : public Task
+class PlatformModeTask : public Task
 {
 public:
-  explicit VehicleControlModeTask(const AutowareControl & target) : target_(target) {}
-  TaskResult execute(Interface & interface, GateStatusTemp & gates) override;
+  explicit PlatformModeTask(const PlatformMode & target) : target_(target) {}
+  TaskResult execute(Interface & interface, GateStatus & gates) override;
 
 private:
-  AutowareControl target_;
+  PlatformMode target_;
   std::optional<rclcpp::Time> stamp_;
 };
 

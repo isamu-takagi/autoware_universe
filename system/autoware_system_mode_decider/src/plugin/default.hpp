@@ -24,7 +24,7 @@ class DefaultPlugin : public Plugin
 {
 public:
   AutowareMode decide(const CurrentModes & status, const AutowareModeSet & availables) override;
-  DrivingModeConfig config() const override;
+  void setup(DrivingModeConfigInterface & config) const override;
 };
 
 }  // namespace autoware::system_mode_decider

@@ -79,7 +79,9 @@ class RosInterface : public Interface
 public:
   explicit RosInterface(rclcpp::Node * node);
   rclcpp::Time now() const override;
-  void change_gate_status(const GateStatus & status) override;
+  void change_trajectory_source(const TrajectorySource & source) override;
+  void change_command_source(const CommandSource & source) override;
+  void change_platform_mode(const PlatformMode & mode) override;
 
 private:
   using TrajectorySourceMsg = autoware_system_mode_msgs::msg::TrajectorySource;
@@ -87,9 +89,6 @@ private:
   rclcpp::Node * node_;
   rclcpp::Publisher<TrajectorySourceMsg>::SharedPtr pub_trajectory_select_;
   rclcpp::Client<SelectCommandSource>::SharedPtr cli_command_select_;
-
-  void change_trajectory_source(uint32_t id);
-  void change_command_source(uint32_t id);
 };
 
 }  // namespace autoware::system_mode_decider

@@ -17,12 +17,12 @@
 namespace autoware::system_mode_decider
 {
 
-TaskResult NoneTask::execute(Interface &, GateStatusTemp &)
+TaskResult NoneTask::execute(Interface &, GateStatus &)
 {
   return TaskResult::kRunning;
 }
 
-TaskResult TrajectorySourceTask::execute(Interface & interface, GateStatusTemp & gates)
+TaskResult TrajectorySourceTask::execute(Interface & interface, GateStatus & gates)
 {
   (void)interface;
   (void)gates;
@@ -38,6 +38,20 @@ TaskResult TrajectorySourceTask::execute(Interface & interface, GateStatusTemp &
   stamp_ = interface.now();
   interface.change_gate_status(target_);
   */
+}
+
+TaskResult CommandSourceTask::execute(Interface & interface, GateStatus & gates)
+{
+  (void)interface;
+  (void)gates;
+  return TaskResult::kRunning;
+}
+
+TaskResult PlatformModeTask::execute(Interface & interface, GateStatus & gates)
+{
+  (void)interface;
+  (void)gates;
+  return TaskResult::kRunning;
 }
 
 }  // namespace autoware::system_mode_decider
