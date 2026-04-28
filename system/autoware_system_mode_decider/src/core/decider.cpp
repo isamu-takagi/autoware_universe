@@ -56,7 +56,6 @@ Decider::Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin
   current_modes_.autoware_control = AutowareControl::kUnknown;
   current_modes_.mrm_request = MrmRequest::kNone;
   current_modes_.autoware_mode = AutowareMode{0};  // unknown mode
-  current_modes_.platform_mode = PlatformMode{0};  // unknown mode
 }
 
 SystemModeStatusStore & Decider::access_status()
@@ -96,18 +95,31 @@ void Decider::update()
   }
 }
 
-void Decider::notify_gate_status(const GateStatus & status)
+void Decider::notify_trajectory_source(const TrajectorySource & source)
 {
-  actual_gate_status_[status.type] = status.id;
+  if (gates_.expect.trajectory_source != source) {
+    // Unintended change detected !!
+  }
+  gates_.status.trajectory_source = source;
+  gates_.expect.trajectory_source = source;
+}
 
-  Task * task = tasks_.empty() ? none_task_.get() : tasks_.front().get();
+void Decider::notify_command_source(const CommandSource & source)
+{
+  if (gates_.expect.command_source != source) {
+    // Unintended change detected !!
+  }
+  gates_.status.command_source = source;
+  gates_.expect.command_source = source;
+}
 
-  if (task->expects(status)) {
-    tasks_.pop();
-    // update();
-  } else {
+void Decider::notify_vehicle_control_mode(const PlatformMode & mode)
+{
+  if (gates_.expect.platform_mode != mode) {
     // Override detected !!
   }
+  gates_.status.platform_mode = mode;
+  gates_.expect.platform_mode = mode;
 }
 
 void Decider::update_autoware_mode(const AutowareMode & mode)
@@ -133,11 +145,7 @@ void Decider::update_autoware_mode(const AutowareMode & mode)
 
 void Decider::update_platform_mode(const PlatformMode & mode)
 {
-  PlatformMode & prev = current_modes_.platform_mode;
-
-  if (prev.id == mode.id) return;
-  prev = mode;
-  RCLCPP_INFO_STREAM(logger, "Change Platform Mode: " << prev.id << " -> " << mode.id);
+  (void)mode;
 }
 
 void Decider::change_operation_mode(const OperationMode & operation_mode)
@@ -158,8 +166,6 @@ void Decider::change_operation_mode(const OperationMode & operation_mode)
 
 void Decider::change_autoware_control(const AutowareControl & autoware_control)
 {
-  current_modes_.autoware_control = autoware_control;
-
   if (autoware_control == AutowareControl::kDisable) {
     return;
   }
@@ -168,12 +174,14 @@ void Decider::change_autoware_control(const AutowareControl & autoware_control)
     return;
   }
 
-  if (driving_mode_status_.is_available(mode)) {
-    RCLCPP_INFO_STREAM(logger, "change operation mode: " << mode.id);
-    current_modes_.operation_mode = operation_mode;
-  } else {
-    RCLCPP_WARN_STREAM(logger, "reject operation mode: " << mode.id);
+  // The check target is the normal behavior, operation mode. MRM is not included.
+  const auto mode = plugin_->from_operation_mode(current_modes_.operation_mode);
+  if (!driving_mode_status_.is_available(mode)) {
+    RCLCPP_WARN_STREAM(logger, "reject autoware control change");
   }
+
+  RCLCPP_INFO_STREAM(logger, "accept autoware control change");
+  current_modes_.autoware_control = autoware_control;
 }
 
 }  // namespace autoware::system_mode_decider

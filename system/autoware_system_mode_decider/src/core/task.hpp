@@ -24,6 +24,19 @@
 namespace autoware::system_mode_decider
 {
 
+struct GateStatusItem
+{
+  TrajectorySource trajectory_source;
+  CommandSource command_source;
+  PlatformMode platform_mode;
+};
+
+struct GateStatusTemp
+{
+  GateStatusItem status;
+  GateStatusItem expect;
+};
+
 class Task
 {
 public:
@@ -51,6 +64,19 @@ public:
 
 private:
   GateStatus target_;
+  std::optional<rclcpp::Time> stamp_;
+};
+
+class VehicleControlModeTask : public Task
+{
+public:
+  explicit VehicleControlModeTask(const AutowareControl & target) : target_(target) {}
+  void execute(Interface & interface) override;
+  bool timeout(Interface & interface) override;
+  bool expects(const GateStatus & status) const override;
+
+private:
+  AutowareControl target_;
   std::optional<rclcpp::Time> stamp_;
 };
 

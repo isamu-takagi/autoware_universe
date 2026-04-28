@@ -40,15 +40,15 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
   sub_system_mode_status_ = create_subscription<SystemModeStatus>(
     "~/system/driving_mode/status", rclcpp::QoS(1),
     std::bind(&SystemModeDecider::on_system_mode_status, this, _1));
-  sub_trajectory_source_ = create_subscription<TrajectorySource>(
+  sub_trajectory_source_ = create_subscription<TrajectorySourceMsg>(
     "~/trajectory/source/status", rclcpp::QoS(1).transient_local(),
     std::bind(&SystemModeDecider::on_trajectory_source, this, _1));
-  sub_command_source_ = create_subscription<CommandSource>(
+  sub_command_source_ = create_subscription<CommandSourceMsg>(
     "~/command/source/status", rclcpp::QoS(1).transient_local(),
     std::bind(&SystemModeDecider::on_command_source, this, _1));
-  sub_vehicle_source_ = create_subscription<VehicleSource>(
-    "~/vehicle/source/status", rclcpp::QoS(1).durability_volatile(),
-    std::bind(&SystemModeDecider::on_vehicle_source, this, _1));
+  sub_control_mode_report_ = create_subscription<ControlModeReport>(
+    "~/vehicle/control_mode/report", rclcpp::QoS(1).durability_volatile(),
+    std::bind(&SystemModeDecider::on_control_mode_report, this, _1));
 
   srv_operation_mode_ = create_service<ChangeOperationMode>(
     "~/system/change_operation_mode",
@@ -105,22 +105,33 @@ void SystemModeDecider::on_system_mode_status(const SystemModeStatus & msg)
   }
 }
 
-void SystemModeDecider::on_trajectory_source(const TrajectorySource & msg)
+void SystemModeDecider::on_trajectory_source(const TrajectorySourceMsg & msg)
 {
   init_flag_ |= 0x01;
-  decider_->notify_gate_status(GateStatus{GateType::kTrajectoryGate, msg.source});
+  decider_->notify_trajectory_source(TrajectorySource{msg.source});
 }
 
-void SystemModeDecider::on_command_source(const CommandSource & msg)
+void SystemModeDecider::on_command_source(const CommandSourceMsg & msg)
 {
   init_flag_ |= 0x02;
-  decider_->notify_gate_status(GateStatus{GateType::kCommandGate, msg.source});
+  decider_->notify_command_source(CommandSource{msg.source});
 }
 
-void SystemModeDecider::on_vehicle_source(const VehicleSource & msg)
+void SystemModeDecider::on_control_mode_report(const ControlModeReport & msg)
 {
+  // clang-format off
+  const auto convert = [](const ControlModeReport & msg) {
+    switch (msg.mode) {
+      case ControlModeReport::AUTONOMOUS:               return PlatformMode::kAutoware;
+      case ControlModeReport::AUTONOMOUS_STEER_ONLY:    return PlatformMode::kAutowareSteering;
+      case ControlModeReport::AUTONOMOUS_VELOCITY_ONLY: return PlatformMode::kAutowareVelocity;
+      case ControlModeReport::MANUAL:                   return PlatformMode::kManual;
+      default:                                          return PlatformMode::kUnknown;
+    }
+  };
+  // clang-format on
   init_flag_ |= 0x04;
-  decider_->notify_gate_status(GateStatus{GateType::kVehicleDriver, msg.mode});
+  decider_->notify_vehicle_control_mode(convert(msg));
 }
 
 void SystemModeDecider::on_change_operation_mode(
@@ -152,7 +163,7 @@ void SystemModeDecider::on_change_autoware_control(
 RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
 {
   pub_trajectory_select_ =
-    node->create_publisher<TrajectorySource>("~/trajectory/source/select", rclcpp::QoS(1));
+    node->create_publisher<TrajectorySourceMsg>("~/trajectory/source/select", rclcpp::QoS(1));
   cli_command_select_ = node->create_client<SelectCommandSource>("~/command/source/select");
 }
 
@@ -191,7 +202,7 @@ void RosInterface::change_gate_status(const GateStatus & status)
 
 void RosInterface::change_trajectory_source(uint32_t id)
 {
-  TrajectorySource msg;
+  TrajectorySourceMsg msg;
   msg.source = id;
   pub_trajectory_select_->publish(msg);
 }

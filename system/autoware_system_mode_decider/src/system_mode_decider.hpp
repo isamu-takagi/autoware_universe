@@ -41,27 +41,27 @@ public:
 
 private:
   using SystemModeStatus = autoware_system_mode_msgs::msg::SystemModeStatus;
-  using TrajectorySource = autoware_system_mode_msgs::msg::TrajectorySource;
-  using CommandSource = tier4_system_msgs::msg::CommandSourceStatus;
-  using VehicleSource = autoware_vehicle_msgs::msg::ControlModeReport;
+  using TrajectorySourceMsg = autoware_system_mode_msgs::msg::TrajectorySource;
+  using CommandSourceMsg = tier4_system_msgs::msg::CommandSourceStatus;
+  using ControlModeReport = autoware_vehicle_msgs::msg::ControlModeReport;
   using ChangeOperationMode = autoware_system_msgs::srv::ChangeOperationMode;
   using ChangeAutowareControl = autoware_system_msgs::srv::ChangeAutowareControl;
 
   diagnostic_updater::Updater diag_;
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Subscription<SystemModeStatus>::SharedPtr sub_system_mode_status_;
-  rclcpp::Subscription<TrajectorySource>::SharedPtr sub_trajectory_source_;
-  rclcpp::Subscription<CommandSource>::SharedPtr sub_command_source_;
-  rclcpp::Subscription<VehicleSource>::SharedPtr sub_vehicle_source_;
+  rclcpp::Subscription<TrajectorySourceMsg>::SharedPtr sub_trajectory_source_;
+  rclcpp::Subscription<CommandSourceMsg>::SharedPtr sub_command_source_;
+  rclcpp::Subscription<ControlModeReport>::SharedPtr sub_control_mode_report_;
   rclcpp::Service<ChangeOperationMode>::SharedPtr srv_operation_mode_;
   rclcpp::Service<ChangeAutowareControl>::SharedPtr srv_autoware_control_;
   void on_timer_init();
   void on_timer_main();
 
   void on_system_mode_status(const SystemModeStatus & msg);
-  void on_trajectory_source(const TrajectorySource & msg);
-  void on_command_source(const CommandSource & msg);
-  void on_vehicle_source(const VehicleSource & msg);
+  void on_trajectory_source(const TrajectorySourceMsg & msg);
+  void on_command_source(const CommandSourceMsg & msg);
+  void on_control_mode_report(const ControlModeReport & msg);
   void on_change_operation_mode(
     ChangeOperationMode::Request::SharedPtr req, ChangeOperationMode::Response::SharedPtr res);
   void on_change_autoware_control(
@@ -82,10 +82,10 @@ public:
   void change_gate_status(const GateStatus & status) override;
 
 private:
-  using TrajectorySource = autoware_system_mode_msgs::msg::TrajectorySource;
+  using TrajectorySourceMsg = autoware_system_mode_msgs::msg::TrajectorySource;
   using SelectCommandSource = tier4_system_msgs::srv::SelectCommandSource;
   rclcpp::Node * node_;
-  rclcpp::Publisher<TrajectorySource>::SharedPtr pub_trajectory_select_;
+  rclcpp::Publisher<TrajectorySourceMsg>::SharedPtr pub_trajectory_select_;
   rclcpp::Client<SelectCommandSource>::SharedPtr cli_command_select_;
 
   void change_trajectory_source(uint32_t id);

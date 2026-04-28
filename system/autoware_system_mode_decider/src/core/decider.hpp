@@ -29,19 +29,16 @@
 namespace autoware::system_mode_decider
 {
 
-class DeciderLogic
-{
-public:
-  DeciderLogic();
-};
-
 class Decider
 {
 public:
   Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin);
   SystemModeStatusStore & access_status();
   void update();
-  void notify_gate_status(const GateStatus & status);
+  void notify_trajectory_source(const TrajectorySource & source);
+  void notify_command_source(const CommandSource & source);
+  void notify_vehicle_control_mode(const PlatformMode & mode);
+
   void change_operation_mode(const OperationMode & operation_mode);
   void change_autoware_control(const AutowareControl & autoware_control);
 
@@ -58,7 +55,7 @@ private:
 
   std::unique_ptr<NoneTask> none_task_ = std::make_unique<NoneTask>();
   std::queue<std::unique_ptr<Task>> tasks_;
-  std::unordered_map<GateType, uint32_t> actual_gate_status_;
+  GateStatusTemp gates_;
 };
 
 }  // namespace autoware::system_mode_decider

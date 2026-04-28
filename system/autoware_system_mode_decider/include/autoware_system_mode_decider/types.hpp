@@ -36,6 +36,35 @@ struct GateStatus
   uint32_t id;
 };
 
+struct TrajectorySource
+{
+  uint32_t id;
+  bool operator==(const TrajectorySource & another) const { return id == another.id; }
+  bool operator!=(const TrajectorySource & another) const { return id != another.id; }
+};
+
+struct CommandSource
+{
+  uint32_t id;
+  bool operator==(const CommandSource & another) const { return id == another.id; }
+  bool operator!=(const CommandSource & another) const { return id != another.id; }
+};
+
+struct AutowareMode
+{
+  uint32_t id;
+  bool operator==(const AutowareMode & another) const { return id == another.id; }
+  bool operator!=(const AutowareMode & another) const { return id != another.id; }
+};
+
+enum class PlatformMode {
+  kUnknown,
+  kManual,
+  kAutoware,
+  kAutowareSteering,
+  kAutowareVelocity,
+};
+
 enum class OperationMode {
   kUnknown,
   kStop,
@@ -55,25 +84,12 @@ enum class MrmRequest {
   kDelegate,
 };
 
-struct AutowareMode
-{
-  uint32_t id;
-  bool operator==(const AutowareMode & another) const { return id == another.id; }
-};
-
-struct PlatformMode
-{
-  uint32_t id;
-  bool operator==(const PlatformMode & another) const { return id == another.id; }
-};
-
 struct CurrentModes
 {
   OperationMode operation_mode;      // request
   AutowareControl autoware_control;  // request
   MrmRequest mrm_request;            // request
   AutowareMode autoware_mode;        // current
-  PlatformMode platform_mode;        // current
 };
 
 using AutowareModeSet = std::unordered_set<AutowareMode>;
@@ -88,15 +104,6 @@ template <>
 struct hash<autoware::system_mode_decider::AutowareMode>
 {
   size_t operator()(const autoware::system_mode_decider::AutowareMode & k) const
-  {
-    return hash<uint32_t>{}(k.id);
-  }
-};
-
-template <>
-struct hash<autoware::system_mode_decider::PlatformMode>
-{
-  size_t operator()(const autoware::system_mode_decider::PlatformMode & k) const
   {
     return hash<uint32_t>{}(k.id);
   }
