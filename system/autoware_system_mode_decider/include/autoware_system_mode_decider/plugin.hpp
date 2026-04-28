@@ -15,7 +15,8 @@
 #ifndef AUTOWARE_SYSTEM_MODE_DECIDER__PLUGIN_HPP_
 #define AUTOWARE_SYSTEM_MODE_DECIDER__PLUGIN_HPP_
 
-#include "status.hpp"
+#include "config.hpp"
+#include "types.hpp"
 
 namespace autoware::system_mode_decider
 {
@@ -25,8 +26,7 @@ class Plugin
 public:
   virtual ~Plugin() = default;
   virtual AutowareMode decide(const CurrentModes & status, const AutowareModeSet & availables) = 0;
-  virtual ModeMapping mapping() const = 0;
-  virtual AutowareMode from_operation_mode(const OperationMode & operation_mode) const = 0;
+  virtual DrivingModeConfig config() const = 0;
 };
 
 }  // namespace autoware::system_mode_decider

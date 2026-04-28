@@ -37,22 +37,15 @@ void print_modes(const std::string & title, const ModeIterable & modes)
   RCLCPP_INFO_STREAM(logger, title << ":" << text);
 }
 
-std::vector<AutowareMode> modes_from_mapping(const ModeMapping & mapping)
-{
-  std::vector<AutowareMode> modes;
-  for (const auto & [mode, gate] : mapping) {
-    modes.emplace_back(mode);
-  }
-  return modes;
-}
-
 Decider::Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin)
-: mapping_(plugin->mapping()), driving_mode_status_(modes_from_mapping(mapping_))
+: driving_mode_config_(plugin->config()),
+  driving_mode_status_(driving_mode_config_.autoware_modes())
 {
   interface_ = std::move(interface);
   plugin_ = plugin;
 
-  current_modes_.operation_mode = OperationMode::kStop;
+  current_modes_.operation_autoware_mode =
+    driving_mode_config_.from_operation_mode(OperationMode::kStop);
   current_modes_.autoware_control = AutowareControl::kUnknown;
   current_modes_.mrm_request = MrmRequest::kNone;
   current_modes_.autoware_mode = AutowareMode{0};  // unknown mode
@@ -73,7 +66,7 @@ void Decider::update()
 
   // List available modes.
   AutowareModeSet availables;
-  for (const auto & [mode, gate] : mapping_) {
+  for (const auto & mode : driving_mode_config_.autoware_modes()) {
     if (temporary_unavailable_modes_.count(mode) == 0) {
       if (mode.id != current_modes_.autoware_mode.id) {
         if (driving_mode_status_.is_available(mode)) availables.insert(mode);
@@ -85,13 +78,26 @@ void Decider::update()
 
   // TODO(isamu-takagi): Check frequently mode change.
   update_autoware_mode(plugin_->decide(current_modes_, availables));
+  execute_tasks();
+}
 
-  Task * task = tasks_.empty() ? none_task_.get() : tasks_.front().get();
-  task->execute(*interface_);
-  if (task->timeout(*interface_)) {
-    tasks_ = std::queue<std::unique_ptr<Task>>();
-    RCLCPP_INFO_STREAM(logger, "timeout");
-    temporary_unavailable_modes_.insert(current_modes_.autoware_mode);
+void Decider::execute_tasks()
+{
+  while (!tasks_.empty()) {
+    const auto result = tasks_.front()->execute(*interface_, gates_);
+    switch (result) {
+      case TaskResult::kFinished:
+        tasks_.pop();
+        break;
+      case TaskResult::kTimeout:
+        tasks_ = std::queue<std::unique_ptr<Task>>();
+        temporary_unavailable_modes_.insert(current_modes_.autoware_mode);
+        return;
+      case TaskResult::kRunning:
+        return;
+      default:
+        throw std::logic_error("invalid task result");
+    }
   }
 }
 
@@ -128,18 +134,22 @@ void Decider::update_autoware_mode(const AutowareMode & mode)
   if (prev.id == mode.id) {
     return;
   }
-  if (mapping_.count(mode) == 0) {
+  if (!driving_mode_config_.exists(mode)) {
     RCLCPP_ERROR_STREAM(logger, "decision logic returns unknown mode: " << mode.id);
     return;
   }
+
   RCLCPP_INFO_STREAM(logger, "Change Autoware Mode: " << prev.id << " -> " << mode.id);
-
-  std::queue<std::unique_ptr<Task>> tasks;
-  for (const auto & status : mapping_.at(mode)) {
-    tasks.push(std::make_unique<GateTask>(status));
-  }
-
   prev = mode;
+
+  const auto gates = driving_mode_config_.gates(mode);
+  std::queue<std::unique_ptr<Task>> tasks;
+  if (gates.trajectory_source) {
+    tasks.push(std::make_unique<TrajectorySourceTask>(*gates.trajectory_source));
+  }
+  if (gates.command_source) {
+    tasks.push(std::make_unique<CommandSourceTask>(*gates.command_source));
+  }
   tasks_.swap(tasks);
 }
 
@@ -150,7 +160,7 @@ void Decider::update_platform_mode(const PlatformMode & mode)
 
 void Decider::change_operation_mode(const OperationMode & operation_mode)
 {
-  const auto mode = plugin_->from_operation_mode(operation_mode);
+  const auto mode = driving_mode_config_.from_operation_mode(operation_mode);
 
   // TODO(isamu-takagi): Implement background mode change.
   // if (current_modes_.autoware_control == AutowareControl::kDisable) {
@@ -158,7 +168,7 @@ void Decider::change_operation_mode(const OperationMode & operation_mode)
 
   if (driving_mode_status_.is_available(mode)) {
     RCLCPP_INFO_STREAM(logger, "change operation mode: " << mode.id);
-    current_modes_.operation_mode = operation_mode;
+    current_modes_.operation_autoware_mode = mode;
   } else {
     RCLCPP_WARN_STREAM(logger, "reject operation mode: " << mode.id);
   }
@@ -175,8 +185,7 @@ void Decider::change_autoware_control(const AutowareControl & autoware_control)
   }
 
   // The check target is the normal behavior, operation mode. MRM is not included.
-  const auto mode = plugin_->from_operation_mode(current_modes_.operation_mode);
-  if (!driving_mode_status_.is_available(mode)) {
+  if (!driving_mode_status_.is_available(current_modes_.operation_autoware_mode)) {
     RCLCPP_WARN_STREAM(logger, "reject autoware control change");
   }
 

@@ -43,12 +43,13 @@ public:
   void change_autoware_control(const AutowareControl & autoware_control);
 
 private:
+  void execute_tasks();
   void update_autoware_mode(const AutowareMode & mode);
   void update_platform_mode(const PlatformMode & mode);
 
   std::unique_ptr<Interface> interface_;
   std::shared_ptr<Plugin> plugin_;
-  ModeMapping mapping_;
+  DrivingModeConfig driving_mode_config_;
   SystemModeStatusStore driving_mode_status_;
   CurrentModes current_modes_;
   std::unordered_set<AutowareMode> temporary_unavailable_modes_;

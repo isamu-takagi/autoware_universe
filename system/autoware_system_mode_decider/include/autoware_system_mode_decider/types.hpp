@@ -86,10 +86,10 @@ enum class MrmRequest {
 
 struct CurrentModes
 {
-  OperationMode operation_mode;      // request
-  AutowareControl autoware_control;  // request
-  MrmRequest mrm_request;            // request
-  AutowareMode autoware_mode;        // current
+  AutowareControl autoware_control;      // request
+  MrmRequest mrm_request;                // request
+  AutowareMode operation_autoware_mode;  // request
+  AutowareMode autoware_mode;            // current
 };
 
 using AutowareModeSet = std::unordered_set<AutowareMode>;

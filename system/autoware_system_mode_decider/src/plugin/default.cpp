@@ -31,6 +31,12 @@ constexpr auto RemoteMode = AutowareMode{1004};
 constexpr auto EmergencyStop = AutowareMode{2001};
 constexpr auto ComfortableStop = AutowareMode{2002};
 constexpr auto UnknownMode = AutowareMode{0};
+constexpr auto MainTrajectory = TrajectorySource{100};
+constexpr auto StopCommand = CommandSource{11};
+constexpr auto MainCommand = CommandSource{12};
+constexpr auto LocalCommand = CommandSource{13};
+constexpr auto RemoteCommand = CommandSource{14};
+constexpr auto EmergencyStopCommand = CommandSource{21};
 
 void print_modes(const std::string & title, const std::vector<AutowareMode> & modes)
 {
@@ -44,7 +50,7 @@ void print_modes(const std::string & title, const std::vector<AutowareMode> & mo
 AutowareMode DefaultPlugin::decide(const CurrentModes & modes, const AutowareModeSet & availables)
 {
   std::vector<AutowareMode> candidates;
-  candidates.push_back(from_operation_mode(modes.operation_mode));
+  candidates.push_back(modes.operation_autoware_mode);
   candidates.push_back(EmergencyStop);
   candidates.push_back(ComfortableStop);
   // print_modes("Candidates", candidates);
@@ -58,47 +64,38 @@ AutowareMode DefaultPlugin::decide(const CurrentModes & modes, const AutowareMod
   return result.empty() ? EmergencyStop : result.front();
 };
 
-ModeMapping DefaultPlugin::mapping() const
+DrivingModeConfig DefaultPlugin::config() const
 {
-  ModeMapping mapping;
+  DrivingModeConfig config;
 
-  mapping[StopMode] = {};
-  mapping[StopMode].emplace_back(GateStatus{GateType::kCommandGate, 11});
+  config.define_autoware_mode(StopMode);
+  config.define_autoware_mode(AutonomousMode);
+  config.define_autoware_mode(LocalMode);
+  config.define_autoware_mode(RemoteMode);
+  config.define_autoware_mode(EmergencyStop);
+  config.define_autoware_mode(ComfortableStop);
 
-  mapping[AutonomousMode] = {};
-  mapping[AutonomousMode].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
-  mapping[AutonomousMode].emplace_back(GateStatus{GateType::kCommandGate, 12});
+  config.define_trajectory_source(MainTrajectory);
 
-  mapping[LocalMode] = {};
-  mapping[LocalMode].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
-  mapping[LocalMode].emplace_back(GateStatus{GateType::kCommandGate, 12});
+  config.define_command_source(StopCommand);
+  config.define_command_source(MainCommand);
+  config.define_command_source(LocalCommand);
+  config.define_command_source(RemoteCommand);
+  config.define_command_source(EmergencyStopCommand);
 
-  mapping[RemoteMode] = {};
-  mapping[RemoteMode].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
-  mapping[RemoteMode].emplace_back(GateStatus{GateType::kCommandGate, 12});
+  config.bind_gates(StopMode, {std::nullopt, StopCommand});
+  config.bind_gates(AutonomousMode, {MainTrajectory, MainCommand});
+  config.bind_gates(LocalMode, {std::nullopt, LocalCommand});
+  config.bind_gates(RemoteMode, {std::nullopt, RemoteCommand});
+  config.bind_gates(EmergencyStop, {std::nullopt, EmergencyStopCommand});
+  config.bind_gates(ComfortableStop, {MainTrajectory, MainCommand});
 
-  mapping[EmergencyStop] = {};
-  mapping[EmergencyStop].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
-  mapping[EmergencyStop].emplace_back(GateStatus{GateType::kCommandGate, 12});
+  config.bind_operation_mode(StopMode, OperationMode::kStop);
+  config.bind_operation_mode(AutonomousMode, OperationMode::kAutonomous);
+  config.bind_operation_mode(LocalMode, OperationMode::kLocal);
+  config.bind_operation_mode(RemoteMode, OperationMode::kRemote);
 
-  mapping[ComfortableStop] = {};
-  mapping[ComfortableStop].emplace_back(GateStatus{GateType::kTrajectoryGate, 100});
-  mapping[ComfortableStop].emplace_back(GateStatus{GateType::kCommandGate, 12});
-
-  return mapping;
-}
-
-AutowareMode DefaultPlugin::from_operation_mode(const OperationMode & operation_mode) const
-{
-  // clang-format off
-  switch (operation_mode) {
-    case OperationMode::kStop:       return StopMode;
-    case OperationMode::kAutonomous: return AutonomousMode;
-    case OperationMode::kLocal:      return LocalMode;
-    case OperationMode::kRemote:     return RemoteMode;
-    default:                         return UnknownMode;
-  }
-  // clang-format on
+  return config;
 }
 
 }  // namespace autoware::system_mode_decider

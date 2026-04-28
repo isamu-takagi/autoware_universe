@@ -17,37 +17,27 @@
 namespace autoware::system_mode_decider
 {
 
-void NoneTask::execute(Interface &)
+TaskResult NoneTask::execute(Interface &, GateStatusTemp &)
 {
-  // Do nothing
+  return TaskResult::kRunning;
 }
 
-bool NoneTask::timeout(Interface &)
+TaskResult TrajectorySourceTask::execute(Interface & interface, GateStatusTemp & gates)
 {
-  return false;
-}
+  (void)interface;
+  (void)gates;
+  return TaskResult::kRunning;
 
-bool NoneTask::expects(const GateStatus &) const
-{
-  return false;
-}
+  /*
+  return target_.type == status.type && target_.id == status.id;
 
-void GateTask::execute(Interface & interface)
-{
+  if (!stamp_) return false;
+  return 3.0 < (interface.now() - stamp_.value()).seconds();
+
   if (stamp_) return;
   stamp_ = interface.now();
   interface.change_gate_status(target_);
-}
-
-bool GateTask::timeout(Interface & interface)
-{
-  if (!stamp_) return false;
-  return 3.0 < (interface.now() - stamp_.value()).seconds();
-}
-
-bool GateTask::expects(const GateStatus & status) const
-{
-  return target_.type == status.type && target_.id == status.id;
+  */
 }
 
 }  // namespace autoware::system_mode_decider
