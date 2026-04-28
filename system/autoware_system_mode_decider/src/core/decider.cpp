@@ -90,9 +90,11 @@ void Decider::execute_tasks()
     const auto result = tasks_.front()->execute(*interface_, gates_);
     switch (result) {
       case TaskResult::kFinished:
+        RCLCPP_INFO_STREAM(logger, tasks_.front()->describe() << ": finished");
         tasks_.pop();
         break;
       case TaskResult::kTimeout:
+        RCLCPP_WARN_STREAM(logger, tasks_.front()->describe() << ": timeout");
         tasks_ = std::queue<std::unique_ptr<Task>>();
         temporary_unavailable_modes_.insert(current_modes_.autoware_mode);
         return;
@@ -111,6 +113,7 @@ void Decider::notify_trajectory_source(const TrajectorySource & source)
   }
   gates_.status.trajectory_source = source;
   gates_.expect.trajectory_source = source;
+  execute_tasks();
 }
 
 void Decider::notify_command_source(const CommandSource & source)
@@ -120,6 +123,7 @@ void Decider::notify_command_source(const CommandSource & source)
   }
   gates_.status.command_source = source;
   gates_.expect.command_source = source;
+  execute_tasks();
 }
 
 void Decider::notify_vehicle_control_mode(const PlatformMode & mode)
@@ -129,6 +133,7 @@ void Decider::notify_vehicle_control_mode(const PlatformMode & mode)
   }
   gates_.status.platform_mode = mode;
   gates_.expect.platform_mode = mode;
+  execute_tasks();
 }
 
 void Decider::update_autoware_mode(const AutowareMode & mode)

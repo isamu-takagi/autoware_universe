@@ -20,6 +20,7 @@
 #include <rclcpp/time.hpp>
 
 #include <optional>
+#include <string>
 
 namespace autoware::system_mode_decider
 {
@@ -48,12 +49,14 @@ class Task
 public:
   virtual ~Task() = default;
   virtual TaskResult execute(Interface & interface, GateStatus & gates) = 0;
+  virtual std::string describe() const = 0;
 };
 
 class NoneTask : public Task
 {
 public:
   TaskResult execute(Interface & interface, GateStatus & gates) override;
+  std::string describe() const override;
 };
 
 class TrajectorySourceTask : public Task
@@ -61,8 +64,10 @@ class TrajectorySourceTask : public Task
 public:
   explicit TrajectorySourceTask(const TrajectorySource & target) : target_(target) {}
   TaskResult execute(Interface & interface, GateStatus & gates) override;
+  std::string describe() const override;
 
 private:
+  static constexpr double timeout = 3.0;
   TrajectorySource target_;
   std::optional<rclcpp::Time> stamp_;
 };
@@ -72,8 +77,10 @@ class CommandSourceTask : public Task
 public:
   explicit CommandSourceTask(const CommandSource & target) : target_(target) {}
   TaskResult execute(Interface & interface, GateStatus & gates) override;
+  std::string describe() const override;
 
 private:
+  static constexpr double timeout = 3.0;
   CommandSource target_;
   std::optional<rclcpp::Time> stamp_;
 };
@@ -83,6 +90,7 @@ class PlatformModeTask : public Task
 public:
   explicit PlatformModeTask(const PlatformMode & target) : target_(target) {}
   TaskResult execute(Interface & interface, GateStatus & gates) override;
+  std::string describe() const override;
 
 private:
   PlatformMode target_;

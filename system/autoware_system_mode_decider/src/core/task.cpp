@@ -14,6 +14,8 @@
 
 #include "task.hpp"
 
+#include <string>
+
 namespace autoware::system_mode_decider
 {
 
@@ -22,29 +24,47 @@ TaskResult NoneTask::execute(Interface &, GateStatus &)
   return TaskResult::kRunning;
 }
 
+std::string NoneTask::describe() const
+{
+  return "NoneTask";
+}
+
 TaskResult TrajectorySourceTask::execute(Interface & interface, GateStatus & gates)
 {
-  (void)interface;
-  (void)gates;
-  return TaskResult::kRunning;
-
-  /*
-  return target_.type == status.type && target_.id == status.id;
-
-  if (!stamp_) return false;
-  return 3.0 < (interface.now() - stamp_.value()).seconds();
-
-  if (stamp_) return;
+  if (gates.status.trajectory_source == target_) {
+    return TaskResult::kFinished;
+  }
+  if (stamp_) {
+    const auto duration = (interface.now() - stamp_.value()).seconds();
+    return timeout < duration ? TaskResult::kTimeout : TaskResult::kRunning;
+  }
   stamp_ = interface.now();
-  interface.change_gate_status(target_);
-  */
+  interface.change_trajectory_source(target_);
+  return TaskResult::kRunning;
+}
+
+std::string TrajectorySourceTask::describe() const
+{
+  return "TrajectorySourceTask[" + std::to_string(target_.id) + "]";
 }
 
 TaskResult CommandSourceTask::execute(Interface & interface, GateStatus & gates)
 {
-  (void)interface;
-  (void)gates;
+  if (gates.status.command_source == target_) {
+    return TaskResult::kFinished;
+  }
+  if (stamp_) {
+    const auto duration = (interface.now() - stamp_.value()).seconds();
+    return timeout < duration ? TaskResult::kTimeout : TaskResult::kRunning;
+  }
+  stamp_ = interface.now();
+  interface.change_command_source(target_);
   return TaskResult::kRunning;
+}
+
+std::string CommandSourceTask::describe() const
+{
+  return "CommandSourceTask[" + std::to_string(target_.id) + "]";
 }
 
 TaskResult PlatformModeTask::execute(Interface & interface, GateStatus & gates)
@@ -52,6 +72,11 @@ TaskResult PlatformModeTask::execute(Interface & interface, GateStatus & gates)
   (void)interface;
   (void)gates;
   return TaskResult::kRunning;
+}
+
+std::string PlatformModeTask::describe() const
+{
+  return "PlatformModeTask";
 }
 
 }  // namespace autoware::system_mode_decider
