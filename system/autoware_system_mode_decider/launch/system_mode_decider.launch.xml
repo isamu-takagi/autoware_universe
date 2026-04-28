@@ -15,5 +15,6 @@
     <remap from="~/command/source/status" to="/control/control_command_gate/source/status"/>
     <remap from="~/command/source/select" to="/control/control_command_gate/source/select"/>
     <remap from="~/vehicle/control_mode/report" to="/vehicle/status/control_mode"/>
+    <remap from="~/vehicle/control_mode/command" to="/control/control_mode_request"/>
   </node>
 </launch>

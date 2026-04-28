@@ -170,7 +170,9 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
 {
   pub_trajectory_select_ =
     node->create_publisher<TrajectorySourceMsg>("~/trajectory/source/select", rclcpp::QoS(1));
-  cli_command_select_ = node->create_client<SelectCommandSource>("~/command/source/select");
+  cli_command_select_ = node->create_client<SelectCommandSourceSrv>("~/command/source/select");
+  cli_control_mode_command_ =
+    node->create_client<ControlModeCommandSrv>("~/vehicle/control_mode/command");
 }
 
 rclcpp::Time RosInterface::now() const
@@ -187,15 +189,34 @@ void RosInterface::change_trajectory_source(const TrajectorySource & source)
 
 void RosInterface::change_command_source(const CommandSource & source)
 {
-  const auto request = std::make_shared<SelectCommandSource::Request>();
+  const auto request = std::make_shared<SelectCommandSourceSrv::Request>();
   request->source = source.id;
   cli_command_select_->async_send_request(request);
 }
 
 void RosInterface::change_platform_mode(const PlatformMode & mode)
 {
-  (void)mode;
-  // TODO(isamu-takagi): Implement platform mode change.
+  // clang-format off
+  const auto convert = [](const PlatformMode & mode) -> std::optional<uint8_t> {
+    using Command = ControlModeCommandSrv::Request;
+    switch (mode) {
+      case PlatformMode::kAutoware:         return Command::AUTONOMOUS;
+      case PlatformMode::kAutowareSteering: return Command::AUTONOMOUS_STEER_ONLY;
+      case PlatformMode::kAutowareVelocity: return Command::AUTONOMOUS_VELOCITY_ONLY;
+      case PlatformMode::kManual:           return Command::MANUAL;
+      default:                              return std::nullopt;
+    }
+  };
+  // clang-format on
+
+  const auto command = convert(mode);
+  if (!command) {
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "unknown platform mode");
+    return;
+  }
+  const auto request = std::make_shared<ControlModeCommandSrv::Request>();
+  request->mode = command.value();
+  cli_control_mode_command_->async_send_request(request);
 }
 
 }  // namespace autoware::system_mode_decider

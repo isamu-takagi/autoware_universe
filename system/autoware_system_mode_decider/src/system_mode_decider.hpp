@@ -26,6 +26,7 @@
 #include <autoware_system_msgs/srv/change_autoware_control.hpp>
 #include <autoware_system_msgs/srv/change_operation_mode.hpp>
 #include <autoware_vehicle_msgs/msg/control_mode_report.hpp>
+#include <autoware_vehicle_msgs/srv/control_mode_command.hpp>
 #include <tier4_system_msgs/msg/command_source_status.hpp>
 #include <tier4_system_msgs/srv/select_command_source.hpp>
 
@@ -85,10 +86,12 @@ public:
 
 private:
   using TrajectorySourceMsg = autoware_system_mode_msgs::msg::TrajectorySource;
-  using SelectCommandSource = tier4_system_msgs::srv::SelectCommandSource;
+  using SelectCommandSourceSrv = tier4_system_msgs::srv::SelectCommandSource;
+  using ControlModeCommandSrv = autoware_vehicle_msgs::srv::ControlModeCommand;
   rclcpp::Node * node_;
   rclcpp::Publisher<TrajectorySourceMsg>::SharedPtr pub_trajectory_select_;
-  rclcpp::Client<SelectCommandSource>::SharedPtr cli_command_select_;
+  rclcpp::Client<SelectCommandSourceSrv>::SharedPtr cli_command_select_;
+  rclcpp::Client<ControlModeCommandSrv>::SharedPtr cli_control_mode_command_;
 };
 
 }  // namespace autoware::system_mode_decider
