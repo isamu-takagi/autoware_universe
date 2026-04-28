@@ -19,6 +19,7 @@ from .driving_mode import DrivingModeControl
 from .gate_status import CommandGateDisplay
 from .gate_status import TrajectoryGateDisplay
 from .operation_mode import OperationModeControl
+from .vehicle_interface import VehicleInterfaceControl
 
 
 class MainWidget(QtWidgets.QWidget):
@@ -36,10 +37,12 @@ class MainWidget(QtWidgets.QWidget):
         self.modes_control = DrivingModeControl(node, modes)
         self.status_trajectory = TrajectoryGateDisplay(node)
         self.status_command = CommandGateDisplay(node)
+        self.vehicle_interface = VehicleInterfaceControl(node)
 
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.operation_mode_control)
         layout.addWidget(self.modes_control)
         layout.addWidget(self.status_trajectory)
         layout.addWidget(self.status_command)
+        layout.addWidget(self.vehicle_interface)
         self.setLayout(layout)
