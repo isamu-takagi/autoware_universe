@@ -198,16 +198,20 @@ void Decider::change_autoware_control(const AutowareControl & autoware_control)
   }
 
   // The check target is the normal behavior, operation mode. MRM is not included.
-  if (!driving_mode_status_->is_available(current_modes_.operation_autoware_mode)) {
+  const auto mode = current_modes_.operation_autoware_mode;
+  if (!driving_mode_status_->is_available(mode)) {
     RCLCPP_WARN_STREAM(logger, "reject autoware control enable");
     return;
   }
-
   RCLCPP_INFO_STREAM(logger, "accept autoware control change");
   current_modes_.autoware_control = autoware_control;
 
   std::queue<std::unique_ptr<Task>> tasks;
+  tasks.push(std::make_unique<TransitionFilterTask>(true));
+  tasks.push(std::make_unique<WaitModeReadyTask>(mode));
   tasks.push(std::make_unique<PlatformModeTask>(PlatformMode::kAutoware));
+  tasks.push(std::make_unique<WaitModeStableTask>(mode));
+  tasks.push(std::make_unique<TransitionFilterTask>(false));
   tasks_.swap(tasks);
 }
 

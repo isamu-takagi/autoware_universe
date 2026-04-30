@@ -68,7 +68,7 @@ public:
 
 private:
   static constexpr double timeout = 3.0;
-  TrajectorySource target_;
+  const TrajectorySource target_;
   std::optional<rclcpp::Time> stamp_;
 };
 
@@ -81,7 +81,7 @@ public:
 
 private:
   static constexpr double timeout = 3.0;
-  CommandSource target_;
+  const CommandSource target_;
   std::optional<rclcpp::Time> stamp_;
 };
 
@@ -94,8 +94,41 @@ public:
 
 private:
   static constexpr double timeout = 3.0;
-  PlatformMode target_;
+  const PlatformMode target_;
   std::optional<rclcpp::Time> stamp_;
+};
+
+class TransitionFilterTask : public Task
+{
+public:
+  explicit TransitionFilterTask(const bool target) : target_(target) {}
+  TaskResult execute(Interface & interface, GateStatus & gates) override;
+  std::string describe() const override;
+
+private:
+  const bool target_;
+};
+
+class WaitModeReadyTask : public Task
+{
+public:
+  explicit WaitModeReadyTask(const AutowareMode & mode) : mode_(mode) {}
+  TaskResult execute(Interface & interface, GateStatus & gates) override;
+  std::string describe() const override;
+
+private:
+  const AutowareMode mode_;
+};
+
+class WaitModeStableTask : public Task
+{
+public:
+  explicit WaitModeStableTask(const AutowareMode & mode) : mode_(mode) {}
+  TaskResult execute(Interface & interface, GateStatus & gates) override;
+  std::string describe() const override;
+
+private:
+  const AutowareMode mode_;
 };
 
 }  // namespace autoware::system_mode_decider

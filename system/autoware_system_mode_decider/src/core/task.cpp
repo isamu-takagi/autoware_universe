@@ -86,4 +86,40 @@ std::string PlatformModeTask::describe() const
   return "PlatformModeTask";
 }
 
+TaskResult TransitionFilterTask::execute(Interface & interface, GateStatus & gates)
+{
+  (void)interface;
+  (void)gates;
+  return TaskResult::kFinished;
+}
+
+std::string TransitionFilterTask::describe() const
+{
+  return "TransitionFilterTask[" + std::string(target_ ? "true" : "false") + "]";
+}
+
+TaskResult WaitModeReadyTask::execute(Interface & interface, GateStatus & gates)
+{
+  (void)interface;
+  (void)gates;
+  return TaskResult::kFinished;
+}
+
+std::string WaitModeReadyTask::describe() const
+{
+  return "WaitModeReadyTask";
+}
+
+TaskResult WaitModeStableTask::execute(Interface & interface, GateStatus & gates)
+{
+  (void)interface;
+  (void)gates;
+  return TaskResult::kFinished;
+}
+
+std::string WaitModeStableTask::describe() const
+{
+  return "WaitModeStableTask";
+}
+
 }  // namespace autoware::system_mode_decider

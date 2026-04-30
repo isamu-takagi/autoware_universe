@@ -50,14 +50,16 @@ private:
 
   std::unique_ptr<Interface> interface_;
   std::shared_ptr<Plugin> plugin_;
+
   std::unique_ptr<DrivingModeConfig> driving_mode_config_;
   std::unique_ptr<SystemModeStatusStore> driving_mode_status_;
-  CurrentModes current_modes_;
   std::unordered_set<AutowareMode> temporary_unavailable_modes_;
+
+  CurrentModes current_modes_;
+  GateStatus gates_;
 
   std::unique_ptr<NoneTask> none_task_ = std::make_unique<NoneTask>();
   std::queue<std::unique_ptr<Task>> tasks_;
-  GateStatus gates_;
 };
 
 }  // namespace autoware::system_mode_decider
