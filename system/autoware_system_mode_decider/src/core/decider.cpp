@@ -110,7 +110,7 @@ void Decider::execute_tasks()
 void Decider::notify_trajectory_source(const TrajectorySource & source)
 {
   if (gates_.expect.trajectory_source != source) {
-    RCLCPP_WARN_STREAM(logger, "unintended trajectory source change: " << source.id);
+    RCLCPP_WARN_STREAM(logger, "trajectory source override: " << source.id);
   }
   gates_.status.trajectory_source = source;
   gates_.expect.trajectory_source = source;
@@ -120,7 +120,7 @@ void Decider::notify_trajectory_source(const TrajectorySource & source)
 void Decider::notify_command_source(const CommandSource & source)
 {
   if (gates_.expect.command_source != source) {
-    RCLCPP_WARN_STREAM(logger, "unintended command source change: " << source.id);
+    RCLCPP_WARN_STREAM(logger, "command source override: " << source.id);
   }
   gates_.status.command_source = source;
   gates_.expect.command_source = source;
@@ -130,7 +130,9 @@ void Decider::notify_command_source(const CommandSource & source)
 void Decider::notify_vehicle_control_mode(const PlatformMode & mode)
 {
   if (gates_.expect.platform_mode != mode) {
-    RCLCPP_WARN_STREAM(logger, "unintended platform mode change: " << to_string(mode));
+    RCLCPP_WARN_STREAM(logger, "platform mode override: " << to_string(mode));
+    request_.platform_mode = mode;
+    tasks_.swap(std::queue<std::unique_ptr<Task>>());
   }
   gates_.status.platform_mode = mode;
   gates_.expect.platform_mode = mode;

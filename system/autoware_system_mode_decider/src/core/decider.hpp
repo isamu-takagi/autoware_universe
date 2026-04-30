@@ -56,8 +56,6 @@ private:
 
   RequestModes request_;
   GateStatus gates_;
-
-  std::unique_ptr<NoneTask> none_task_ = std::make_unique<NoneTask>();
   std::queue<std::unique_ptr<Task>> tasks_;
 };
 
