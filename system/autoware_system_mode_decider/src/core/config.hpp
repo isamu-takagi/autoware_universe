@@ -37,13 +37,15 @@ public:
   bool exists(const AutowareMode & mode) const;
   Gates gates(const AutowareMode & mode) const;
   AutowareMode to_autoware_mode(const OperationMode & operation) const;
+  OperationMode to_operation_mode(const AutowareMode & autoware) const;
 
 private:
   std::unordered_set<AutowareMode> autoware_modes_;
   std::unordered_set<TrajectorySource> trajectory_sources_;
   std::unordered_set<CommandSource> command_sources_;
   std::unordered_map<AutowareMode, Gates> gates_mapping_;
-  std::unordered_map<OperationMode, AutowareMode> operation_mode_mapping_;
+  std::unordered_map<OperationMode, AutowareMode> operation_to_autoware_;
+  std::unordered_map<AutowareMode, OperationMode> autoware_to_operation_;
 };
 
 }  // namespace autoware::system_mode_decider

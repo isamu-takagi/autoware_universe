@@ -1,14 +1,12 @@
 <launch>
   <arg name="config" default="$(find-pkg-share autoware_system_mode_decider)/config/system_mode_decider.param.yaml"/>
-  <!-- <arg name="output/control" default="/control/command/control_cmd"/> -->
-
-  <!-- Enabled if "main" is listed in config input_names -->
-  <!-- <arg name="inputs/main/control" default="/control/trajectory_follower/control_cmd"/> -->
 
   <node pkg="autoware_system_mode_decider" exec="system_mode_decider_node">
     <param from="$(var config)"/>
     <remap from="~/system/change_operation_mode" to="/system/operation_mode/change_operation_mode"/>
     <remap from="~/system/change_autoware_control" to="/system/operation_mode/change_autoware_control"/>
+    <remap from="~/system/operation_mode_state" to="/system/operation_mode/state"/>
+    <remap from="~/system/mrm_state" to="/system/fail_safe/mrm_state"/>
     <remap from="~/system/driving_mode/status" to="/system/driving_mode/status"/>
     <remap from="~/trajectory/source/status" to="/planning/trajectory_gate/source/status"/>
     <remap from="~/trajectory/source/select" to="/planning/trajectory_gate/source/select"/>

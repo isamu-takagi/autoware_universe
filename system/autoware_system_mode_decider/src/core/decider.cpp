@@ -211,4 +211,21 @@ ServiceResponse Decider::change_autoware_control(const AutowareControl & autowar
   return ServiceResponse{true, ""};
 }
 
+OperationModeState Decider::operation_mode_state() const
+{
+  const auto is_available = [this](const OperationMode & mode) {
+    return driving_mode_status_->is_available(driving_mode_config_->to_autoware_mode(mode));
+  };
+
+  OperationModeState state;
+  state.mode = driving_mode_config_->to_operation_mode(request_.operation_mode);
+  state.is_autoware_control_enabled = (request_.platform_mode != PlatformMode::kManual);
+  state.is_in_transition = !tasks_.empty();
+  state.is_stop_mode_available = is_available(OperationMode::kStop);
+  state.is_autonomous_mode_available = is_available(OperationMode::kAutonomous);
+  state.is_local_mode_available = is_available(OperationMode::kLocal);
+  state.is_remote_mode_available = is_available(OperationMode::kRemote);
+  return state;
+}
+
 }  // namespace autoware::system_mode_decider

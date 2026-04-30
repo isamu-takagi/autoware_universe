@@ -41,14 +41,14 @@ class Decider
 {
 public:
   Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin);
-  SystemModeStatusStore & access_status();
   void update();
   void notify_trajectory_source(const TrajectorySource & source);
   void notify_command_source(const CommandSource & source);
   void notify_vehicle_control_mode(const PlatformMode & mode);
-
   ServiceResponse change_operation_mode(const OperationMode & operation_mode);
   ServiceResponse change_autoware_control(const AutowareControl & autoware_control);
+  OperationModeState operation_mode_state() const;
+  SystemModeStatusStore & access_status();
 
 private:
   void execute_tasks();

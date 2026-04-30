@@ -21,6 +21,7 @@
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <pluginlib/class_loader.hpp>
 
+#include <autoware_adapi_v1_msgs/msg/operation_mode_state.hpp>
 #include <autoware_system_mode_msgs/msg/system_mode_status.hpp>
 #include <autoware_system_mode_msgs/msg/trajectory_source.hpp>
 #include <autoware_system_msgs/srv/change_autoware_control.hpp>
@@ -47,6 +48,7 @@ private:
   using ControlModeReport = autoware_vehicle_msgs::msg::ControlModeReport;
   using ChangeOperationMode = autoware_system_msgs::srv::ChangeOperationMode;
   using ChangeAutowareControl = autoware_system_msgs::srv::ChangeAutowareControl;
+  using OperationModeState = autoware_adapi_v1_msgs::msg::OperationModeState;
 
   diagnostic_updater::Updater diag_;
   rclcpp::TimerBase::SharedPtr timer_;
@@ -56,8 +58,10 @@ private:
   rclcpp::Subscription<ControlModeReport>::SharedPtr sub_control_mode_report_;
   rclcpp::Service<ChangeOperationMode>::SharedPtr srv_operation_mode_;
   rclcpp::Service<ChangeAutowareControl>::SharedPtr srv_autoware_control_;
+  rclcpp::Publisher<OperationModeState>::SharedPtr pub_operation_mode_;
   void on_timer_init();
   void on_timer_main();
+  void publish_operation_mode_state();
 
   void on_system_mode_status(const SystemModeStatus & msg);
   void on_trajectory_source(const TrajectorySourceMsg & msg);

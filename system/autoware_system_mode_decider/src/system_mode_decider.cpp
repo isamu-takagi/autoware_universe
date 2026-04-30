@@ -56,6 +56,8 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
   srv_autoware_control_ = create_service<ChangeAutowareControl>(
     "~/system/change_autoware_control",
     std::bind(&SystemModeDecider::on_change_autoware_control, this, _1, _2));
+  pub_operation_mode_ = create_publisher<OperationModeState>(
+    "~/system/operation_mode_state", rclcpp::QoS(1).transient_local());
 
   const auto period = rclcpp::Rate(1.0).period();
   timer_ = rclcpp::create_timer(this, get_clock(), period, [this]() { on_timer_init(); });
@@ -77,6 +79,34 @@ void SystemModeDecider::on_timer_init()
 void SystemModeDecider::on_timer_main()
 {
   decider_->update();
+  publish_operation_mode_state();
+}
+
+void SystemModeDecider::publish_operation_mode_state()
+{
+  // clang-format off
+  const auto convert = [](const OperationMode & mode) {
+    switch (mode) {
+      case OperationMode::kStop:       return OperationModeState::STOP;
+      case OperationMode::kAutonomous: return OperationModeState::AUTONOMOUS;
+      case OperationMode::kLocal:      return OperationModeState::LOCAL;
+      case OperationMode::kRemote:     return OperationModeState::REMOTE;
+      default:                         return OperationModeState::UNKNOWN;
+    }
+  };
+  // clang-format on
+
+  const auto state = decider_->operation_mode_state();
+  OperationModeState msg;
+  msg.stamp = now();
+  msg.mode = convert(state.mode);
+  msg.is_autoware_control_enabled = state.is_autoware_control_enabled;
+  msg.is_in_transition = state.is_in_transition;
+  msg.is_stop_mode_available = state.is_stop_mode_available;
+  msg.is_autonomous_mode_available = state.is_autonomous_mode_available;
+  msg.is_local_mode_available = state.is_local_mode_available;
+  msg.is_remote_mode_available = state.is_remote_mode_available;
+  pub_operation_mode_->publish(msg);
 }
 
 void SystemModeDecider::on_system_mode_status(const SystemModeStatus & msg)

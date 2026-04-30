@@ -60,7 +60,8 @@ void DrivingModeConfig::bind_operation_mode(
     const auto id = std::to_string(mode.id);
     throw std::invalid_argument("unknown autoware mode: " + id);
   }
-  operation_mode_mapping_[operation] = mode;
+  operation_to_autoware_[operation] = mode;
+  autoware_to_operation_[mode] = operation;
 }
 
 std::vector<AutowareMode> DrivingModeConfig::autoware_modes() const
@@ -80,7 +81,12 @@ DrivingModeConfig::Gates DrivingModeConfig::gates(const AutowareMode & mode) con
 
 AutowareMode DrivingModeConfig::to_autoware_mode(const OperationMode & operation_mode) const
 {
-  return operation_mode_mapping_.at(operation_mode);
+  return operation_to_autoware_.at(operation_mode);
+}
+
+OperationMode DrivingModeConfig::to_operation_mode(const AutowareMode & autoware_mode) const
+{
+  return autoware_to_operation_.at(autoware_mode);
 }
 
 }  // namespace autoware::system_mode_decider
