@@ -66,17 +66,19 @@ enum class AutowareControl {
   kDisable,
 };
 
-enum class MrmRequest {
+enum class MrmStrategy {
   kNone,
   kDelegate,
+  kTarget,
 };
 
-struct CurrentModes
+struct RequestModes
 {
-  AutowareControl autoware_control;      // request
-  MrmRequest mrm_request;                // request
-  AutowareMode operation_autoware_mode;  // request
-  AutowareMode autoware_mode;            // current
+  AutowareMode operation_mode;   // Operation mode API
+  PlatformMode platform_mode;    // Operation mode API
+  MrmStrategy mrm_strategy;      // MRM request API
+  AutowareMode mrm_target_mode;  // MRM request API
+  AutowareMode autoware_mode;    // Decision logic plugin.
 };
 
 using AutowareModeSet = std::unordered_set<AutowareMode>;

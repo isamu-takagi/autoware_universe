@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PLUGIN__DEFAULT_HPP_
-#define PLUGIN__DEFAULT_HPP_
-
-#include <autoware_system_mode_decider/plugin.hpp>
+#include "values.hpp"
 
 namespace autoware::system_mode_decider
 {
 
-class DefaultPlugin : public Plugin
+PlatformMode to_platform_mode(const AutowareControl & autoware_control)
 {
-public:
-  AutowareMode decide(const RequestModes & status, const AutowareModeSet & availables) override;
-  void setup(DrivingModeConfigInterface & config) const override;
-};
+  // clang-format off
+  switch (autoware_control) {
+    case AutowareControl::kEnable:  return PlatformMode::kAutoware;
+    case AutowareControl::kDisable: return PlatformMode::kManual;
+    default:                        return PlatformMode::kUnknown;
+  }
+  // clang-format on
+}
 
 }  // namespace autoware::system_mode_decider
-
-#endif  // PLUGIN__DEFAULT_HPP_

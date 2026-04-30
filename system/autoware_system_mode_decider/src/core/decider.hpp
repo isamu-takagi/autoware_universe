@@ -55,7 +55,7 @@ private:
   std::unique_ptr<SystemModeStatusStore> driving_mode_status_;
   std::unordered_set<AutowareMode> temporary_unavailable_modes_;
 
-  CurrentModes current_modes_;
+  RequestModes request_;
   GateStatus gates_;
 
   std::unique_ptr<NoneTask> none_task_ = std::make_unique<NoneTask>();

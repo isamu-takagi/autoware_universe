@@ -12,21 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PLUGIN__DEFAULT_HPP_
-#define PLUGIN__DEFAULT_HPP_
+#ifndef CORE__VALUES_HPP_
+#define CORE__VALUES_HPP_
 
-#include <autoware_system_mode_decider/plugin.hpp>
+#include <autoware_system_mode_decider/types.hpp>
 
 namespace autoware::system_mode_decider
 {
 
-class DefaultPlugin : public Plugin
-{
-public:
-  AutowareMode decide(const RequestModes & status, const AutowareModeSet & availables) override;
-  void setup(DrivingModeConfigInterface & config) const override;
-};
+PlatformMode to_platform_mode(const AutowareControl & report);
 
 }  // namespace autoware::system_mode_decider
 
-#endif  // PLUGIN__DEFAULT_HPP_
+#endif  // CORE__VALUES_HPP_

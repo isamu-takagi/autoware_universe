@@ -47,10 +47,10 @@ void print_modes(const std::string & title, const std::vector<AutowareMode> & mo
   RCLCPP_INFO_STREAM(logger, title << ":" << text);
 }
 
-AutowareMode DefaultPlugin::decide(const CurrentModes & modes, const AutowareModeSet & availables)
+AutowareMode DefaultPlugin::decide(const RequestModes & modes, const AutowareModeSet & availables)
 {
   std::vector<AutowareMode> candidates;
-  candidates.push_back(modes.operation_autoware_mode);
+  candidates.push_back(modes.operation_mode);
   candidates.push_back(EmergencyStop);
   candidates.push_back(ComfortableStop);
   // print_modes("Candidates", candidates);

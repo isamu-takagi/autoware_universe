@@ -14,6 +14,8 @@
 
 #include "decider.hpp"
 
+#include "values.hpp"
+
 #include <rclcpp/logging.hpp>
 
 #include <memory>
@@ -47,11 +49,12 @@ Decider::Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin
   driving_mode_status_ =
     std::make_unique<SystemModeStatusStore>(driving_mode_config_->autoware_modes());
 
-  current_modes_.operation_autoware_mode =
-    driving_mode_config_->from_operation_mode(OperationMode::kStop);
-  current_modes_.autoware_control = AutowareControl::kUnknown;
-  current_modes_.mrm_request = MrmRequest::kNone;
-  current_modes_.autoware_mode = AutowareMode{0};  // unknown mode
+  constexpr AutowareMode unknown_mode = AutowareMode{0};
+  request_.operation_mode = driving_mode_config_->from_operation_mode(OperationMode::kStop);
+  request_.platform_mode = PlatformMode::kUnknown;
+  request_.mrm_strategy = MrmStrategy::kNone;
+  request_.mrm_target_mode = unknown_mode;
+  request_.autoware_mode = unknown_mode;
 }
 
 SystemModeStatusStore & Decider::access_status()
@@ -61,7 +64,7 @@ SystemModeStatusStore & Decider::access_status()
 
 void Decider::update()
 {
-  // RCLCPP_INFO_STREAM(logger, "Current Autoware Mode: " << current_modes_.autoware_mode.id);
+  // RCLCPP_INFO_STREAM(logger, "Current Autoware Mode: " << request_.autoware_mode.id);
   // print_modes("Temporary Unavailable Modes", temporary_unavailable_modes_);
 
   // Detect status timeout.
@@ -71,7 +74,7 @@ void Decider::update()
   AutowareModeSet availables;
   for (const auto & mode : driving_mode_config_->autoware_modes()) {
     if (temporary_unavailable_modes_.count(mode) == 0) {
-      if (mode.id != current_modes_.autoware_mode.id) {
+      if (mode.id != request_.autoware_mode.id) {
         if (driving_mode_status_->is_available(mode)) availables.insert(mode);
       } else {
         if (driving_mode_status_->is_continuable(mode)) availables.insert(mode);
@@ -80,7 +83,7 @@ void Decider::update()
   }
 
   // TODO(isamu-takagi): Check frequently mode change.
-  update_autoware_mode(plugin_->decide(current_modes_, availables));
+  update_autoware_mode(plugin_->decide(request_, availables));
   execute_tasks();
 }
 
@@ -96,7 +99,7 @@ void Decider::execute_tasks()
       case TaskResult::kTimeout:
         RCLCPP_WARN_STREAM(logger, tasks_.front()->describe() << ": timeout");
         tasks_ = std::queue<std::unique_ptr<Task>>();
-        temporary_unavailable_modes_.insert(current_modes_.autoware_mode);
+        temporary_unavailable_modes_.insert(request_.autoware_mode);
         return;
       case TaskResult::kRunning:
         RCLCPP_WARN_STREAM(logger, tasks_.front()->describe() << ": running");
@@ -139,7 +142,7 @@ void Decider::notify_vehicle_control_mode(const PlatformMode & mode)
 
 void Decider::update_autoware_mode(const AutowareMode & mode)
 {
-  AutowareMode & prev = current_modes_.autoware_mode;
+  AutowareMode & prev = request_.autoware_mode;
   if (prev.id == mode.id) {
     return;
   }
@@ -172,12 +175,12 @@ void Decider::change_operation_mode(const OperationMode & operation_mode)
   const auto mode = driving_mode_config_->from_operation_mode(operation_mode);
 
   // TODO(isamu-takagi): Implement background mode change.
-  // if (current_modes_.autoware_control == AutowareControl::kDisable) {
+  // if (request_.autoware_control == AutowareControl::kDisable) {
   // }
 
   if (driving_mode_status_->is_available(mode)) {
     RCLCPP_INFO_STREAM(logger, "change operation mode: " << mode.id);
-    current_modes_.operation_autoware_mode = mode;
+    request_.operation_mode = mode;
   } else {
     RCLCPP_WARN_STREAM(logger, "reject operation mode: " << mode.id);
   }
@@ -185,26 +188,24 @@ void Decider::change_operation_mode(const OperationMode & operation_mode)
 
 void Decider::change_autoware_control(const AutowareControl & autoware_control)
 {
-  // If disable, request the manual mode immediately.
-  if (autoware_control == AutowareControl::kDisable) {
-    RCLCPP_WARN_STREAM(logger, "accept autoware control disable");
-    current_modes_.autoware_control = autoware_control;
-    interface_->change_platform_mode(PlatformMode::kManual);
-    return;
-  }
+  const auto platform_mode = to_platform_mode(autoware_control);
 
-  if (autoware_control != AutowareControl::kEnable) {
+  // If disable, request the manual mode immediately.
+  if (platform_mode == PlatformMode::kManual) {
+    RCLCPP_WARN_STREAM(logger, "accept autoware control disable");
+    request_.platform_mode = platform_mode;
+    interface_->change_platform_mode(platform_mode);
     return;
   }
 
   // The check target is the normal behavior, operation mode. MRM is not included.
-  const auto mode = current_modes_.operation_autoware_mode;
+  const auto mode = request_.operation_mode;
   if (!driving_mode_status_->is_available(mode)) {
     RCLCPP_WARN_STREAM(logger, "reject autoware control enable");
     return;
   }
   RCLCPP_INFO_STREAM(logger, "accept autoware control change");
-  current_modes_.autoware_control = autoware_control;
+  request_.platform_mode = platform_mode;
 
   std::queue<std::unique_ptr<Task>> tasks;
   tasks.push(std::make_unique<TransitionFilterTask>(true));
