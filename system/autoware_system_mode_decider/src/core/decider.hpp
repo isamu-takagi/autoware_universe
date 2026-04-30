@@ -45,8 +45,7 @@ public:
 
 private:
   void execute_tasks();
-  void update_autoware_mode(const AutowareMode & mode);
-  void update_platform_mode(const PlatformMode & mode);
+  void change_autoware_mode(const AutowareMode & mode);
 
   std::unique_ptr<Interface> interface_;
   std::shared_ptr<Plugin> plugin_;

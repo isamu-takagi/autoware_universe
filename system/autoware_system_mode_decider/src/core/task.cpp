@@ -14,6 +14,8 @@
 
 #include "task.hpp"
 
+#include "values.hpp"
+
 #include <string>
 
 namespace autoware::system_mode_decider
@@ -39,6 +41,7 @@ TaskResult TrajectorySourceTask::execute(Interface & interface, GateStatus & gat
     return timeout < duration ? TaskResult::kTimeout : TaskResult::kRunning;
   }
   stamp_ = interface.now();
+  gates.expect.trajectory_source = target_;
   interface.change_trajectory_source(target_);
   return TaskResult::kRunning;
 }
@@ -58,6 +61,7 @@ TaskResult CommandSourceTask::execute(Interface & interface, GateStatus & gates)
     return timeout < duration ? TaskResult::kTimeout : TaskResult::kRunning;
   }
   stamp_ = interface.now();
+  gates.expect.command_source = target_;
   interface.change_command_source(target_);
   return TaskResult::kRunning;
 }
@@ -77,13 +81,14 @@ TaskResult PlatformModeTask::execute(Interface & interface, GateStatus & gates)
     return timeout < duration ? TaskResult::kTimeout : TaskResult::kRunning;
   }
   stamp_ = interface.now();
+  gates.expect.platform_mode = target_;
   interface.change_platform_mode(target_);
   return TaskResult::kRunning;
 }
 
 std::string PlatformModeTask::describe() const
 {
-  return "PlatformModeTask";
+  return "PlatformModeTask[" + to_string(target_) + "]";
 }
 
 TaskResult TransitionFilterTask::execute(Interface & interface, GateStatus & gates)

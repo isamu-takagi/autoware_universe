@@ -17,10 +17,14 @@
 
 #include <autoware_system_mode_decider/types.hpp>
 
+#include <string>
+
 namespace autoware::system_mode_decider
 {
 
 PlatformMode to_platform_mode(const AutowareControl & report);
+
+std::string to_string(const PlatformMode & mode);
 
 }  // namespace autoware::system_mode_decider
 

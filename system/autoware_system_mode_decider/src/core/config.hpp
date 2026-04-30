@@ -36,7 +36,7 @@ public:
   std::vector<AutowareMode> autoware_modes() const;
   bool exists(const AutowareMode & mode) const;
   Gates gates(const AutowareMode & mode) const;
-  AutowareMode from_operation_mode(const OperationMode & operation) const;
+  AutowareMode to_autoware_mode(const OperationMode & operation) const;
 
 private:
   std::unordered_set<AutowareMode> autoware_modes_;

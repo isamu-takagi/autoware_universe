@@ -78,7 +78,7 @@ DrivingModeConfig::Gates DrivingModeConfig::gates(const AutowareMode & mode) con
   return gates_mapping_.at(mode);
 }
 
-AutowareMode DrivingModeConfig::from_operation_mode(const OperationMode & operation_mode) const
+AutowareMode DrivingModeConfig::to_autoware_mode(const OperationMode & operation_mode) const
 {
   return operation_mode_mapping_.at(operation_mode);
 }

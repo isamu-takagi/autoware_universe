@@ -14,6 +14,8 @@
 
 #include "values.hpp"
 
+#include <string>
+
 namespace autoware::system_mode_decider
 {
 
@@ -24,6 +26,19 @@ PlatformMode to_platform_mode(const AutowareControl & autoware_control)
     case AutowareControl::kEnable:  return PlatformMode::kAutoware;
     case AutowareControl::kDisable: return PlatformMode::kManual;
     default:                        return PlatformMode::kUnknown;
+  }
+  // clang-format on
+}
+
+std::string to_string(const PlatformMode & mode)
+{
+  // clang-format off
+  switch (mode) {
+    case PlatformMode::kAutoware:         return "Autoware";
+    case PlatformMode::kAutowareSteering: return "AutowareSteering";
+    case PlatformMode::kAutowareVelocity: return "AutowareVelocity";
+    case PlatformMode::kManual:           return "Manual";
+    default:                              return "Invalid";
   }
   // clang-format on
 }
