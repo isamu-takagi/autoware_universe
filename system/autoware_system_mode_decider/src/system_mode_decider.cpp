@@ -149,9 +149,9 @@ void SystemModeDecider::on_change_operation_mode(
   };
   // clang-format on
 
-  // TODO(isamu-takagi): error handling
-  decider_->change_operation_mode(convert(*req));
-  res->status.success = true;
+  const auto status = decider_->change_operation_mode(convert(*req));
+  res->status.success = status.success;
+  res->status.message = status.message;
 }
 
 void SystemModeDecider::on_change_autoware_control(
@@ -161,9 +161,9 @@ void SystemModeDecider::on_change_autoware_control(
     return req.autoware_control ? AutowareControl::kEnable : AutowareControl::kDisable;
   };
 
-  // TODO(isamu-takagi): error handling
-  decider_->change_autoware_control(convert(*req));
-  res->status.success = true;
+  const auto status = decider_->change_autoware_control(convert(*req));
+  res->status.success = status.success;
+  res->status.message = status.message;
 }
 
 RosInterface::RosInterface(rclcpp::Node * node) : node_(node)

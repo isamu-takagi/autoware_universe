@@ -24,11 +24,18 @@
 
 #include <memory>
 #include <queue>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 
 namespace autoware::system_mode_decider
 {
+
+struct ServiceResponse
+{
+  bool success;
+  std::string message;
+};
 
 class Decider
 {
@@ -40,8 +47,8 @@ public:
   void notify_command_source(const CommandSource & source);
   void notify_vehicle_control_mode(const PlatformMode & mode);
 
-  void change_operation_mode(const OperationMode & operation_mode);
-  void change_autoware_control(const AutowareControl & autoware_control);
+  ServiceResponse change_operation_mode(const OperationMode & operation_mode);
+  ServiceResponse change_autoware_control(const AutowareControl & autoware_control);
 
 private:
   void execute_tasks();

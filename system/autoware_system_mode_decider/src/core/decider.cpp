@@ -132,7 +132,7 @@ void Decider::notify_vehicle_control_mode(const PlatformMode & mode)
   if (gates_.expect.platform_mode != mode) {
     RCLCPP_WARN_STREAM(logger, "platform mode override: " << to_string(mode));
     request_.platform_mode = mode;
-    tasks_.swap(std::queue<std::unique_ptr<Task>>());
+    tasks_ = std::queue<std::unique_ptr<Task>>();
   }
   gates_.status.platform_mode = mode;
   gates_.expect.platform_mode = mode;
@@ -168,19 +168,19 @@ void Decider::change_autoware_mode(const AutowareMode & mode)
   tasks_.swap(tasks);
 }
 
-void Decider::change_operation_mode(const OperationMode & operation_mode)
+ServiceResponse Decider::change_operation_mode(const OperationMode & operation_mode)
 {
   const auto mode = driving_mode_config_->to_autoware_mode(operation_mode);
 
-  if (driving_mode_status_->is_available(mode)) {
-    RCLCPP_INFO_STREAM(logger, "change operation mode: " << mode.id);
-    request_.operation_mode = mode;
-  } else {
-    RCLCPP_WARN_STREAM(logger, "reject operation mode: " << mode.id);
+  if (!driving_mode_status_->is_available(mode)) {
+    return ServiceResponse{false, "operation mode is not available"};
   }
+
+  request_.operation_mode = mode;
+  return ServiceResponse{true, ""};
 }
 
-void Decider::change_autoware_control(const AutowareControl & autoware_control)
+ServiceResponse Decider::change_autoware_control(const AutowareControl & autoware_control)
 {
   const auto platform_mode = to_platform_mode(autoware_control);
 
@@ -189,17 +189,15 @@ void Decider::change_autoware_control(const AutowareControl & autoware_control)
     RCLCPP_INFO_STREAM(logger, "accept autoware control disable");
     request_.platform_mode = platform_mode;
     interface_->change_platform_mode(platform_mode);
-    return;
+    return ServiceResponse{true, ""};
   }
 
   // The check target is the normal behavior, operation mode. MRM is not included.
   const auto mode = request_.operation_mode;
+
   if (!driving_mode_status_->is_available(mode)) {
-    RCLCPP_WARN_STREAM(logger, "reject autoware control enable");
-    return;
+    return ServiceResponse{false, "operation mode is not available"};
   }
-  RCLCPP_INFO_STREAM(logger, "accept autoware control change");
-  request_.platform_mode = platform_mode;
 
   std::queue<std::unique_ptr<Task>> tasks;
   tasks.push(std::make_unique<TransitionFilterTask>(true));
@@ -208,6 +206,9 @@ void Decider::change_autoware_control(const AutowareControl & autoware_control)
   tasks.push(std::make_unique<WaitModeStableTask>(mode));
   tasks.push(std::make_unique<TransitionFilterTask>(false));
   tasks_.swap(tasks);
+
+  request_.platform_mode = platform_mode;
+  return ServiceResponse{true, ""};
 }
 
 }  // namespace autoware::system_mode_decider
