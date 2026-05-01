@@ -2,20 +2,19 @@
 
 ## Overview
 
-AutowareはAPIからの要求や自己診断の状態に応じて様々な挙動を実行します。
-各挙動はそれぞれtrajectoryまたはcommandを出力としており、これらが以下の図のようにtrajectory gateとcommand gateにより選択されます。
-このパッケージではこれらの
+Autoware performs different behaviors depending on the API and the diagnostics.
+Each behavior outputs either a trajectory or a command, and they are selected by the trajectory gate and command gate as shown below.
 
 ![architecture](./doc/architecture.drawio.svg)
 
 ## Driving Mode
 
-ここではAutowareが取りうる挙動をDriving Modeと呼んで区別し、各ゲートへの入力もtrajectory sourceとcommand sourceと呼ぶことにします。
-また、車両インターフェースは状態としてControl Modeを持っており、これによってAutowareからの出力が反映されるか決まります。
-このとき、Driving Modeは以下の表のようなtrajectory sourceとcommand sourceとControl Modeの組み合わせに対応します。
+Here, we distinguish Autoware behaviors as driving modes and call the inputs to each gate the trajectory source and command source.
+The vehicle interface has a control mode as its state, which determines whether outputs from Autoware are applied.
+In that case, each driving mode corresponds to a combination of trajectory source, command source, and control mode as shown below.
 
-実際にはControl ModeはAutowareから制御できなかったり、オーバーライドにより変化することがあるので分けて扱います。
-Driving Modeの中でAutowareの制御下にあるものをAutoware Mode、それ以外をPlatform Modeと呼ぶことにします。
+In practice, control mode may not be controlled by Autoware or may change due to overrides, so it is handled separately.
+Driving modes under Autoware control are called autoware modes, and the rest are called platform modes.
 
 <table>
 <tr><th rowspan="2">Driving Mode</th><th colspan="2">Autoware Mode</th><th>Platform Mode</th></tr>
@@ -30,8 +29,8 @@ Driving Modeの中でAutowareの制御下にあるものをAutoware Mode、そ�
 
 ## Operation Mode and Fail-safe API
 
-また、operation mode API や Fail-safe API はモードについて独自のIDを定義しています。
-Driving Modeはこれらのモードを統合して扱うため、APIのIDから変換する必要があります。
+The operation mode API and Fail-safe API define their own IDs for modes.
+Since driving mode integrates these modes, conversion from API IDs is required.
 
 | API            | ID  | Driving Mode ID | Description     |
 | -------------- | --- | --------------- | --------------- |
@@ -48,32 +47,32 @@ Driving Modeはこれらのモードを統合して扱うため、APIのIDから
 
 ## Drive Mode Status
 
-| Flags       | Description                                                                        |
-| ----------- | ---------------------------------------------------------------------------------- |
-| available   | 該当モードに切り替えられる状態になっているか。実際に出力が行われている保証はない。 |
-| ready       | 該当モードの出力が実際に行われている状態になっているか。                           |
-| stable      | 該当モードの動作が安定し遷移を完了できる状態になっているか。                       |
-| continuable | 該当モードで現在走行しており、今後も動作を継続できる状態になっているか。           |
+| Flags       | Description                                                                                             |
+| ----------- | ------------------------------------------------------------------------------------------------------- |
+| available   | Whether it is possible to switch to the mode. This does not guarantee that output is actually produced. |
+| ready       | Whether the mode output is actually being produced.                                                     |
+| stable      | Whether the mode operation is stable and the transition can be completed.                               |
+| continuable | Whether the vehicle is currently driving in the mode and can continue to do so.                         |
 
 ## Autoware Mode Transition
 
-Autoware Modeが変更された場合、以下の処理によりモードの切り替えを行います。
+When the autoware mode changes, the following steps are used to switch modes.
 
-1. コマンドフィルターを有効化する。
-2. 現在のmodeのreadyを待つ
-3. Trajectory Sourceを切り替える
-4. Command Sourceを切り替える。
-5. 現在のmodeのstableを待つ
-6. コマンドフィルターを無効化する。
+1. Enable the command filter.
+2. Wait for the current mode to become ready.
+3. Switch the trajectory source.
+4. Switch the command source.
+5. Wait for the current mode to become stable.
+6. Disable the command filter.
 
-## Platform mode Transition
+## Platform Mode Transition
 
-Autowareの制御が反映されない状態へ切り替える場合は直ちに実行されます。
-Autowareの制御が反映される状態へ切り替える場合は以下の処理が行われます。
-走行中には追加の条件を必要する場合は available に含めてください。
+Switching to a state where Autoware control is not applied is performed immediately.
+Switching to a state where Autoware control is applied uses the following steps.
+If additional conditions are required while driving, include them in available status.
 
-1. コマンドフィルターを有効化する。
-2. 現在のmodeのreadyを待つ
-3. Control Modeを切り替える
-4. 現在のmodeのstableを待つ
-5. コマンドフィルターを無効化する。
+1. Enable the command filter.
+2. Wait for the current mode to become ready.
+3. Switch the control mode.
+4. Wait for the current mode to become stable.
+5. Disable the command filter.
