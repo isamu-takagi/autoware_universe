@@ -24,18 +24,10 @@
 
 #include <memory>
 #include <queue>
-#include <string>
-#include <unordered_map>
 #include <unordered_set>
 
 namespace autoware::driving_mode_manager
 {
-
-struct ServiceResponse
-{
-  bool success;
-  std::string message;
-};
 
 class Manager
 {

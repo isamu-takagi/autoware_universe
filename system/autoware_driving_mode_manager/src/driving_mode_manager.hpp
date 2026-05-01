@@ -49,7 +49,6 @@ private:
   using ControlModeReport = autoware_vehicle_msgs::msg::ControlModeReport;
   using ChangeOperationMode = autoware_system_msgs::srv::ChangeOperationMode;
   using ChangeAutowareControl = autoware_system_msgs::srv::ChangeAutowareControl;
-  using OperationModeState = autoware_adapi_v1_msgs::msg::OperationModeState;
 
   diagnostic_updater::Updater diag_;
   rclcpp::TimerBase::SharedPtr timer_;
@@ -59,10 +58,8 @@ private:
   rclcpp::Subscription<ControlModeReport>::SharedPtr sub_control_mode_report_;
   rclcpp::Service<ChangeOperationMode>::SharedPtr srv_operation_mode_;
   rclcpp::Service<ChangeAutowareControl>::SharedPtr srv_autoware_control_;
-  rclcpp::Publisher<OperationModeState>::SharedPtr pub_operation_mode_;
   void on_timer_init();
   void on_timer_main();
-  void publish_operation_mode_state();
 
   void on_driving_mode_status(const DrivingModeStatus & msg);
   void on_trajectory_source(const TrajectorySourceMsg & msg);
@@ -88,15 +85,18 @@ public:
   void change_trajectory_source(const TrajectorySource & source) override;
   void change_command_source(const CommandSource & source) override;
   void change_platform_mode(const PlatformMode & mode) override;
+  void publish_operation_mode(const OperationModeState & state) const override;
 
 private:
   using TrajectorySourceSrv = autoware_driving_mode_msgs::srv::ChangeTrajectorySource;
   using ChangeCommandSourceSrv = autoware_driving_mode_msgs::srv::ChangeCommandSource;
   using ControlModeCommandSrv = autoware_vehicle_msgs::srv::ControlModeCommand;
+  using OperationModeStateMsg = autoware_adapi_v1_msgs::msg::OperationModeState;
   rclcpp::Node * node_;
   rclcpp::Client<TrajectorySourceSrv>::SharedPtr cli_trajectory_source_;
   rclcpp::Client<ChangeCommandSourceSrv>::SharedPtr cli_command_source_;
   rclcpp::Client<ControlModeCommandSrv>::SharedPtr cli_control_mode_command_;
+  rclcpp::Publisher<OperationModeStateMsg>::SharedPtr pub_operation_mode_;
 };
 
 }  // namespace autoware::driving_mode_manager

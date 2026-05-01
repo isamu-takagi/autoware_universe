@@ -56,8 +56,6 @@ DrivingModeManager::DrivingModeManager(const rclcpp::NodeOptions & options)
   srv_autoware_control_ = create_service<ChangeAutowareControl>(
     "~/system/change_autoware_control",
     std::bind(&DrivingModeManager::on_change_autoware_control, this, _1, _2));
-  pub_operation_mode_ = create_publisher<OperationModeState>(
-    "~/system/operation_mode_state", rclcpp::QoS(1).transient_local());
 
   const auto period = rclcpp::Rate(1.0).period();
   timer_ = rclcpp::create_timer(this, get_clock(), period, [this]() { on_timer_init(); });
@@ -79,34 +77,6 @@ void DrivingModeManager::on_timer_init()
 void DrivingModeManager::on_timer_main()
 {
   manager_->update();
-  publish_operation_mode_state();
-}
-
-void DrivingModeManager::publish_operation_mode_state()
-{
-  const auto convert = [](const OperationMode & mode) {
-    // clang-format off
-    switch (mode) {
-      case OperationMode::kStop:       return OperationModeState::STOP;
-      case OperationMode::kAutonomous: return OperationModeState::AUTONOMOUS;
-      case OperationMode::kLocal:      return OperationModeState::LOCAL;
-      case OperationMode::kRemote:     return OperationModeState::REMOTE;
-      default:                         return OperationModeState::UNKNOWN;
-    }
-    // clang-format on
-  };
-
-  const auto state = manager_->operation_mode_state();
-  OperationModeState msg;
-  msg.stamp = now();
-  msg.mode = convert(state.mode);
-  msg.is_autoware_control_enabled = state.is_autoware_control_enabled;
-  msg.is_in_transition = state.is_in_transition;
-  msg.is_stop_mode_available = state.is_stop_mode_available;
-  msg.is_autonomous_mode_available = state.is_autonomous_mode_available;
-  msg.is_local_mode_available = state.is_local_mode_available;
-  msg.is_remote_mode_available = state.is_remote_mode_available;
-  pub_operation_mode_->publish(msg);
 }
 
 void DrivingModeManager::on_driving_mode_status(const DrivingModeStatus & msg)
@@ -202,6 +172,8 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
   cli_command_source_ = node->create_client<ChangeCommandSourceSrv>("~/command/source/change");
   cli_control_mode_command_ =
     node->create_client<ControlModeCommandSrv>("~/vehicle/control_mode/command");
+  pub_operation_mode_ = node->create_publisher<OperationModeStateMsg>(
+    "~/system/operation_mode_state", rclcpp::QoS(1).transient_local());
 }
 
 rclcpp::Time RosInterface::now() const
@@ -246,6 +218,32 @@ void RosInterface::change_platform_mode(const PlatformMode & mode)
   const auto request = std::make_shared<ControlModeCommandSrv::Request>();
   request->mode = command.value();
   cli_control_mode_command_->async_send_request(request);
+}
+
+void RosInterface::publish_operation_mode(const OperationModeState & state) const
+{
+  const auto convert = [](const OperationMode & mode) {
+    // clang-format off
+    switch (mode) {
+      case OperationMode::kStop:       return OperationModeStateMsg::STOP;
+      case OperationMode::kAutonomous: return OperationModeStateMsg::AUTONOMOUS;
+      case OperationMode::kLocal:      return OperationModeStateMsg::LOCAL;
+      case OperationMode::kRemote:     return OperationModeStateMsg::REMOTE;
+      default:                         return OperationModeStateMsg::UNKNOWN;
+    }
+    // clang-format on
+  };
+
+  OperationModeStateMsg msg;
+  msg.stamp = now();
+  msg.mode = convert(state.mode);
+  msg.is_autoware_control_enabled = state.is_autoware_control_enabled;
+  msg.is_in_transition = state.is_in_transition;
+  msg.is_stop_mode_available = state.is_stop_mode_available;
+  msg.is_autonomous_mode_available = state.is_autonomous_mode_available;
+  msg.is_local_mode_available = state.is_local_mode_available;
+  msg.is_remote_mode_available = state.is_remote_mode_available;
+  pub_operation_mode_->publish(msg);
 }
 
 }  // namespace autoware::driving_mode_manager

@@ -18,8 +18,16 @@
 #include <autoware_driving_mode_manager/types.hpp>
 #include <rclcpp/time.hpp>
 
+#include <string>
+
 namespace autoware::driving_mode_manager
 {
+
+struct ServiceResponse
+{
+  bool success;
+  std::string message;
+};
 
 struct OperationModeState
 {
@@ -40,6 +48,19 @@ public:
   virtual void change_trajectory_source(const TrajectorySource & source) = 0;
   virtual void change_command_source(const CommandSource & source) = 0;
   virtual void change_platform_mode(const PlatformMode & mode) = 0;
+  virtual void publish_operation_mode(const OperationModeState & state) const = 0;
+};
+
+class MainLogic
+{
+public:
+  virtual ~MainLogic() = default;
+  virtual void update() = 0;
+  virtual void notify_trajectory_source(const TrajectorySource & source) = 0;
+  virtual void notify_command_source(const CommandSource & source) = 0;
+  virtual void notify_vehicle_control_mode(const PlatformMode & mode) = 0;
+  virtual ServiceResponse change_operation_mode(const OperationMode & operation_mode) = 0;
+  virtual ServiceResponse change_autoware_control(const AutowareControl & autoware_control) = 0;
 };
 
 }  // namespace autoware::driving_mode_manager
