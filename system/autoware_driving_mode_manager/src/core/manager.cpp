@@ -44,13 +44,12 @@ Manager::Manager(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin
   interface_ = std::move(interface);
   plugin_ = plugin;
 
-  driving_mode_config_ = std::make_unique<DrivingModeConfig>();
-  plugin_->setup(*driving_mode_config_);
-  driving_mode_status_ =
-    std::make_unique<DrivingModeStatus>(driving_mode_config_->autoware_modes());
+  config_ = std::make_unique<DrivingModeConfig>();
+  plugin_->setup(*config_);
+  status_ = std::make_unique<DrivingModeStatus>(config_->autoware_modes());
 
   constexpr AutowareMode unknown_mode = AutowareMode{0};
-  request_.operation_mode = driving_mode_config_->to_autoware_mode(OperationMode::kStop);
+  request_.operation_mode = config_->to_autoware_mode(OperationMode::kStop);
   request_.platform_mode = PlatformMode::kUnknown;
   request_.mrm_strategy = MrmStrategy::kNone;
   request_.mrm_target_mode = unknown_mode;
@@ -59,22 +58,22 @@ Manager::Manager(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin
 
 DrivingModeStatus & Manager::access_status()
 {
-  return *driving_mode_status_;
+  return *status_;
 }
 
 void Manager::update()
 {
   // Detect status timeout.
-  driving_mode_status_->update(interface_->now(), 1.0);
+  status_->update(interface_->now(), 1.0);
 
   // List available modes.
   AutowareModeSet availables;
-  for (const auto & mode : driving_mode_config_->autoware_modes()) {
+  for (const auto & mode : config_->autoware_modes()) {
     if (temporary_unavailable_modes_.count(mode) == 0) {
       if (mode.id != request_.autoware_mode.id) {
-        if (driving_mode_status_->is_available(mode)) availables.insert(mode);
+        if (status_->is_available(mode)) availables.insert(mode);
       } else {
-        if (driving_mode_status_->is_continuable(mode)) availables.insert(mode);
+        if (status_->is_continuable(mode)) availables.insert(mode);
       }
     }
   }
@@ -145,7 +144,7 @@ void Manager::change_autoware_mode(const AutowareMode & mode)
   if (prev.id == mode.id) {
     return;
   }
-  if (!driving_mode_config_->exists(mode)) {
+  if (!config_->exists(mode)) {
     RCLCPP_ERROR_STREAM(logger, "decision logic returns unknown mode: " << mode.id);
     return;
   }
@@ -153,7 +152,7 @@ void Manager::change_autoware_mode(const AutowareMode & mode)
   RCLCPP_INFO_STREAM(logger, "Change Autoware Mode: " << prev.id << " -> " << mode.id);
   prev = mode;
 
-  const auto gates = driving_mode_config_->gates(mode);
+  const auto gates = config_->gates(mode);
   std::queue<std::unique_ptr<Task>> tasks;
   tasks.push(std::make_unique<TransitionFilterTask>(true));
   tasks.push(std::make_unique<WaitModeReadyTask>(mode));
@@ -170,9 +169,9 @@ void Manager::change_autoware_mode(const AutowareMode & mode)
 
 ServiceResponse Manager::change_operation_mode(const OperationMode & operation_mode)
 {
-  const auto mode = driving_mode_config_->to_autoware_mode(operation_mode);
+  const auto mode = config_->to_autoware_mode(operation_mode);
 
-  if (!driving_mode_status_->is_available(mode)) {
+  if (!status_->is_available(mode)) {
     return ServiceResponse{false, "operation mode is not available"};
   }
 
@@ -195,7 +194,7 @@ ServiceResponse Manager::change_autoware_control(const AutowareControl & autowar
   // The check target is the normal behavior, operation mode. MRM is not included.
   const auto mode = request_.operation_mode;
 
-  if (!driving_mode_status_->is_available(mode)) {
+  if (!status_->is_available(mode)) {
     return ServiceResponse{false, "operation mode is not available"};
   }
 
@@ -214,11 +213,11 @@ ServiceResponse Manager::change_autoware_control(const AutowareControl & autowar
 OperationModeState Manager::operation_mode_state() const
 {
   const auto is_available = [this](const OperationMode & mode) {
-    return driving_mode_status_->is_available(driving_mode_config_->to_autoware_mode(mode));
+    return status_->is_available(config_->to_autoware_mode(mode));
   };
 
   OperationModeState state;
-  state.mode = driving_mode_config_->to_operation_mode(request_.operation_mode);
+  state.mode = config_->to_operation_mode(request_.operation_mode);
   state.is_autoware_control_enabled = (request_.platform_mode != PlatformMode::kManual);
   state.is_in_transition = !tasks_.empty();
   state.is_stop_mode_available = is_available(OperationMode::kStop);

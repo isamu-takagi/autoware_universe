@@ -57,8 +57,8 @@ private:
   std::unique_ptr<Interface> interface_;
   std::shared_ptr<Plugin> plugin_;
 
-  std::unique_ptr<DrivingModeConfig> driving_mode_config_;
-  std::unique_ptr<DrivingModeStatus> driving_mode_status_;
+  std::unique_ptr<DrivingModeConfig> config_;
+  std::unique_ptr<DrivingModeStatus> status_;
   std::unordered_set<AutowareMode> temporary_unavailable_modes_;
 
   RequestModes request_;
