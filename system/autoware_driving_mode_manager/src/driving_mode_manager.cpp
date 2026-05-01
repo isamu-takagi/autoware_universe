@@ -14,6 +14,8 @@
 
 #include "driving_mode_manager.hpp"
 
+#include "ros_interface.hpp"
+
 #include <memory>
 #include <string>
 
