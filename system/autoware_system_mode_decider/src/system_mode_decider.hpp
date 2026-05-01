@@ -22,8 +22,9 @@
 #include <pluginlib/class_loader.hpp>
 
 #include <autoware_adapi_v1_msgs/msg/operation_mode_state.hpp>
-#include <autoware_system_mode_msgs/msg/system_mode_status.hpp>
-#include <autoware_system_mode_msgs/msg/trajectory_source.hpp>
+#include <autoware_system_mode_msgs/msg/driving_mode_status.hpp>
+#include <autoware_system_mode_msgs/msg/trajectory_source_status.hpp>
+#include <autoware_system_mode_msgs/srv/change_trajectory_source.hpp>
 #include <autoware_system_msgs/srv/change_autoware_control.hpp>
 #include <autoware_system_msgs/srv/change_operation_mode.hpp>
 #include <autoware_vehicle_msgs/msg/control_mode_report.hpp>
@@ -42,8 +43,8 @@ public:
   explicit SystemModeDecider(const rclcpp::NodeOptions & options);
 
 private:
-  using SystemModeStatus = autoware_system_mode_msgs::msg::SystemModeStatus;
-  using TrajectorySourceMsg = autoware_system_mode_msgs::msg::TrajectorySource;
+  using DrivingModeStatus = autoware_system_mode_msgs::msg::DrivingModeStatus;
+  using TrajectorySourceMsg = autoware_system_mode_msgs::msg::TrajectorySourceStatus;
   using CommandSourceMsg = tier4_system_msgs::msg::CommandSourceStatus;
   using ControlModeReport = autoware_vehicle_msgs::msg::ControlModeReport;
   using ChangeOperationMode = autoware_system_msgs::srv::ChangeOperationMode;
@@ -52,7 +53,7 @@ private:
 
   diagnostic_updater::Updater diag_;
   rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Subscription<SystemModeStatus>::SharedPtr sub_system_mode_status_;
+  rclcpp::Subscription<DrivingModeStatus>::SharedPtr sub_driving_mode_status_;
   rclcpp::Subscription<TrajectorySourceMsg>::SharedPtr sub_trajectory_source_;
   rclcpp::Subscription<CommandSourceMsg>::SharedPtr sub_command_source_;
   rclcpp::Subscription<ControlModeReport>::SharedPtr sub_control_mode_report_;
@@ -63,7 +64,7 @@ private:
   void on_timer_main();
   void publish_operation_mode_state();
 
-  void on_system_mode_status(const SystemModeStatus & msg);
+  void on_driving_mode_status(const DrivingModeStatus & msg);
   void on_trajectory_source(const TrajectorySourceMsg & msg);
   void on_command_source(const CommandSourceMsg & msg);
   void on_control_mode_report(const ControlModeReport & msg);
@@ -89,11 +90,11 @@ public:
   void change_platform_mode(const PlatformMode & mode) override;
 
 private:
-  using TrajectorySourceMsg = autoware_system_mode_msgs::msg::TrajectorySource;
+  using TrajectorySourceSrv = autoware_system_mode_msgs::srv::ChangeTrajectorySource;
   using SelectCommandSourceSrv = tier4_system_msgs::srv::SelectCommandSource;
   using ControlModeCommandSrv = autoware_vehicle_msgs::srv::ControlModeCommand;
   rclcpp::Node * node_;
-  rclcpp::Publisher<TrajectorySourceMsg>::SharedPtr pub_trajectory_select_;
+  rclcpp::Client<TrajectorySourceSrv>::SharedPtr cli_trajectory_select_;
   rclcpp::Client<SelectCommandSourceSrv>::SharedPtr cli_command_select_;
   rclcpp::Client<ControlModeCommandSrv>::SharedPtr cli_control_mode_command_;
 };

@@ -47,7 +47,7 @@ Decider::Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin
   driving_mode_config_ = std::make_unique<DrivingModeConfig>();
   plugin_->setup(*driving_mode_config_);
   driving_mode_status_ =
-    std::make_unique<SystemModeStatusStore>(driving_mode_config_->autoware_modes());
+    std::make_unique<DrivingModeStatus>(driving_mode_config_->autoware_modes());
 
   constexpr AutowareMode unknown_mode = AutowareMode{0};
   request_.operation_mode = driving_mode_config_->to_autoware_mode(OperationMode::kStop);
@@ -57,7 +57,7 @@ Decider::Decider(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin
   request_.autoware_mode = unknown_mode;
 }
 
-SystemModeStatusStore & Decider::access_status()
+DrivingModeStatus & Decider::access_status()
 {
   return *driving_mode_status_;
 }

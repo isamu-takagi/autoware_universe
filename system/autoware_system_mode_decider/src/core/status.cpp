@@ -43,14 +43,14 @@ void TimeoutStatus::update(const rclcpp::Time & now, double timeout)
   }
 }
 
-SystemModeStatusStore::SystemModeStatusStore(const std::vector<AutowareMode> & modes)
+DrivingModeStatus::DrivingModeStatus(const std::vector<AutowareMode> & modes)
 {
   for (const auto & mode : modes) {
-    modes_[mode.id] = SystemModeStatusData{};
+    modes_[mode.id] = DrivingModeStatusData{};
   }
 }
 
-void SystemModeStatusStore::update(const rclcpp::Time & now, double timeout)
+void DrivingModeStatus::update(const rclcpp::Time & now, double timeout)
 {
   for (auto & [id, status] : modes_) {
     status.available.update(now, timeout);
@@ -59,13 +59,13 @@ void SystemModeStatusStore::update(const rclcpp::Time & now, double timeout)
   }
 }
 
-SystemModeStatusData * SystemModeStatusStore::data(const AutowareMode & mode)
+DrivingModeStatusData * DrivingModeStatus::data(const AutowareMode & mode)
 {
   const auto iter = modes_.find(mode.id);
   return iter == modes_.end() ? nullptr : &iter->second;
 }
 
-bool SystemModeStatusStore::is_ready() const
+bool DrivingModeStatus::is_ready() const
 {
   for (const auto & [id, status] : modes_) {
     if (status.available.timeout()) return false;
@@ -75,19 +75,19 @@ bool SystemModeStatusStore::is_ready() const
   return true;
 }
 
-bool SystemModeStatusStore::is_available(const AutowareMode & mode) const
+bool DrivingModeStatus::is_available(const AutowareMode & mode) const
 {
   const auto iter = modes_.find(mode.id);
   return iter == modes_.end() ? false : iter->second.available.status();
 }
 
-bool SystemModeStatusStore::is_stable(const AutowareMode & mode) const
+bool DrivingModeStatus::is_stable(const AutowareMode & mode) const
 {
   const auto iter = modes_.find(mode.id);
   return iter == modes_.end() ? false : iter->second.stable.status();
 }
 
-bool SystemModeStatusStore::is_continuable(const AutowareMode & mode) const
+bool DrivingModeStatus::is_continuable(const AutowareMode & mode) const
 {
   const auto iter = modes_.find(mode.id);
   return iter == modes_.end() ? false : iter->second.continuable.status();

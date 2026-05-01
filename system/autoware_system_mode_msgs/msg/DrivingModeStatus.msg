@@ -1,0 +1,2 @@
+builtin_interfaces/Time stamp
+autoware_system_mode_msgs/DrivingModeStatusItem[] items

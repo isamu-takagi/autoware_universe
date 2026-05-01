@@ -48,7 +48,7 @@ public:
   ServiceResponse change_operation_mode(const OperationMode & operation_mode);
   ServiceResponse change_autoware_control(const AutowareControl & autoware_control);
   OperationModeState operation_mode_state() const;
-  SystemModeStatusStore & access_status();
+  DrivingModeStatus & access_status();
 
 private:
   void execute_tasks();
@@ -58,7 +58,7 @@ private:
   std::shared_ptr<Plugin> plugin_;
 
   std::unique_ptr<DrivingModeConfig> driving_mode_config_;
-  std::unique_ptr<SystemModeStatusStore> driving_mode_status_;
+  std::unique_ptr<DrivingModeStatus> driving_mode_status_;
   std::unordered_set<AutowareMode> temporary_unavailable_modes_;
 
   RequestModes request_;

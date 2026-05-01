@@ -37,9 +37,9 @@ SystemModeDecider::SystemModeDecider(const rclcpp::NodeOptions & options)
   const auto plugin = loader_.createSharedInstance(plugin_name);
   decider_ = std::make_unique<Decider>(std::make_unique<RosInterface>(this), plugin);
 
-  sub_system_mode_status_ = create_subscription<SystemModeStatus>(
+  sub_driving_mode_status_ = create_subscription<DrivingModeStatus>(
     "~/system/driving_mode/status", rclcpp::QoS(1),
-    std::bind(&SystemModeDecider::on_system_mode_status, this, _1));
+    std::bind(&SystemModeDecider::on_driving_mode_status, this, _1));
   sub_trajectory_source_ = create_subscription<TrajectorySourceMsg>(
     "~/trajectory/source/status", rclcpp::QoS(1).transient_local(),
     std::bind(&SystemModeDecider::on_trajectory_source, this, _1));
@@ -109,23 +109,23 @@ void SystemModeDecider::publish_operation_mode_state()
   pub_operation_mode_->publish(msg);
 }
 
-void SystemModeDecider::on_system_mode_status(const SystemModeStatus & msg)
+void SystemModeDecider::on_driving_mode_status(const DrivingModeStatus & msg)
 {
-  using SystemModeStatusItem = autoware_system_mode_msgs::msg::SystemModeStatusItem;
+  using DrivingModeStatusItem = autoware_system_mode_msgs::msg::DrivingModeStatusItem;
   for (const auto & item : msg.items) {
-    SystemModeStatusData * data = decider_->access_status().data(AutowareMode{item.mode});
+    DrivingModeStatusData * data = decider_->access_status().data(AutowareMode{item.mode});
     if (!data) {
       RCLCPP_WARN_STREAM(get_logger(), "unknown status mode: " << item.mode);
       continue;
     }
     switch (item.type) {
-      case SystemModeStatusItem::AVAILABLE:
+      case DrivingModeStatusItem::AVAILABLE:
         data->available.update(msg.stamp, item.status);
         break;
-      case SystemModeStatusItem::STABLE:
+      case DrivingModeStatusItem::STABLE:
         data->stable.update(msg.stamp, item.status);
         break;
-      case SystemModeStatusItem::CONTINUABLE:
+      case DrivingModeStatusItem::CONTINUABLE:
         data->continuable.update(msg.stamp, item.status);
         break;
       default:
@@ -198,8 +198,7 @@ void SystemModeDecider::on_change_autoware_control(
 
 RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
 {
-  pub_trajectory_select_ =
-    node->create_publisher<TrajectorySourceMsg>("~/trajectory/source/select", rclcpp::QoS(1));
+  cli_trajectory_select_ = node->create_client<TrajectorySourceSrv>("~/trajectory/source/select");
   cli_command_select_ = node->create_client<SelectCommandSourceSrv>("~/command/source/select");
   cli_control_mode_command_ =
     node->create_client<ControlModeCommandSrv>("~/vehicle/control_mode/command");
@@ -212,9 +211,9 @@ rclcpp::Time RosInterface::now() const
 
 void RosInterface::change_trajectory_source(const TrajectorySource & source)
 {
-  TrajectorySourceMsg msg;
-  msg.source = source.id;
-  pub_trajectory_select_->publish(msg);
+  const auto request = std::make_shared<TrajectorySourceSrv::Request>();
+  request->source = source.id;
+  cli_trajectory_select_->async_send_request(request);
 }
 
 void RosInterface::change_command_source(const CommandSource & source)
