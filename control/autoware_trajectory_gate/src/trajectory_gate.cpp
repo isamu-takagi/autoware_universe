@@ -77,9 +77,9 @@ void TrajectoryGate::publish_source() const
   pub_source_->publish(msg);
 }
 
-void TrajectoryGate::on_select_source(
+void TrajectoryGate::on_change_source(
   const ChangeTrajectorySource::Request::SharedPtr req,
-  ChangeTrajectorySource::Response::SharedPtr res)
+  const ChangeTrajectorySource::Response::SharedPtr res)
 {
   const auto success = selector_.select(req->source);
   publish_source();

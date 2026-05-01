@@ -49,9 +49,9 @@ private:
   rclcpp::Service<ChangeTrajectorySource>::SharedPtr srv_source_;
 
   void publish_source() const;
-  void on_select_source(
+  void on_change_source(
     const ChangeTrajectorySource::Request::SharedPtr req,
-    ChangeTrajectorySource::Response::SharedPtr res);
+    const ChangeTrajectorySource::Response::SharedPtr res);
 };
 
 }  // namespace autoware::trajectory_gate
