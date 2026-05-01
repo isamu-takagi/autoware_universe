@@ -1,3 +1,0 @@
-<library path="autoware_system_mode_decider_plugin">
-  <class base_class_type="autoware::system_mode_decider::Plugin" type="autoware::system_mode_decider::DefaultPlugin"/>
-</library>
