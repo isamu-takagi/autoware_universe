@@ -21,25 +21,11 @@
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include <autoware_system_mode_msgs/msg/trajectory_source.hpp>
+#include <autoware_driving_mode_msgs/msg/trajectory_source_status.hpp>
+#include <autoware_driving_mode_msgs/srv/change_trajectory_source.hpp>
 
 #include <memory>
 #include <vector>
-
-/*
-#include "command/compatibility.hpp"
-#include "command/filter.hpp"
-#include "command/interface.hpp"
-#include "command/selector.hpp"
-
-#include <autoware_command_mode_types/sources.hpp>
-
-#include <tier4_system_msgs/msg/command_source_status.hpp>
-#include <tier4_system_msgs/srv/select_command_source.hpp>
-
-#include <memory>
-#include <string>
-*/
 
 namespace autoware::trajectory_gate
 {
@@ -50,7 +36,8 @@ public:
   explicit TrajectoryGate(const rclcpp::NodeOptions & options);
 
 private:
-  using TrajectorySource = autoware_system_mode_msgs::msg::TrajectorySource;
+  using TrajectorySourceStatus = autoware_driving_mode_msgs::msg::TrajectorySourceStatus;
+  using ChangeTrajectorySource = autoware_driving_mode_msgs::srv::ChangeTrajectorySource;
 
   diagnostic_updater::Updater diag_;
 
@@ -58,36 +45,13 @@ private:
   std::vector<std::unique_ptr<TrajectorySender>> subscriptions_;
   std::vector<std::unique_ptr<TrajectoryReceiver>> receivers_;
 
-  rclcpp::Publisher<TrajectorySource>::SharedPtr pub_source_;
-  rclcpp::Subscription<TrajectorySource>::SharedPtr sub_source_;
+  rclcpp::Publisher<TrajectorySourceStatus>::SharedPtr pub_source_;
+  rclcpp::Service<ChangeTrajectorySource>::SharedPtr srv_source_;
 
-  void on_select_source(const TrajectorySource & msg);
-  void notify_source() const;
-
-  /*
-    static constexpr uint16_t unknown = autoware::command_mode_types::sources::unknown;
-    static constexpr uint16_t builtin = autoware::command_mode_types::sources::builtin;
-    using CommandSourceStatus = tier4_system_msgs::msg::CommandSourceStatus;
-    using SelectCommandSource = tier4_system_msgs::srv::SelectCommandSource;
-
-    void publish_source_status();
-    void on_timer();
-    void on_select_source(
-      const SelectCommandSource::Request::SharedPtr req,
-      const SelectCommandSource::Response::SharedPtr res);
-
-    rclcpp::TimerBase::SharedPtr timer_;
-    rclcpp::Publisher<CommandSourceStatus>::SharedPtr pub_status_;
-    rclcpp::Service<SelectCommandSource>::SharedPtr srv_select_;
-
-
-    std::unique_ptr<CommandSelector> selector_;
-    CommandFilter * output_filter_;
-    Compatibility * compatibility_;
-
-    uint16_t current_source_ = 0;
-    bool transition_flag_ = false;
-  */
+  void publish_source() const;
+  void on_select_source(
+    const ChangeTrajectorySource::Request::SharedPtr req,
+    ChangeTrajectorySource::Response::SharedPtr res);
 };
 
 }  // namespace autoware::trajectory_gate
