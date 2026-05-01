@@ -198,8 +198,8 @@ void DrivingModeManager::on_change_autoware_control(
 
 RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
 {
-  cli_trajectory_select_ = node->create_client<TrajectorySourceSrv>("~/trajectory/source/select");
-  cli_command_select_ = node->create_client<SelectCommandSourceSrv>("~/command/source/select");
+  cli_trajectory_source_ = node->create_client<TrajectorySourceSrv>("~/trajectory/source/change");
+  cli_command_source_ = node->create_client<ChangeCommandSourceSrv>("~/command/source/change");
   cli_control_mode_command_ =
     node->create_client<ControlModeCommandSrv>("~/vehicle/control_mode/command");
 }
@@ -213,14 +213,14 @@ void RosInterface::change_trajectory_source(const TrajectorySource & source)
 {
   const auto request = std::make_shared<TrajectorySourceSrv::Request>();
   request->source = source.id;
-  cli_trajectory_select_->async_send_request(request);
+  cli_trajectory_source_->async_send_request(request);
 }
 
 void RosInterface::change_command_source(const CommandSource & source)
 {
-  const auto request = std::make_shared<SelectCommandSourceSrv::Request>();
+  const auto request = std::make_shared<ChangeCommandSourceSrv::Request>();
   request->source = source.id;
-  cli_command_select_->async_send_request(request);
+  cli_command_source_->async_send_request(request);
 }
 
 void RosInterface::change_platform_mode(const PlatformMode & mode)

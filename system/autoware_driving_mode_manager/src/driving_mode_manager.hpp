@@ -22,15 +22,15 @@
 #include <pluginlib/class_loader.hpp>
 
 #include <autoware_adapi_v1_msgs/msg/operation_mode_state.hpp>
+#include <autoware_driving_mode_msgs/msg/command_source_status.hpp>
 #include <autoware_driving_mode_msgs/msg/driving_mode_status.hpp>
 #include <autoware_driving_mode_msgs/msg/trajectory_source_status.hpp>
+#include <autoware_driving_mode_msgs/srv/change_command_source.hpp>
 #include <autoware_driving_mode_msgs/srv/change_trajectory_source.hpp>
 #include <autoware_system_msgs/srv/change_autoware_control.hpp>
 #include <autoware_system_msgs/srv/change_operation_mode.hpp>
 #include <autoware_vehicle_msgs/msg/control_mode_report.hpp>
 #include <autoware_vehicle_msgs/srv/control_mode_command.hpp>
-#include <tier4_system_msgs/msg/command_source_status.hpp>
-#include <tier4_system_msgs/srv/select_command_source.hpp>
 
 #include <memory>
 
@@ -45,7 +45,7 @@ public:
 private:
   using DrivingModeStatus = autoware_driving_mode_msgs::msg::DrivingModeStatus;
   using TrajectorySourceMsg = autoware_driving_mode_msgs::msg::TrajectorySourceStatus;
-  using CommandSourceMsg = tier4_system_msgs::msg::CommandSourceStatus;
+  using CommandSourceMsg = autoware_driving_mode_msgs::msg::CommandSourceStatus;
   using ControlModeReport = autoware_vehicle_msgs::msg::ControlModeReport;
   using ChangeOperationMode = autoware_system_msgs::srv::ChangeOperationMode;
   using ChangeAutowareControl = autoware_system_msgs::srv::ChangeAutowareControl;
@@ -91,11 +91,11 @@ public:
 
 private:
   using TrajectorySourceSrv = autoware_driving_mode_msgs::srv::ChangeTrajectorySource;
-  using SelectCommandSourceSrv = tier4_system_msgs::srv::SelectCommandSource;
+  using ChangeCommandSourceSrv = autoware_driving_mode_msgs::srv::ChangeCommandSource;
   using ControlModeCommandSrv = autoware_vehicle_msgs::srv::ControlModeCommand;
   rclcpp::Node * node_;
-  rclcpp::Client<TrajectorySourceSrv>::SharedPtr cli_trajectory_select_;
-  rclcpp::Client<SelectCommandSourceSrv>::SharedPtr cli_command_select_;
+  rclcpp::Client<TrajectorySourceSrv>::SharedPtr cli_trajectory_source_;
+  rclcpp::Client<ChangeCommandSourceSrv>::SharedPtr cli_command_source_;
   rclcpp::Client<ControlModeCommandSrv>::SharedPtr cli_control_mode_command_;
 };
 

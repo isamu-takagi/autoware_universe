@@ -35,7 +35,7 @@ TrajectoryGate::TrajectoryGate(const rclcpp::NodeOptions & options)
   pub_source_ =
     create_publisher<TrajectorySourceStatus>("~/source/status", rclcpp::QoS(1).transient_local());
   srv_source_ = create_service<ChangeTrajectorySource>(
-    "~/source/select", std::bind(&TrajectoryGate::on_select_source, this, _1, _2));
+    "~/source/change", std::bind(&TrajectoryGate::on_change_source, this, _1, _2));
 
   // Create input streams.
   for (const auto id : {100, 200, 300}) {
