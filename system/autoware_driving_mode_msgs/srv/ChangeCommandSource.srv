@@ -1,3 +1,4 @@
 uint32 source
 ---
 bool success
+string message
