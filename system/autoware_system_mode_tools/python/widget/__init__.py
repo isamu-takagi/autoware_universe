@@ -19,7 +19,7 @@ from .driving_mode import DrivingModeControl
 from .gate_status import CommandGateDisplay
 from .gate_status import TrajectoryGateDisplay
 from .operation_mode import OperationModeControl
-from .vehicle_interface import VehicleInterfaceControl
+from .vehicle_interface import VehicleInterfaceWidget
 
 
 class MainWidget(QtWidgets.QWidget):
@@ -37,12 +37,22 @@ class MainWidget(QtWidgets.QWidget):
         self.modes_control = DrivingModeControl(node, modes)
         self.status_trajectory = TrajectoryGateDisplay(node)
         self.status_command = CommandGateDisplay(node)
-        self.vehicle_interface = VehicleInterfaceControl(node)
+        self.vehicle_interface = VehicleInterfaceWidget(node)
 
-        layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(self.operation_mode_control)
-        layout.addWidget(self.modes_control)
-        layout.addWidget(self.status_trajectory)
-        layout.addWidget(self.status_command)
-        layout.addWidget(self.vehicle_interface)
+        layout = QtWidgets.QGridLayout()
         self.setLayout(layout)
+
+        self._add_row(layout, 0, "Operation Mode", self.operation_mode_control)
+        self._add_row(layout, 1, "Driving Mode", self.modes_control)
+        self._add_row(layout, 2, "Trajectory Gate", self.status_trajectory)
+        self._add_row(layout, 3, "Command Gate", self.status_command)
+        self._add_row(layout, 4, "Vehicle Interface", self.vehicle_interface)
+
+    @staticmethod
+    def _add_row(layout, row, label, widget):
+        if isinstance(widget, QtWidgets.QWidget):
+            layout.addWidget(QtWidgets.QLabel(label), row, 0)
+            layout.addWidget(widget, row, 1)
+        if isinstance(widget, QtWidgets.QLayout):
+            layout.addWidget(QtWidgets.QLabel(label), row, 0)
+            layout.addLayout(widget, row, 1)

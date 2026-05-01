@@ -20,6 +20,44 @@ from python_qt_binding import QtCore
 from python_qt_binding import QtWidgets
 
 
+class VehicleInterfaceWidget(QtWidgets.QVBoxLayout):
+    def __init__(self, node):
+        super().__init__()
+        control = node.declare_parameter("vehicle_control", False).value
+        display = True
+        if control:
+            self.control = VehicleInterfaceControl(node)
+            self.addWidget(self.control)
+        if display:
+            self.display = VehicleInterfaceDisplay(node)
+            self.addWidget(self.display)
+        self.setContentsMargins(0, 0, 0, 0)
+        self.setSpacing(0)
+
+
+class VehicleInterfaceDisplay(QtWidgets.QLabel):
+    def __init__(self, node):
+        super().__init__("No Data")
+        self.subscription = node.create_subscription(
+            ControlModeReport, "/vehicle/status/control_mode", self.on_msg, default_qos(1)
+        )
+        self.setAlignment(QtCore.Qt.AlignCenter)
+        self.setStyleSheet("border: 1px solid black;")
+
+    def on_msg(self, msg):
+        self.setText(self.__mode_text.get(msg.mode, "Unknown"))
+
+    __mode_text = {
+        ControlModeReport.NO_COMMAND: "No Command",
+        ControlModeReport.AUTONOMOUS: "Autoware",
+        ControlModeReport.AUTONOMOUS_STEER_ONLY: "Steering",
+        ControlModeReport.AUTONOMOUS_VELOCITY_ONLY: "Velocity",
+        ControlModeReport.MANUAL: "Manual",
+        ControlModeReport.DISENGAGED: "Disengaged",
+        ControlModeReport.NOT_READY: "Not Ready",
+    }
+
+
 class VehicleInterfaceControl(QtWidgets.QWidget):
     def __init__(self, node):
         super().__init__()
@@ -41,18 +79,13 @@ class VehicleInterfaceControl(QtWidgets.QWidget):
             (ControlModeCommand.Request.AUTONOMOUS_VELOCITY_ONLY, "Velocity"),
             (ControlModeCommand.Request.MANUAL, "Manual"),
         ]
-        self.status = QtWidgets.QLabel("None")
-        self.status.setAlignment(QtCore.Qt.AlignCenter)
-        self.status.setStyleSheet("border: 1px solid black;")
-
-        layout = QtWidgets.QGridLayout()
+        layout = QtWidgets.QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-        layout.addWidget(QtWidgets.QLabel("Control Mode"), 0, 0)
-        layout.addWidget(self.status, 0, 1)
-        for col, (mode, name) in enumerate(modes, start=2):
+        for col, (mode, name) in enumerate(modes, start=0):
             button = QtWidgets.QPushButton(name)
             button.clicked.connect(lambda _, mode=mode: self.change_mode(mode))
-            layout.addWidget(button, 0, col)
+            layout.addWidget(button)
         self.setLayout(layout)
 
     def on_timer(self):
@@ -67,7 +100,6 @@ class VehicleInterfaceControl(QtWidgets.QWidget):
 
     def change_mode(self, mode):
         self.mode = mode
-        self.status.setText(self.__mode_text.get(mode, "Unknown"))
         self.publish()
 
     def on_request(self, request, response):
@@ -86,14 +118,4 @@ class VehicleInterfaceControl(QtWidgets.QWidget):
         ControlModeCommand.Request.AUTONOMOUS_STEER_ONLY: ControlModeReport.AUTONOMOUS_STEER_ONLY,
         ControlModeCommand.Request.AUTONOMOUS_VELOCITY_ONLY: ControlModeReport.AUTONOMOUS_VELOCITY_ONLY,
         ControlModeCommand.Request.MANUAL: ControlModeReport.MANUAL,
-    }
-
-    __mode_text = {
-        ControlModeReport.NO_COMMAND: "No Command",
-        ControlModeReport.AUTONOMOUS: "Autoware",
-        ControlModeReport.AUTONOMOUS_STEER_ONLY: "Steering",
-        ControlModeReport.AUTONOMOUS_VELOCITY_ONLY: "Velocity",
-        ControlModeReport.MANUAL: "Manual",
-        ControlModeReport.DISENGAGED: "Disengaged",
-        ControlModeReport.NOT_READY: "Not Ready",
     }

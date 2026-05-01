@@ -15,30 +15,35 @@
 
 from autoware_system_mode_msgs.msg import TrajectorySource
 from autoware_system_mode_tools.utils import durable_qos
+from python_qt_binding import QtCore
 from python_qt_binding import QtWidgets
 from tier4_system_msgs.msg import CommandSourceStatus
 
 
 class TrajectoryGateDisplay(QtWidgets.QLabel):
     def __init__(self, node):
-        super().__init__("Trajectory: N/A")
+        super().__init__("No Data")
         self.subscription = node.create_subscription(
             TrajectorySource, "/planning/trajectory_gate/source/status", self.on_msg, durable_qos(1)
         )
+        self.setAlignment(QtCore.Qt.AlignCenter)
+        self.setStyleSheet("border: 1px solid black;")
 
     def on_msg(self, msg):
-        self.setText(f"Trajectory: {msg.source}")
+        self.setText(str(msg.source))
 
 
 class CommandGateDisplay(QtWidgets.QLabel):
     def __init__(self, node):
-        super().__init__("Command: N/A")
+        super().__init__("No Data")
         self.subscription = node.create_subscription(
             CommandSourceStatus,
             "/control/control_command_gate/source/status",
             self.on_msg,
             durable_qos(1),
         )
+        self.setAlignment(QtCore.Qt.AlignCenter)
+        self.setStyleSheet("border: 1px solid black;")
 
     def on_msg(self, msg):
-        self.setText(f"Command: {msg.source}")
+        self.setText(str(msg.source))

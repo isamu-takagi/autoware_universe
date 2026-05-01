@@ -84,8 +84,8 @@ void SystemModeDecider::on_timer_main()
 
 void SystemModeDecider::publish_operation_mode_state()
 {
-  // clang-format off
   const auto convert = [](const OperationMode & mode) {
+    // clang-format off
     switch (mode) {
       case OperationMode::kStop:       return OperationModeState::STOP;
       case OperationMode::kAutonomous: return OperationModeState::AUTONOMOUS;
@@ -93,8 +93,8 @@ void SystemModeDecider::publish_operation_mode_state()
       case OperationMode::kRemote:     return OperationModeState::REMOTE;
       default:                         return OperationModeState::UNKNOWN;
     }
+    // clang-format on
   };
-  // clang-format on
 
   const auto state = decider_->operation_mode_state();
   OperationModeState msg;
