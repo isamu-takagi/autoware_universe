@@ -16,8 +16,9 @@
 from python_qt_binding import QtWidgets
 
 from .driving_mode import DrivingModeControl
-from .gate_status import CommandGateDisplay
-from .gate_status import TrajectoryGateDisplay
+from .gate_status import CommandFilterDisplay
+from .gate_status import CommandSourceDisplay
+from .gate_status import TrajectorySourceDisplay
 from .operation_mode import OperationModeControl
 from .vehicle_interface import VehicleInterfaceWidget
 
@@ -35,8 +36,9 @@ class MainWidget(QtWidgets.QWidget):
         ]
         self.operation_mode_control = OperationModeControl(node, modes)
         self.modes_control = DrivingModeControl(node, modes)
-        self.status_trajectory = TrajectoryGateDisplay(node)
-        self.status_command = CommandGateDisplay(node)
+        self.trajectory_source = TrajectorySourceDisplay(node)
+        self.command_source = CommandSourceDisplay(node)
+        self.command_filter = CommandFilterDisplay(node)
         self.vehicle_interface = VehicleInterfaceWidget(node)
 
         layout = QtWidgets.QGridLayout()
@@ -44,9 +46,10 @@ class MainWidget(QtWidgets.QWidget):
 
         self._add_row(layout, 0, "Operation Mode", self.operation_mode_control)
         self._add_row(layout, 1, "Driving Mode", self.modes_control)
-        self._add_row(layout, 2, "Trajectory Gate", self.status_trajectory)
-        self._add_row(layout, 3, "Command Gate", self.status_command)
-        self._add_row(layout, 4, "Vehicle Interface", self.vehicle_interface)
+        self._add_row(layout, 2, "Trajectory Source", self.trajectory_source)
+        self._add_row(layout, 3, "Command Source", self.command_source)
+        self._add_row(layout, 4, "Command Filter", self.command_filter)
+        self._add_row(layout, 5, "Vehicle Interface", self.vehicle_interface)
 
     @staticmethod
     def _add_row(layout, row, label, widget):

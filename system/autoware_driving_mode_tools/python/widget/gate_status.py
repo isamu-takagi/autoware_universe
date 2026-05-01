@@ -13,18 +13,22 @@
 # limitations under the License.
 
 
-from autoware_driving_mode_msgs.msg import TrajectorySource
+from autoware_driving_mode_msgs.msg import CommandFilterStatus
+from autoware_driving_mode_msgs.msg import CommandSourceStatus
+from autoware_driving_mode_msgs.msg import TrajectorySourceStatus
 from autoware_driving_mode_tools.utils import durable_qos
 from python_qt_binding import QtCore
 from python_qt_binding import QtWidgets
-from tier4_system_msgs.msg import CommandSourceStatus
 
 
-class TrajectoryGateDisplay(QtWidgets.QLabel):
+class TrajectorySourceDisplay(QtWidgets.QLabel):
     def __init__(self, node):
         super().__init__("No Data")
         self.subscription = node.create_subscription(
-            TrajectorySource, "/planning/trajectory_gate/source/status", self.on_msg, durable_qos(1)
+            TrajectorySourceStatus,
+            "/planning/trajectory_gate/source/status",
+            self.on_msg,
+            durable_qos(1),
         )
         self.setAlignment(QtCore.Qt.AlignCenter)
         self.setStyleSheet("border: 1px solid black;")
@@ -33,7 +37,7 @@ class TrajectoryGateDisplay(QtWidgets.QLabel):
         self.setText(str(msg.source))
 
 
-class CommandGateDisplay(QtWidgets.QLabel):
+class CommandSourceDisplay(QtWidgets.QLabel):
     def __init__(self, node):
         super().__init__("No Data")
         self.subscription = node.create_subscription(
@@ -47,3 +51,19 @@ class CommandGateDisplay(QtWidgets.QLabel):
 
     def on_msg(self, msg):
         self.setText(str(msg.source))
+
+
+class CommandFilterDisplay(QtWidgets.QLabel):
+    def __init__(self, node):
+        super().__init__("No Data")
+        self.subscription = node.create_subscription(
+            CommandFilterStatus,
+            "/control/control_command_gate/filter/status",
+            self.on_msg,
+            durable_qos(1),
+        )
+        self.setAlignment(QtCore.Qt.AlignCenter)
+        self.setStyleSheet("border: 1px solid black;")
+
+    def on_msg(self, msg):
+        self.setText(str(msg.filter))

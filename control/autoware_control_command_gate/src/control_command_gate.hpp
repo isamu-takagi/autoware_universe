@@ -69,8 +69,8 @@ private:
   CommandFilter * output_filter_;
   Compatibility * compatibility_;
 
-  uint16_t current_source_ = 0;
-  bool transition_flag_ = false;
+  std::optional<uint16_t> current_source_;
+  std::optional<bool> transition_flag_;
 };
 
 }  // namespace autoware::control_command_gate

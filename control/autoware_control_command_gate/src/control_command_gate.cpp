@@ -135,6 +135,7 @@ ControlCmdGate::ControlCmdGate(const rclcpp::NodeOptions & options)
   // Select initial command source. Note that the select function calls on_change_source.
   selector_->select_builtin_source(builtin);
   publish_source_status();
+  publish_filter_status();
 
   const auto period = rclcpp::Rate(declare_parameter<double>("rate")).period();
   timer_ = rclcpp::create_timer(this, get_clock(), period, [this]() { on_timer(); });
