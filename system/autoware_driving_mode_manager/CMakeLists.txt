@@ -5,12 +5,13 @@ find_package(autoware_cmake REQUIRED)
 autoware_package()
 
 ament_auto_add_library(${PROJECT_NAME}_common SHARED
-  "src/driving_mode_manager.cpp"
   "src/core/config.cpp"
   "src/core/status.cpp"
   "src/core/task.cpp"
   "src/core/values.cpp"
   "src/core/manager.cpp"
+  "src/ros_interface.cpp"
+  "src/driving_mode_manager.cpp"
 )
 target_include_directories(${PROJECT_NAME}_common PRIVATE
   "src"

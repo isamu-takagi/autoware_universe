@@ -16,7 +16,7 @@
 #define TYPE__INTERFACE_HPP_
 
 #include <autoware_driving_mode_manager/types.hpp>
-#include <rclcpp/time.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 #include <string>
 

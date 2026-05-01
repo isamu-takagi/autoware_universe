@@ -81,6 +81,7 @@ void Manager::update()
   // TODO(isamu-takagi): Check frequently mode change.
   change_autoware_mode(plugin_->decide(request_, availables));
   execute_tasks();
+  publish_operation_mode();
 }
 
 void Manager::execute_tasks()
@@ -104,6 +105,23 @@ void Manager::execute_tasks()
         throw std::logic_error("invalid task result");
     }
   }
+}
+
+void Manager::publish_operation_mode() const
+{
+  const auto is_available = [this](const OperationMode & mode) {
+    return status_->is_available(config_->to_autoware_mode(mode));
+  };
+
+  OperationModeState state;
+  state.mode = config_->to_operation_mode(request_.operation_mode);
+  state.is_autoware_control_enabled = (request_.platform_mode != PlatformMode::kManual);
+  state.is_in_transition = !tasks_.empty();
+  state.is_stop_mode_available = is_available(OperationMode::kStop);
+  state.is_autonomous_mode_available = is_available(OperationMode::kAutonomous);
+  state.is_local_mode_available = is_available(OperationMode::kLocal);
+  state.is_remote_mode_available = is_available(OperationMode::kRemote);
+  interface_->publish_operation_mode(state);
 }
 
 void Manager::notify_trajectory_source(const TrajectorySource & source)
@@ -208,23 +226,6 @@ ServiceResponse Manager::change_autoware_control(const AutowareControl & autowar
 
   request_.platform_mode = platform_mode;
   return ServiceResponse{true, ""};
-}
-
-OperationModeState Manager::operation_mode_state() const
-{
-  const auto is_available = [this](const OperationMode & mode) {
-    return status_->is_available(config_->to_autoware_mode(mode));
-  };
-
-  OperationModeState state;
-  state.mode = config_->to_operation_mode(request_.operation_mode);
-  state.is_autoware_control_enabled = (request_.platform_mode != PlatformMode::kManual);
-  state.is_in_transition = !tasks_.empty();
-  state.is_stop_mode_available = is_available(OperationMode::kStop);
-  state.is_autonomous_mode_available = is_available(OperationMode::kAutonomous);
-  state.is_local_mode_available = is_available(OperationMode::kLocal);
-  state.is_remote_mode_available = is_available(OperationMode::kRemote);
-  return state;
 }
 
 }  // namespace autoware::driving_mode_manager
