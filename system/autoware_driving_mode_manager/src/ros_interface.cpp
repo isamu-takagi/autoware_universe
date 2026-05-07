@@ -124,41 +124,34 @@ void RosInterface::publish_operation_mode(const OperationModeState & state) cons
 
 void RosInterface::on_driving_mode_status(const DrivingModeStatus & msg)
 {
-  (void)msg;
-  /*
   using DrivingModeStatusItem = autoware_driving_mode_msgs::msg::DrivingModeStatusItem;
+
   for (const auto & item : msg.items) {
-    DrivingModeStatusData * data = manager_->access_status().data(AutowareMode{item.mode});
-    if (!data) {
-      RCLCPP_WARN_STREAM(get_logger(), "unknown status mode: " << item.mode);
-      continue;
-    }
     switch (item.type) {
       case DrivingModeStatusItem::AVAILABLE:
-        data->available.update(msg.stamp, item.status);
+        logic_->on_available_flag(AutowareMode{item.mode}, item.status);
         break;
       case DrivingModeStatusItem::STABLE:
-        data->stable.update(msg.stamp, item.status);
+        logic_->on_stable_flag(AutowareMode{item.mode}, item.status);
         break;
       case DrivingModeStatusItem::CONTINUABLE:
-        data->continuable.update(msg.stamp, item.status);
+        logic_->on_continuable_flag(AutowareMode{item.mode}, item.status);
         break;
       default:
-        RCLCPP_WARN_STREAM(get_logger(), "unknown status type: " << item.type);
+        RCLCPP_WARN_STREAM(node_->get_logger(), "unknown status type: " << item.type);
         break;
     }
   }
-  */
 }
 
 void RosInterface::on_trajectory_source(const TrajectorySourceMsg & msg)
 {
-  manager_->notify_trajectory_source(TrajectorySource{msg.source});
+  logic_->notify_trajectory_source(TrajectorySource{msg.source});
 }
 
 void RosInterface::on_command_source(const CommandSourceMsg & msg)
 {
-  manager_->notify_command_source(CommandSource{msg.source});
+  logic_->notify_command_source(CommandSource{msg.source});
 }
 
 void RosInterface::on_control_mode_report(const ControlModeReport & msg)
@@ -174,7 +167,7 @@ void RosInterface::on_control_mode_report(const ControlModeReport & msg)
     }
   };
   // clang-format on
-  manager_->notify_vehicle_control_mode(convert(msg));
+  logic_->notify_vehicle_control_mode(convert(msg));
 }
 
 void RosInterface::on_change_operation_mode(
@@ -192,7 +185,7 @@ void RosInterface::on_change_operation_mode(
   };
   // clang-format on
 
-  const auto status = manager_->change_operation_mode(convert(*req));
+  const auto status = logic_->change_operation_mode(convert(*req));
   res->status.success = status.success;
   res->status.message = status.message;
 }
@@ -204,12 +197,9 @@ void RosInterface::on_change_autoware_control(
     return req.autoware_control ? AutowareControl::kEnable : AutowareControl::kDisable;
   };
 
-  const auto status = manager_->change_autoware_control(convert(*req));
+  const auto status = logic_->change_autoware_control(convert(*req));
   res->status.success = status.success;
   res->status.message = status.message;
 }
 
 }  // namespace autoware::driving_mode_manager
-
-#include <rclcpp_components/register_node_macro.hpp>
-RCLCPP_COMPONENTS_REGISTER_NODE(autoware::driving_mode_manager::RosInterface)

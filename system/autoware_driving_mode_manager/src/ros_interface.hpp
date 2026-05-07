@@ -35,6 +35,8 @@ class RosInterface : public Interface
 {
 public:
   explicit RosInterface(rclcpp::Node * node);
+  void set_logic(MainLogic * logic) { logic_ = logic; }
+
   rclcpp::Time now() const override;
   void change_trajectory_source(const TrajectorySource & source) override;
   void change_command_source(const CommandSource & source) override;
@@ -53,6 +55,8 @@ private:
   using ControlModeReport = autoware_vehicle_msgs::msg::ControlModeReport;
   using ChangeOperationMode = autoware_system_msgs::srv::ChangeOperationMode;
   using ChangeAutowareControl = autoware_system_msgs::srv::ChangeAutowareControl;
+
+  MainLogic * logic_;
 
   rclcpp::Node * node_;
   rclcpp::Client<TrajectorySourceSrv>::SharedPtr cli_trajectory_source_;
