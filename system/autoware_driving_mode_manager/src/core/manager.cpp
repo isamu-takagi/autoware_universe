@@ -139,8 +139,7 @@ void Manager::execute_tasks()
     case TaskPhase::kCompleted:
       break;
     default:
-      RCLCPP_ERROR_STREAM(logger, "unknown task phase");
-      break;
+      throw std::logic_error("invalid task phase");
   }
 }
 
