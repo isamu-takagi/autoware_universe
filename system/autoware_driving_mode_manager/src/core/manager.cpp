@@ -108,6 +108,40 @@ void Manager::execute_tasks()
         throw std::logic_error("invalid task result");
     }
   }
+
+  const auto create_complete_tasks = [](const AutowareMode & mode) {
+    std::queue<std::unique_ptr<Task>> tasks;
+    tasks.push(std::make_unique<WaitModeStableTask>(mode));
+    tasks.push(std::make_unique<TransitionFilterTask>(CommandFilter{false}));
+    return tasks;
+  };
+
+  const auto create_override_tasks = []() {
+    std::queue<std::unique_ptr<Task>> tasks;
+    tasks.push(std::make_unique<TransitionFilterTask>(CommandFilter{false}));
+    return tasks;
+  };
+
+  switch (phase_) {
+    case TaskPhase::kAutowareMode:
+    case TaskPhase::kPlatformMode:
+      phase_ = TaskPhase::kWaitStable;
+      tasks_ = create_complete_tasks(request_.autoware_mode);
+      break;
+    case TaskPhase::kOverridden:
+      phase_ = TaskPhase::kWaitStable;
+      tasks_ = create_override_tasks();
+      break;
+    case TaskPhase::kWaitStable:
+      phase_ = TaskPhase::kCompleted;
+      break;
+    case TaskPhase::kAborted:
+    case TaskPhase::kCompleted:
+      break;
+    default:
+      RCLCPP_ERROR_STREAM(logger, "unknown task phase");
+      break;
+  }
 }
 
 void Manager::publish_operation_mode() const
