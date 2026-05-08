@@ -109,7 +109,9 @@ public:
   std::string describe() const override;
 
 private:
+  static constexpr double timeout = 3.0;
   const CommandFilter target_;
+  std::optional<rclcpp::Time> stamp_;
 };
 
 class WaitModeReadyTask : public Task

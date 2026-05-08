@@ -83,9 +83,17 @@ std::string PlatformModeTask::describe() const
 
 TaskResult TransitionFilterTask::execute(Interface & interface, GateStatus & gates)
 {
-  (void)interface;
-  (void)gates;
-  return TaskResult::kFinished;
+  if (gates.status.command_filter == target_) {
+    return TaskResult::kFinished;
+  }
+  if (stamp_) {
+    const auto duration = (interface.now() - stamp_.value()).seconds();
+    return timeout < duration ? TaskResult::kTimeout : TaskResult::kRunning;
+  }
+  stamp_ = interface.now();
+  gates.expect.command_filter = target_;
+  interface.change_command_filter(target_);
+  return TaskResult::kRunning;
 }
 
 std::string TransitionFilterTask::describe() const
