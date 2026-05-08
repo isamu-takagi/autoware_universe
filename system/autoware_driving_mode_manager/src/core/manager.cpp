@@ -57,6 +57,12 @@ Manager::Manager(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin
   request_.autoware_mode = unknown_mode;
 }
 
+bool Manager::is_ready() const
+{
+  if (!status_->is_ready()) return false;
+  return true;
+}
+
 void Manager::update()
 {
   // Detect status timeout.
