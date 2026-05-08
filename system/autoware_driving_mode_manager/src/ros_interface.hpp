@@ -35,7 +35,7 @@ class RosInterface : public Interface
 {
 public:
   explicit RosInterface(rclcpp::Node * node);
-  void set_logic(MainLogic * logic) { logic_ = logic; }
+  void init(MainLogic * logic) override { logic_ = logic; }
 
   rclcpp::Time now() const override;
   void change_trajectory_source(const TrajectorySource & source) override;

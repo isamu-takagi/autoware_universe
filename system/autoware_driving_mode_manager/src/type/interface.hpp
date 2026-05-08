@@ -40,10 +40,13 @@ struct OperationModeState
   bool is_remote_mode_available;
 };
 
+class MainLogic;
 class Interface
 {
 public:
   virtual ~Interface() = default;
+  virtual void init(MainLogic * logic) = 0;
+
   virtual rclcpp::Time now() const = 0;
   virtual void change_trajectory_source(const TrajectorySource & source) = 0;
   virtual void change_command_source(const CommandSource & source) = 0;
@@ -55,6 +58,7 @@ class MainLogic
 {
 public:
   virtual ~MainLogic() = default;
+
   virtual void update() = 0;
   virtual void notify_trajectory_source(const TrajectorySource & source) = 0;
   virtual void notify_command_source(const CommandSource & source) = 0;

@@ -42,9 +42,10 @@ void print_modes(const std::string & title, const ModeIterable & modes)
 Manager::Manager(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin)
 {
   interface_ = std::move(interface);
-  plugin_ = plugin;
+  interface_->init(this);
 
   config_ = std::make_unique<DrivingModeConfig>();
+  plugin_ = plugin;
   plugin_->setup(*config_);
   status_ = std::make_unique<DrivingModeStatus>(config_->autoware_modes());
 
@@ -149,6 +150,27 @@ void Manager::notify_vehicle_control_mode(const PlatformMode & mode)
   gates_.status.platform_mode = mode;
   gates_.expect.platform_mode = mode;
   execute_tasks();
+}
+
+void Manager::on_available_flag(const AutowareMode & mode, bool flag)
+{
+  if (const auto data = status_->data(mode)) {
+    data->available.update(interface_->now(), flag);
+  }
+}
+
+void Manager::on_stable_flag(const AutowareMode & mode, bool flag)
+{
+  if (const auto data = status_->data(mode)) {
+    data->stable.update(interface_->now(), flag);
+  }
+}
+
+void Manager::on_continuable_flag(const AutowareMode & mode, bool flag)
+{
+  if (const auto data = status_->data(mode)) {
+    data->continuable.update(interface_->now(), flag);
+  }
 }
 
 void Manager::change_autoware_mode(const AutowareMode & mode)
