@@ -90,7 +90,7 @@ TaskResult TransitionFilterTask::execute(Interface & interface, GateStatus & gat
 
 std::string TransitionFilterTask::describe() const
 {
-  return "TransitionFilterTask[" + std::string(target_ ? "true" : "false") + "]";
+  return "TransitionFilterTask[" + std::string(target_.flag ? "true" : "false") + "]";
 }
 
 TaskResult WaitModeReadyTask::execute(Interface & interface, GateStatus & gates)

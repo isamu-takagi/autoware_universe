@@ -29,6 +29,7 @@ struct GateStatusItem
 {
   TrajectorySource trajectory_source;
   CommandSource command_source;
+  CommandFilter command_filter;
   PlatformMode platform_mode;
 };
 
@@ -39,8 +40,10 @@ struct GateStatus
 };
 
 enum class TaskPhase {
-  kGateChange,
+  kAutowareMode,
+  kPlatformMode,
   kWaitStable,
+  kOverridden,
   kAborted,
   kCompleted,
 };
@@ -101,12 +104,12 @@ private:
 class TransitionFilterTask : public Task
 {
 public:
-  explicit TransitionFilterTask(const bool target) : target_(target) {}
+  explicit TransitionFilterTask(const CommandFilter & target) : target_(target) {}
   TaskResult execute(Interface & interface, GateStatus & gates) override;
   std::string describe() const override;
 
 private:
-  const bool target_;
+  const CommandFilter target_;
 };
 
 class WaitModeReadyTask : public Task

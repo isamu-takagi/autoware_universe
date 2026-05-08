@@ -147,14 +147,25 @@ void Manager::notify_command_source(const CommandSource & source)
   execute_tasks();
 }
 
+void Manager::notify_command_filter(const CommandFilter & filter)
+{
+  if (gates_.expect.command_filter != filter) {
+    RCLCPP_WARN_STREAM(logger, "command filter override: " << filter.flag);
+  }
+  gates_.status.command_filter = filter;
+  gates_.expect.command_filter = filter;
+  execute_tasks();
+}
+
 void Manager::notify_vehicle_control_mode(const PlatformMode & mode)
 {
   if (gates_.expect.platform_mode != mode) {
     RCLCPP_WARN_STREAM(logger, "platform mode override: " << to_string(mode));
     request_.platform_mode = mode;
-    tasks_ = std::queue<std::unique_ptr<Task>>();
-    // TODO(isamu-takagi)
-    // platform_tasks = tasks_ = std::queue<std::unique_ptr<Task>>();
+    if (phase_ == TaskPhase::kPlatformMode) {
+      tasks_ = std::queue<std::unique_ptr<Task>>();
+      phase_ = TaskPhase::kOverridden;
+    }
   }
   gates_.status.platform_mode = mode;
   gates_.expect.platform_mode = mode;
@@ -214,10 +225,10 @@ ServiceResponse Manager::change_autoware_control(const AutowareControl & autowar
   }
 
   std::queue<std::unique_ptr<Task>> tasks;
-  tasks.push(std::make_unique<TransitionFilterTask>(true));
+  tasks.push(std::make_unique<TransitionFilterTask>(CommandFilter{true}));
   tasks.push(std::make_unique<PlatformModeTask>(PlatformMode::kAutoware));
   tasks_.swap(tasks);
-  phase_ = TaskPhase::kGateChange;
+  phase_ = TaskPhase::kPlatformMode;
 
   request_.platform_mode = platform_mode;
   return ServiceResponse{true, ""};
@@ -239,12 +250,12 @@ void Manager::change_autoware_mode(const AutowareMode & mode)
 
   const auto gates = config_->gates(mode);
   std::queue<std::unique_ptr<Task>> tasks;
-  tasks.push(std::make_unique<TransitionFilterTask>(true));
+  tasks.push(std::make_unique<TransitionFilterTask>(CommandFilter{true}));
   tasks.push(std::make_unique<WaitModeReadyTask>(mode));
   if (gates.trajectory) tasks.push(std::make_unique<TrajectorySourceTask>(*gates.trajectory));
   if (gates.command) tasks.push(std::make_unique<CommandSourceTask>(*gates.command));
   tasks_.swap(tasks);
-  phase_ = TaskPhase::kGateChange;
+  phase_ = TaskPhase::kAutowareMode;
 }
 
 }  // namespace autoware::driving_mode_manager

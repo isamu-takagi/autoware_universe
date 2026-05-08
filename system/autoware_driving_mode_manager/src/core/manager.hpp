@@ -43,6 +43,7 @@ public:
   void update() override;
   void notify_trajectory_source(const TrajectorySource & source) override;
   void notify_command_source(const CommandSource & source) override;
+  void notify_command_filter(const CommandFilter & filter) override;
   void notify_vehicle_control_mode(const PlatformMode & mode) override;
   void on_available_flag(const AutowareMode & mode, bool flag) override;
   void on_stable_flag(const AutowareMode & mode, bool flag) override;
