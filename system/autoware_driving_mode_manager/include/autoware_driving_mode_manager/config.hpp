@@ -26,8 +26,8 @@ struct DrivingModeConfigInterface
 {
   struct Gates
   {
-    std::optional<TrajectorySource> trajectory_source;
-    std::optional<CommandSource> command_source;
+    std::optional<TrajectorySource> trajectory;
+    std::optional<CommandSource> command;
   };
 
   virtual ~DrivingModeConfigInterface() = default;

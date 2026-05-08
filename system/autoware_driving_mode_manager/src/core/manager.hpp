@@ -64,6 +64,8 @@ private:
 
   RequestModes request_;
   GateStatus gates_;
+
+  TaskPhase phase_ = TaskPhase::kCompleted;
   std::queue<std::unique_ptr<Task>> tasks_;
 };
 

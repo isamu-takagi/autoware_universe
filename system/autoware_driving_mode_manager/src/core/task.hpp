@@ -38,6 +38,13 @@ struct GateStatus
   GateStatusItem expect;
 };
 
+enum class TaskPhase {
+  kGateChange,
+  kWaitStable,
+  kAborted,
+  kCompleted,
+};
+
 enum class TaskResult {
   kFinished,
   kRunning,
@@ -50,13 +57,6 @@ public:
   virtual ~Task() = default;
   virtual TaskResult execute(Interface & interface, GateStatus & gates) = 0;
   virtual std::string describe() const = 0;
-};
-
-class NoneTask : public Task
-{
-public:
-  TaskResult execute(Interface & interface, GateStatus & gates) override;
-  std::string describe() const override;
 };
 
 class TrajectorySourceTask : public Task

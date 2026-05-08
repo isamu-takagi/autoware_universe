@@ -21,16 +21,6 @@
 namespace autoware::driving_mode_manager
 {
 
-TaskResult NoneTask::execute(Interface &, GateStatus &)
-{
-  return TaskResult::kRunning;
-}
-
-std::string NoneTask::describe() const
-{
-  return "NoneTask";
-}
-
 TaskResult TrajectorySourceTask::execute(Interface & interface, GateStatus & gates)
 {
   if (gates.status.trajectory_source == target_) {
