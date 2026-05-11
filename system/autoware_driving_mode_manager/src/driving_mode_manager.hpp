@@ -39,10 +39,7 @@ private:
   void on_timer_main();
 
   pluginlib::ClassLoader<Plugin> loader_;
-
   std::unique_ptr<Manager> manager_;
-
-  int init_flag_ = 0;
 };
 
 }  // namespace autoware::driving_mode_manager

@@ -29,6 +29,7 @@ struct GateStatusItem
 {
   TrajectorySource trajectory_source;
   CommandSource command_source;
+  CommandFilter command_filter;
   PlatformMode platform_mode;
 };
 
@@ -36,6 +37,15 @@ struct GateStatus
 {
   GateStatusItem status;
   GateStatusItem expect;
+};
+
+enum class TaskPhase {
+  kAutowareMode,
+  kPlatformMode,
+  kWaitStable,
+  kOverridden,
+  kAborted,
+  kCompleted,
 };
 
 enum class TaskResult {
@@ -50,13 +60,6 @@ public:
   virtual ~Task() = default;
   virtual TaskResult execute(Interface & interface, GateStatus & gates) = 0;
   virtual std::string describe() const = 0;
-};
-
-class NoneTask : public Task
-{
-public:
-  TaskResult execute(Interface & interface, GateStatus & gates) override;
-  std::string describe() const override;
 };
 
 class TrajectorySourceTask : public Task
@@ -101,12 +104,14 @@ private:
 class TransitionFilterTask : public Task
 {
 public:
-  explicit TransitionFilterTask(const bool target) : target_(target) {}
+  explicit TransitionFilterTask(const CommandFilter & target) : target_(target) {}
   TaskResult execute(Interface & interface, GateStatus & gates) override;
   std::string describe() const override;
 
 private:
-  const bool target_;
+  static constexpr double timeout = 3.0;
+  const CommandFilter target_;
+  std::optional<rclcpp::Time> stamp_;
 };
 
 class WaitModeReadyTask : public Task

@@ -38,17 +38,18 @@ class Manager : public MainLogic
 {
 public:
   Manager(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin);
+  bool is_ready() const;
+
   void update() override;
   void notify_trajectory_source(const TrajectorySource & source) override;
   void notify_command_source(const CommandSource & source) override;
+  void notify_command_filter(const CommandFilter & filter) override;
   void notify_vehicle_control_mode(const PlatformMode & mode) override;
   void on_available_flag(const AutowareMode & mode, bool flag) override;
   void on_stable_flag(const AutowareMode & mode, bool flag) override;
   void on_continuable_flag(const AutowareMode & mode, bool flag) override;
   ServiceResponse change_operation_mode(const OperationMode & operation_mode) override;
   ServiceResponse change_autoware_control(const AutowareControl & autoware_control) override;
-
-  bool is_ready() const { return status_->is_ready(); }
 
 private:
   void execute_tasks();
@@ -64,6 +65,8 @@ private:
 
   RequestModes request_;
   GateStatus gates_;
+
+  TaskPhase phase_ = TaskPhase::kCompleted;
   std::queue<std::unique_ptr<Task>> tasks_;
 };
 

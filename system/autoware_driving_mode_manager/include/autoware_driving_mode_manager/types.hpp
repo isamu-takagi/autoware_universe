@@ -37,6 +37,13 @@ struct CommandSource
   bool operator!=(const CommandSource & another) const { return id != another.id; }
 };
 
+struct CommandFilter
+{
+  bool flag;
+  bool operator==(const CommandFilter & another) const { return flag == another.flag; }
+  bool operator!=(const CommandFilter & another) const { return flag != another.flag; }
+};
+
 struct AutowareMode
 {
   uint32_t id;

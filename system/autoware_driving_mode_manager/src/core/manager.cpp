@@ -42,9 +42,10 @@ void print_modes(const std::string & title, const ModeIterable & modes)
 Manager::Manager(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin)
 {
   interface_ = std::move(interface);
-  plugin_ = plugin;
+  interface_->init(this);
 
   config_ = std::make_unique<DrivingModeConfig>();
+  plugin_ = plugin;
   plugin_->setup(*config_);
   status_ = std::make_unique<DrivingModeStatus>(config_->autoware_modes());
 
@@ -54,6 +55,12 @@ Manager::Manager(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin
   request_.mrm_strategy = MrmStrategy::kNone;
   request_.mrm_target_mode = unknown_mode;
   request_.autoware_mode = unknown_mode;
+}
+
+bool Manager::is_ready() const
+{
+  if (!status_->is_ready()) return false;
+  return true;
 }
 
 void Manager::update()
@@ -94,11 +101,45 @@ void Manager::execute_tasks()
       case TaskResult::kTimeout:
         RCLCPP_WARN_STREAM(logger, tasks_.front()->describe() << ": timeout");
         tasks_ = std::queue<std::unique_ptr<Task>>();
+        phase_ = TaskPhase::kAborted;
         temporary_unavailable_modes_.insert(request_.autoware_mode);
         return;
       default:
         throw std::logic_error("invalid task result");
     }
+  }
+
+  const auto create_complete_tasks = [](const AutowareMode & mode) {
+    std::queue<std::unique_ptr<Task>> tasks;
+    tasks.push(std::make_unique<WaitModeStableTask>(mode));
+    tasks.push(std::make_unique<TransitionFilterTask>(CommandFilter{false}));
+    return tasks;
+  };
+
+  const auto create_override_tasks = []() {
+    std::queue<std::unique_ptr<Task>> tasks;
+    tasks.push(std::make_unique<TransitionFilterTask>(CommandFilter{false}));
+    return tasks;
+  };
+
+  switch (phase_) {
+    case TaskPhase::kAutowareMode:
+    case TaskPhase::kPlatformMode:
+      phase_ = TaskPhase::kWaitStable;
+      tasks_ = create_complete_tasks(request_.autoware_mode);
+      break;
+    case TaskPhase::kOverridden:
+      phase_ = TaskPhase::kWaitStable;
+      tasks_ = create_override_tasks();
+      break;
+    case TaskPhase::kWaitStable:
+      phase_ = TaskPhase::kCompleted;
+      break;
+    case TaskPhase::kAborted:
+    case TaskPhase::kCompleted:
+      break;
+    default:
+      throw std::logic_error("invalid task phase");
   }
 }
 
@@ -139,45 +180,50 @@ void Manager::notify_command_source(const CommandSource & source)
   execute_tasks();
 }
 
+void Manager::notify_command_filter(const CommandFilter & filter)
+{
+  if (gates_.expect.command_filter != filter) {
+    RCLCPP_WARN_STREAM(logger, "command filter override: " << filter.flag);
+  }
+  gates_.status.command_filter = filter;
+  gates_.expect.command_filter = filter;
+  execute_tasks();
+}
+
 void Manager::notify_vehicle_control_mode(const PlatformMode & mode)
 {
   if (gates_.expect.platform_mode != mode) {
     RCLCPP_WARN_STREAM(logger, "platform mode override: " << to_string(mode));
     request_.platform_mode = mode;
-    tasks_ = std::queue<std::unique_ptr<Task>>();
+    if (phase_ == TaskPhase::kPlatformMode) {
+      tasks_ = std::queue<std::unique_ptr<Task>>();
+      phase_ = TaskPhase::kOverridden;
+    }
   }
   gates_.status.platform_mode = mode;
   gates_.expect.platform_mode = mode;
   execute_tasks();
 }
 
-void Manager::change_autoware_mode(const AutowareMode & mode)
+void Manager::on_available_flag(const AutowareMode & mode, bool flag)
 {
-  AutowareMode & prev = request_.autoware_mode;
-  if (prev.id == mode.id) {
-    return;
+  if (const auto data = status_->data(mode)) {
+    data->available.update(interface_->now(), flag);
   }
-  if (!config_->exists(mode)) {
-    RCLCPP_ERROR_STREAM(logger, "decision logic returns unknown mode: " << mode.id);
-    return;
-  }
+}
 
-  RCLCPP_INFO_STREAM(logger, "Change Autoware Mode: " << prev.id << " -> " << mode.id);
-  prev = mode;
+void Manager::on_stable_flag(const AutowareMode & mode, bool flag)
+{
+  if (const auto data = status_->data(mode)) {
+    data->stable.update(interface_->now(), flag);
+  }
+}
 
-  const auto gates = config_->gates(mode);
-  std::queue<std::unique_ptr<Task>> tasks;
-  tasks.push(std::make_unique<TransitionFilterTask>(true));
-  tasks.push(std::make_unique<WaitModeReadyTask>(mode));
-  if (gates.trajectory_source) {
-    tasks.push(std::make_unique<TrajectorySourceTask>(*gates.trajectory_source));
+void Manager::on_continuable_flag(const AutowareMode & mode, bool flag)
+{
+  if (const auto data = status_->data(mode)) {
+    data->continuable.update(interface_->now(), flag);
   }
-  if (gates.command_source) {
-    tasks.push(std::make_unique<CommandSourceTask>(*gates.command_source));
-  }
-  tasks.push(std::make_unique<WaitModeStableTask>(mode));
-  tasks.push(std::make_unique<TransitionFilterTask>(false));
-  tasks_.swap(tasks);
 }
 
 ServiceResponse Manager::change_operation_mode(const OperationMode & operation_mode)
@@ -212,15 +258,37 @@ ServiceResponse Manager::change_autoware_control(const AutowareControl & autowar
   }
 
   std::queue<std::unique_ptr<Task>> tasks;
-  tasks.push(std::make_unique<TransitionFilterTask>(true));
-  tasks.push(std::make_unique<WaitModeReadyTask>(mode));
+  tasks.push(std::make_unique<TransitionFilterTask>(CommandFilter{true}));
   tasks.push(std::make_unique<PlatformModeTask>(PlatformMode::kAutoware));
-  tasks.push(std::make_unique<WaitModeStableTask>(mode));
-  tasks.push(std::make_unique<TransitionFilterTask>(false));
   tasks_.swap(tasks);
+  phase_ = TaskPhase::kPlatformMode;
 
   request_.platform_mode = platform_mode;
   return ServiceResponse{true, ""};
+}
+
+void Manager::change_autoware_mode(const AutowareMode & mode)
+{
+  AutowareMode & prev = request_.autoware_mode;
+  if (prev.id == mode.id) {
+    return;
+  }
+  if (!config_->exists(mode)) {
+    RCLCPP_ERROR_STREAM(logger, "decision logic returns unknown mode: " << mode.id);
+    return;
+  }
+
+  RCLCPP_INFO_STREAM(logger, "Change Autoware Mode: " << prev.id << " -> " << mode.id);
+  prev = mode;
+
+  const auto gates = config_->gates(mode);
+  std::queue<std::unique_ptr<Task>> tasks;
+  tasks.push(std::make_unique<TransitionFilterTask>(CommandFilter{true}));
+  tasks.push(std::make_unique<WaitModeReadyTask>(mode));
+  if (gates.trajectory) tasks.push(std::make_unique<TrajectorySourceTask>(*gates.trajectory));
+  if (gates.command) tasks.push(std::make_unique<CommandSourceTask>(*gates.command));
+  tasks_.swap(tasks);
+  phase_ = TaskPhase::kAutowareMode;
 }
 
 }  // namespace autoware::driving_mode_manager

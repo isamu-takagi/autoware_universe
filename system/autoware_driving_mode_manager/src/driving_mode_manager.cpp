@@ -45,9 +45,7 @@ DrivingModeManager::DrivingModeManager(const rclcpp::NodeOptions & options)
 
 void DrivingModeManager::on_timer_init()
 {
-  if (init_flag_ != 0x07) return;
   if (!manager_->is_ready()) return;
-
   RCLCPP_INFO_STREAM(get_logger(), "DrivingModeManager is ready.");
 
   // const auto period = rclcpp::Rate(10.0).period();

@@ -26,6 +26,7 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
 
   cli_trajectory_source_ = node->create_client<TrajectorySourceSrv>("~/trajectory/source/change");
   cli_command_source_ = node->create_client<ChangeCommandSourceSrv>("~/command/source/change");
+  cli_command_filter_ = node->create_client<ChangeCommandFilterSrv>("~/command/filter/change");
   cli_control_mode_command_ =
     node->create_client<ControlModeCommandSrv>("~/vehicle/control_mode/command");
   pub_operation_mode_ = node->create_publisher<OperationModeStateMsg>(
@@ -40,6 +41,9 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
   sub_command_source_ = node->create_subscription<CommandSourceMsg>(
     "~/command/source/status", rclcpp::QoS(1).transient_local(),
     std::bind(&RosInterface::on_command_source, this, _1));
+  sub_command_filter_ = node->create_subscription<CommandFilterMsg>(
+    "~/command/filter/status", rclcpp::QoS(1).transient_local(),
+    std::bind(&RosInterface::on_command_filter, this, _1));
   sub_control_mode_report_ = node->create_subscription<ControlModeReport>(
     "~/vehicle/control_mode/report", rclcpp::QoS(1).durability_volatile(),
     std::bind(&RosInterface::on_control_mode_report, this, _1));
@@ -69,6 +73,13 @@ void RosInterface::change_command_source(const CommandSource & source)
   const auto request = std::make_shared<ChangeCommandSourceSrv::Request>();
   request->source = source.id;
   cli_command_source_->async_send_request(request);
+}
+
+void RosInterface::change_command_filter(const CommandFilter & filter)
+{
+  const auto request = std::make_shared<ChangeCommandFilterSrv::Request>();
+  request->filter = filter.flag;
+  cli_command_filter_->async_send_request(request);
 }
 
 void RosInterface::change_platform_mode(const PlatformMode & mode)
@@ -152,6 +163,11 @@ void RosInterface::on_trajectory_source(const TrajectorySourceMsg & msg)
 void RosInterface::on_command_source(const CommandSourceMsg & msg)
 {
   logic_->notify_command_source(CommandSource{msg.source});
+}
+
+void RosInterface::on_command_filter(const CommandFilterMsg & msg)
+{
+  logic_->notify_command_filter(CommandFilter{msg.filter});
 }
 
 void RosInterface::on_control_mode_report(const ControlModeReport & msg)

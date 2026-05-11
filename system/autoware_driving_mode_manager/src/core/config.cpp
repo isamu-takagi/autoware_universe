@@ -42,12 +42,12 @@ void DrivingModeConfig::bind_gates(const AutowareMode & mode, const Gates & gate
     const auto id = std::to_string(mode.id);
     throw std::invalid_argument("unknown autoware mode: " + id);
   }
-  if (gates.trajectory_source && trajectory_sources_.count(*gates.trajectory_source) == 0) {
-    const auto id = std::to_string(gates.trajectory_source->id);
+  if (gates.trajectory && trajectory_sources_.count(*gates.trajectory) == 0) {
+    const auto id = std::to_string(gates.trajectory->id);
     throw std::invalid_argument("unknown trajectory source: " + id);
   }
-  if (gates.command_source && command_sources_.count(*gates.command_source) == 0) {
-    const auto id = std::to_string(gates.command_source->id);
+  if (gates.command && command_sources_.count(*gates.command) == 0) {
+    const auto id = std::to_string(gates.command->id);
     throw std::invalid_argument("unknown command source: " + id);
   }
   gates_mapping_[mode] = gates;

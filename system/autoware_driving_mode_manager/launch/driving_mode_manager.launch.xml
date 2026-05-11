@@ -12,6 +12,8 @@
     <remap from="~/trajectory/source/change" to="/planning/trajectory_gate/source/change"/>
     <remap from="~/command/source/status" to="/control/control_command_gate/source/status"/>
     <remap from="~/command/source/change" to="/control/control_command_gate/source/change"/>
+    <remap from="~/command/filter/status" to="/control/control_command_gate/filter/status"/>
+    <remap from="~/command/filter/change" to="/control/control_command_gate/filter/change"/>
     <remap from="~/vehicle/control_mode/report" to="/vehicle/status/control_mode"/>
     <remap from="~/vehicle/control_mode/command" to="/control/control_mode_request"/>
   </node>
