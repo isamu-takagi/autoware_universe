@@ -168,7 +168,7 @@ void ControlCmdGate::on_change_filter(
   const ChangeCommandFilter::Request::SharedPtr req,
   const ChangeCommandFilter::Response::SharedPtr res)
 {
-  output_filter_->set_transition_flag(req->status);
+  output_filter_->set_transition_flag(req->filter);
   res->success = true;
   publish_filter_status();
 }
