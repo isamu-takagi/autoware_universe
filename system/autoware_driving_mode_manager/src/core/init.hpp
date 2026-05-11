@@ -12,27 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CORE__MANAGER_HPP_
-#define CORE__MANAGER_HPP_
+#ifndef CORE__INIT_HPP_
+#define CORE__INIT_HPP_
 
-#include "core/config.hpp"
 #include "core/status.hpp"
-#include "core/task.hpp"
+#include "type/data.hpp"
 #include "type/interface.hpp"
 
-#include <autoware_driving_mode_manager/plugin.hpp>
+#include <autoware_driving_mode_manager/types.hpp>
 
 #include <memory>
-#include <queue>
-#include <unordered_set>
 
 namespace autoware::driving_mode_manager
 {
 
-class Manager : public MainLogic
+class ManagerInit : public MainLogic
 {
 public:
-  Manager(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin);
+  explicit ManagerInit(std::unique_ptr<Interface> && interface);
   bool is_ready() const;
 
   void update() override;
@@ -46,25 +43,11 @@ public:
   ServiceResponse change_operation_mode(const OperationMode & operation_mode) override;
   ServiceResponse change_autoware_control(const AutowareControl & autoware_control) override;
 
-private:
-  void execute_tasks();
-  void publish_operation_mode() const;
-  void change_autoware_mode(const AutowareMode & mode);
-
   std::unique_ptr<Interface> interface_;
-  std::shared_ptr<Plugin> plugin_;
-
-  std::unique_ptr<DrivingModeConfig> config_;
   std::unique_ptr<DrivingModeStatus> status_;
-  std::unordered_set<AutowareMode> temporary_unavailable_modes_;
-
-  RequestModes request_;
-  GateStatus gates_;
-
-  TaskPhase phase_ = TaskPhase::kCompleted;
-  std::queue<std::unique_ptr<Task>> tasks_;
+  GateStatusItem gates_;
 };
 
 }  // namespace autoware::driving_mode_manager
 
-#endif  // CORE__MANAGER_HPP_
+#endif  // CORE__INIT_HPP_

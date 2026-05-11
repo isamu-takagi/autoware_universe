@@ -207,21 +207,21 @@ void Manager::notify_vehicle_control_mode(const PlatformMode & mode)
 
 void Manager::on_available_flag(const AutowareMode & mode, bool flag)
 {
-  if (const auto data = status_->data(mode)) {
+  if (const auto & data = status_->data(mode)) {
     data->available.update(interface_->now(), flag);
   }
 }
 
 void Manager::on_stable_flag(const AutowareMode & mode, bool flag)
 {
-  if (const auto data = status_->data(mode)) {
+  if (const auto & data = status_->data(mode)) {
     data->stable.update(interface_->now(), flag);
   }
 }
 
 void Manager::on_continuable_flag(const AutowareMode & mode, bool flag)
 {
-  if (const auto data = status_->data(mode)) {
+  if (const auto & data = status_->data(mode)) {
     data->continuable.update(interface_->now(), flag);
   }
 }

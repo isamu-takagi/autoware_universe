@@ -15,6 +15,7 @@
 #ifndef CORE__TASK_HPP_
 #define CORE__TASK_HPP_
 
+#include "type/data.hpp"
 #include "type/interface.hpp"
 
 #include <rclcpp/time.hpp>
@@ -24,20 +25,6 @@
 
 namespace autoware::driving_mode_manager
 {
-
-struct GateStatusItem
-{
-  TrajectorySource trajectory_source;
-  CommandSource command_source;
-  CommandFilter command_filter;
-  PlatformMode platform_mode;
-};
-
-struct GateStatus
-{
-  GateStatusItem status;
-  GateStatusItem expect;
-};
 
 enum class TaskPhase {
   kAutowareMode,
