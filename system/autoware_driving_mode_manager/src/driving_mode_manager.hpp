@@ -15,6 +15,7 @@
 #ifndef DRIVING_MODE_MANAGER_HPP_
 #define DRIVING_MODE_MANAGER_HPP_
 
+#include "core/init.hpp"
 #include "core/manager.hpp"
 
 #include <autoware_driving_mode_manager/plugin.hpp>
@@ -39,6 +40,7 @@ private:
   void on_timer_main();
 
   pluginlib::ClassLoader<Plugin> loader_;
+  std::unique_ptr<ManagerInit> init_;
   std::unique_ptr<Manager> manager_;
 };
 

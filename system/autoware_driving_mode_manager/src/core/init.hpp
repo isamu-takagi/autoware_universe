@@ -15,11 +15,12 @@
 #ifndef CORE__INIT_HPP_
 #define CORE__INIT_HPP_
 
+#include "core/config.hpp"
 #include "core/status.hpp"
 #include "type/data.hpp"
 #include "type/interface.hpp"
 
-#include <autoware_driving_mode_manager/types.hpp>
+#include <autoware_driving_mode_manager/plugin.hpp>
 
 #include <memory>
 
@@ -29,7 +30,7 @@ namespace autoware::driving_mode_manager
 class ManagerInit : public MainLogic
 {
 public:
-  explicit ManagerInit(std::unique_ptr<Interface> && interface);
+  ManagerInit(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin);
   bool is_ready() const;
 
   void update() override;
@@ -44,6 +45,8 @@ public:
   ServiceResponse change_autoware_control(const AutowareControl & autoware_control) override;
 
   std::unique_ptr<Interface> interface_;
+  std::shared_ptr<Plugin> plugin_;
+  std::unique_ptr<DrivingModeConfig> config_;
   std::unique_ptr<DrivingModeStatus> status_;
   GateStatusItem gates_;
 };

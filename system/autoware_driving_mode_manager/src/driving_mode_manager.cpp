@@ -37,7 +37,7 @@ DrivingModeManager::DrivingModeManager(const rclcpp::NodeOptions & options)
     throw std::invalid_argument("unknown plugin: " + plugin_name);
   }
   const auto plugin = loader_.createSharedInstance(plugin_name);
-  manager_ = std::make_unique<Manager>(std::make_unique<RosInterface>(this), plugin);
+  init_ = std::make_unique<ManagerInit>(std::make_unique<RosInterface>(this), plugin);
 
   const auto period = rclcpp::Rate(1.0).period();
   timer_ = rclcpp::create_timer(this, get_clock(), period, [this]() { on_timer_init(); });
@@ -45,7 +45,7 @@ DrivingModeManager::DrivingModeManager(const rclcpp::NodeOptions & options)
 
 void DrivingModeManager::on_timer_init()
 {
-  if (!manager_->is_ready()) return;
+  if (!init_->is_ready()) return;
   RCLCPP_INFO_STREAM(get_logger(), "DrivingModeManager is ready.");
 
   // const auto period = rclcpp::Rate(10.0).period();
@@ -56,7 +56,7 @@ void DrivingModeManager::on_timer_init()
 
 void DrivingModeManager::on_timer_main()
 {
-  manager_->update();
+  // init_->update();
 }
 
 }  // namespace autoware::driving_mode_manager

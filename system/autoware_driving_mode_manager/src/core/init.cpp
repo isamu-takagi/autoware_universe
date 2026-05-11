@@ -14,32 +14,21 @@
 
 #include "init.hpp"
 
-#include "values.hpp"
-
-#include <rclcpp/logging.hpp>
-
 #include <memory>
-#include <queue>
-#include <string>
 #include <utility>
-#include <vector>
 
 namespace autoware::driving_mode_manager
 {
 
-const auto logger = rclcpp::get_logger("Manager");
-
-ManagerInit::ManagerInit(std::unique_ptr<Interface> && interface)
+ManagerInit::ManagerInit(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin)
 {
   interface_ = std::move(interface);
   interface_->init(this);
 
-  /*
   config_ = std::make_unique<DrivingModeConfig>();
   plugin_ = plugin;
   plugin_->setup(*config_);
   status_ = std::make_unique<DrivingModeStatus>(config_->autoware_modes());
-  */
 }
 
 bool ManagerInit::is_ready() const
