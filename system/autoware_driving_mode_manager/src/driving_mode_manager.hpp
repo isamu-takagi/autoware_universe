@@ -41,7 +41,7 @@ private:
 
   pluginlib::ClassLoader<Plugin> loader_;
   std::unique_ptr<ManagerInit> init_;
-  std::unique_ptr<Manager> manager_;
+  std::unique_ptr<Manager> main_;
 };
 
 }  // namespace autoware::driving_mode_manager

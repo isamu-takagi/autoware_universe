@@ -45,18 +45,23 @@ DrivingModeManager::DrivingModeManager(const rclcpp::NodeOptions & options)
 
 void DrivingModeManager::on_timer_init()
 {
+  init_->update();
   if (!init_->is_ready()) return;
-  RCLCPP_INFO_STREAM(get_logger(), "DrivingModeManager is ready.");
+
+  main_ = std::make_unique<Manager>(*init_);
+  init_.reset();
 
   // const auto period = rclcpp::Rate(10.0).period();
   const auto period = rclcpp::Rate(2.0).period();
   timer_->cancel();
   timer_ = rclcpp::create_timer(this, get_clock(), period, [this]() { on_timer_main(); });
+
+  RCLCPP_INFO_STREAM(get_logger(), "DrivingModeManager is ready.");
 }
 
 void DrivingModeManager::on_timer_main()
 {
-  // init_->update();
+  main_->update();
 }
 
 }  // namespace autoware::driving_mode_manager

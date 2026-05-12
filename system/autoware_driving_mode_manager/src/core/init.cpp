@@ -40,6 +40,7 @@ bool ManagerInit::is_ready() const
 void ManagerInit::update()
 {
   status_->update(interface_->now(), 1.0);
+  publish_debug_status();
 }
 
 void ManagerInit::notify_trajectory_source(const TrajectorySource & source)
@@ -91,6 +92,17 @@ ServiceResponse ManagerInit::change_operation_mode(const OperationMode &)
 ServiceResponse ManagerInit::change_autoware_control(const AutowareControl &)
 {
   return ServiceResponse{false, "driving mode manager is not ready"};
+}
+
+void ManagerInit::publish_debug_status() const
+{
+  DebugStatus debug;
+  for (const auto & mode : config_->autoware_modes()) {
+    debug.availables[mode] = status_->is_available(mode);
+    debug.stables[mode] = status_->is_stable(mode);
+    debug.continuables[mode] = status_->is_continuable(mode);
+  }
+  interface_->publish_debug_status(debug);
 }
 
 }  // namespace autoware::driving_mode_manager

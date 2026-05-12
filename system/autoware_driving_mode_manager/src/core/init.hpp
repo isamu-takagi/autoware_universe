@@ -49,6 +49,9 @@ public:
   std::unique_ptr<DrivingModeConfig> config_;
   std::unique_ptr<DrivingModeStatus> status_;
   GateStatusItem gates_;
+
+private:
+  void publish_debug_status() const;
 };
 
 }  // namespace autoware::driving_mode_manager

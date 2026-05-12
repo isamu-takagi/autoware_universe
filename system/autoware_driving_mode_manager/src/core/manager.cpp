@@ -39,15 +39,17 @@ void print_modes(const std::string & title, const ModeIterable & modes)
   RCLCPP_INFO_STREAM(logger, title << ":" << text);
 }
 
-Manager::Manager(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin)
+Manager::Manager(ManagerInit & init)
 {
-  interface_ = std::move(interface);
+  interface_ = std::move(init.interface_);
   interface_->init(this);
 
-  config_ = std::make_unique<DrivingModeConfig>();
-  plugin_ = plugin;
-  plugin_->setup(*config_);
-  status_ = std::make_unique<DrivingModeStatus>(config_->autoware_modes());
+  plugin_ = std::move(init.plugin_);
+  config_ = std::move(init.config_);
+  status_ = std::move(init.status_);
+
+  gates_.status = init.gates_;
+  gates_.expect = init.gates_;
 
   constexpr AutowareMode unknown_mode = AutowareMode{0};
   request_.operation_mode = config_->to_autoware_mode(OperationMode::kStop);
@@ -84,6 +86,7 @@ void Manager::update()
   change_autoware_mode(plugin_->decide(request_, availables));
   execute_tasks();
   publish_operation_mode();
+  publish_debug_status();
 }
 
 void Manager::execute_tasks()
@@ -158,6 +161,17 @@ void Manager::publish_operation_mode() const
   state.is_local_mode_available = is_available(OperationMode::kLocal);
   state.is_remote_mode_available = is_available(OperationMode::kRemote);
   interface_->publish_operation_mode(state);
+}
+
+void Manager::publish_debug_status() const
+{
+  DebugStatus debug;
+  for (const auto & mode : config_->autoware_modes()) {
+    debug.availables[mode] = status_->is_available(mode);
+    debug.stables[mode] = status_->is_stable(mode);
+    debug.continuables[mode] = status_->is_continuable(mode);
+  }
+  interface_->publish_debug_status(debug);
 }
 
 void Manager::notify_trajectory_source(const TrajectorySource & source)

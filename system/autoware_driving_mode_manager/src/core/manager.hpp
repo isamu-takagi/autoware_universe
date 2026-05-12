@@ -16,6 +16,7 @@
 #define CORE__MANAGER_HPP_
 
 #include "core/config.hpp"
+#include "core/init.hpp"
 #include "core/status.hpp"
 #include "core/task.hpp"
 #include "type/interface.hpp"
@@ -32,7 +33,7 @@ namespace autoware::driving_mode_manager
 class Manager : public MainLogic
 {
 public:
-  Manager(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin);
+  explicit Manager(ManagerInit & init);
   bool is_ready() const;
 
   void update() override;
@@ -49,6 +50,7 @@ public:
 private:
   void execute_tasks();
   void publish_operation_mode() const;
+  void publish_debug_status() const;
   void change_autoware_mode(const AutowareMode & mode);
 
   std::unique_ptr<Interface> interface_;

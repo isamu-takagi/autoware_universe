@@ -45,6 +45,7 @@ public:
   void change_command_filter(const CommandFilter & filter) override;
   void change_platform_mode(const PlatformMode & mode) override;
   void publish_operation_mode(const OperationModeState & state) const override;
+  void publish_debug_status(const DebugStatus & status) const override;
 
 private:
   using TrajectorySourceSrv = autoware_driving_mode_msgs::srv::ChangeTrajectorySource;
@@ -77,6 +78,8 @@ private:
   rclcpp::Subscription<ControlModeReport>::SharedPtr sub_control_mode_report_;
   rclcpp::Service<ChangeOperationMode>::SharedPtr srv_operation_mode_;
   rclcpp::Service<ChangeAutowareControl>::SharedPtr srv_autoware_control_;
+
+  rclcpp::Publisher<DrivingModeStatus>::SharedPtr pub_driving_mode_status_;
 
   void on_driving_mode_status(const DrivingModeStatus & msg);
   void on_trajectory_source(const TrajectorySourceMsg & msg);

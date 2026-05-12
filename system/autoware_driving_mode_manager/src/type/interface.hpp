@@ -19,6 +19,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <string>
+#include <unordered_map>
 
 namespace autoware::driving_mode_manager
 {
@@ -40,6 +41,13 @@ struct OperationModeState
   bool is_remote_mode_available;
 };
 
+struct DebugStatus
+{
+  std::unordered_map<AutowareMode, bool> availables;
+  std::unordered_map<AutowareMode, bool> stables;
+  std::unordered_map<AutowareMode, bool> continuables;
+};
+
 class MainLogic;
 class Interface
 {
@@ -53,6 +61,7 @@ public:
   virtual void change_command_filter(const CommandFilter & filter) = 0;
   virtual void change_platform_mode(const PlatformMode & mode) = 0;
   virtual void publish_operation_mode(const OperationModeState & state) const = 0;
+  virtual void publish_debug_status(const DebugStatus & status) const = 0;
 };
 
 class MainLogic

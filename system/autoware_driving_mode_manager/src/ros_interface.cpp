@@ -15,6 +15,7 @@
 #include "ros_interface.hpp"
 
 #include <memory>
+#include <utility>
 
 namespace autoware::driving_mode_manager
 {
@@ -54,6 +55,9 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
   srv_autoware_control_ = node->create_service<ChangeAutowareControl>(
     "~/system/change_autoware_control",
     std::bind(&RosInterface::on_change_autoware_control, this, _1, _2));
+
+  pub_driving_mode_status_ =
+    node->create_publisher<DrivingModeStatus>("~/debug/driving_mode/status", rclcpp::QoS(1));
 }
 
 rclcpp::Time RosInterface::now() const
@@ -131,6 +135,29 @@ void RosInterface::publish_operation_mode(const OperationModeState & state) cons
   msg.is_local_mode_available = state.is_local_mode_available;
   msg.is_remote_mode_available = state.is_remote_mode_available;
   pub_operation_mode_->publish(msg);
+}
+
+void RosInterface::publish_debug_status(const DebugStatus & status) const
+{
+  using autoware_driving_mode_msgs::msg::DrivingModeStatusItem;
+  const auto types_and_flags = {
+    std::make_pair(DrivingModeStatusItem::AVAILABLE, status.availables),
+    std::make_pair(DrivingModeStatusItem::STABLE, status.stables),
+    std::make_pair(DrivingModeStatusItem::CONTINUABLE, status.continuables),
+  };
+
+  DrivingModeStatus msg;
+  msg.stamp = now();
+  for (const auto & [type, flags] : types_and_flags) {
+    for (const auto & [mode, flag] : flags) {
+      DrivingModeStatusItem item;
+      item.mode = mode.id;
+      item.type = type;
+      item.status = flag;
+      msg.items.push_back(item);
+    }
+  }
+  pub_driving_mode_status_->publish(msg);
 }
 
 void RosInterface::on_driving_mode_status(const DrivingModeStatus & msg)

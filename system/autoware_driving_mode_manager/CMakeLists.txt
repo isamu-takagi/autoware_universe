@@ -4,6 +4,8 @@ project(autoware_driving_mode_manager)
 find_package(autoware_cmake REQUIRED)
 autoware_package()
 
+
+
 ament_auto_add_library(${PROJECT_NAME}_common SHARED
   "src/core/config.cpp"
   "src/core/status.cpp"
@@ -29,6 +31,13 @@ rclcpp_components_register_node(${PROJECT_NAME}_common
   PLUGIN "autoware::driving_mode_manager::DrivingModeManager"
   EXECUTABLE "driving_mode_manager_node"
 )
+
+#rosidl_generate_interfaces(
+#  ${PROJECT_NAME}
+#  DEPENDENCIES builtin_interfaces
+#)
+#rosidl_get_typesupport_target(typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+#target_link_libraries(${PROJECT_NAME}_common ${typesupport_target})
 
 if(BUILD_TESTING)
 endif()
