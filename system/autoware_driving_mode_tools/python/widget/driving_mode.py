@@ -33,15 +33,34 @@ class DrivingModeControl(QtWidgets.QWidget):
         self.clock = node.get_clock()
         self.status = {}
         self.buttons = defaultdict(dict)
+        self.display = {}
 
         self.create_widget(modes)
         self.timer = node.create_timer(0.5, self.on_timer)
         self.publisher = node.create_publisher(
             DrivingModeStatus, "/system/driving_mode/status", default_qos(1)
         )
+        self.subscription = node.create_subscription(
+            DrivingModeStatus,
+            "/system/driving_mode_manager/debug/driving_mode/status",
+            self.on_msg,
+            default_qos(1),
+        )
 
     def on_msg(self, msg):
-        print(msg.source)
+        status = defaultdict(dict)
+        for mode in self.display.keys():
+            status[mode][DrivingModeStatusItem.CONTINUABLE] = "N"
+            status[mode][DrivingModeStatusItem.AVAILABLE] = "N"
+            status[mode][DrivingModeStatusItem.STABLE] = "N"
+        for item in msg.items:
+            status[item.mode][item.type] = "T" if item.status else "F"
+        for mode in self.display.keys():
+            text = ""
+            text += status[mode][DrivingModeStatusItem.CONTINUABLE]
+            text += status[mode][DrivingModeStatusItem.AVAILABLE]
+            text += status[mode][DrivingModeStatusItem.STABLE]
+            self.display[mode].setText(text)
 
     def on_timer(self):
         self.publish()
@@ -59,18 +78,22 @@ class DrivingModeControl(QtWidgets.QWidget):
         layout.setSpacing(0)
         layout.setRowStretch(len(modes) + 1, 1)
         layout.addWidget(QtWidgets.QLabel("Autoware Mode"), 1, 0)
-        layout.addWidget(centered_label("Continuable"), 1, 1, 1, 3)
-        layout.addWidget(centered_label("Available"), 1, 4, 1, 3)
-        layout.addWidget(centered_label("Stable"), 1, 7, 1, 3)
+        layout.addWidget(QtWidgets.QLabel("Status"), 1, 1)
+        layout.addWidget(centered_label("Continuable"), 1, 2, 1, 3)
+        layout.addWidget(centered_label("Available"), 1, 5, 1, 3)
+        layout.addWidget(centered_label("Stable"), 1, 8, 1, 3)
         self.setLayout(layout)
-        self.create_all_buttons(DrivingModeStatusItem.CONTINUABLE, layout, 0, 1)
-        self.create_all_buttons(DrivingModeStatusItem.AVAILABLE, layout, 0, 4)
-        self.create_all_buttons(DrivingModeStatusItem.STABLE, layout, 0, 7)
+        self.create_all_buttons(DrivingModeStatusItem.CONTINUABLE, layout, 0, 2)
+        self.create_all_buttons(DrivingModeStatusItem.AVAILABLE, layout, 0, 5)
+        self.create_all_buttons(DrivingModeStatusItem.STABLE, layout, 0, 8)
         for row, (mode, name) in enumerate(modes, start=2):
+            self.display[mode] = QtWidgets.QLabel("---")
+            self.display[mode].setAlignment(QtCore.Qt.AlignCenter)
             layout.addWidget(QtWidgets.QLabel(f"{name} ({mode})"), row, 0)
-            self.create_button(DrivingModeStatusItem.CONTINUABLE, mode, layout, row, 1)
-            self.create_button(DrivingModeStatusItem.AVAILABLE, mode, layout, row, 4)
-            self.create_button(DrivingModeStatusItem.STABLE, mode, layout, row, 7)
+            layout.addWidget(self.display[mode], row, 1)
+            self.create_button(DrivingModeStatusItem.CONTINUABLE, mode, layout, row, 2)
+            self.create_button(DrivingModeStatusItem.AVAILABLE, mode, layout, row, 5)
+            self.create_button(DrivingModeStatusItem.STABLE, mode, layout, row, 8)
 
     def set_status(self, mode, category, status):
         self.status[(mode, category)] = status
