@@ -41,6 +41,18 @@ struct OperationModeState
   bool is_remote_mode_available;
 };
 
+struct MrmState
+{
+  enum class State {
+    kNormal,
+    kOperating,
+    kSucceeded,
+    kFailed,
+  };
+  State state;
+  uint16_t behavior;
+};
+
 struct DebugStatus
 {
   std::unordered_map<AutowareMode, bool> availables;
@@ -61,6 +73,7 @@ public:
   virtual void change_command_filter(const CommandFilter & filter) = 0;
   virtual void change_platform_mode(const PlatformMode & mode) = 0;
   virtual void publish_operation_mode(const OperationModeState & state) const = 0;
+  virtual void publish_mrm_state(const MrmState & state) const = 0;
   virtual void publish_debug_status(const DebugStatus & status) const = 0;
 };
 

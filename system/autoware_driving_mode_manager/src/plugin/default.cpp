@@ -92,6 +92,9 @@ void DefaultPlugin::setup(DrivingModeConfigInterface & config) const
   config.bind_operation_mode(AutonomousMode, OperationMode::kAutonomous);
   config.bind_operation_mode(LocalMode, OperationMode::kLocal);
   config.bind_operation_mode(RemoteMode, OperationMode::kRemote);
+
+  config.bind_mrm_behavior(EmergencyStop, 2);
+  config.bind_mrm_behavior(ComfortableStop, 3);
 }
 
 }  // namespace autoware::driving_mode_manager

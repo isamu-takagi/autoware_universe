@@ -17,6 +17,7 @@
 
 #include "type/interface.hpp"
 
+#include <autoware_adapi_v1_msgs/msg/mrm_state.hpp>
 #include <autoware_adapi_v1_msgs/msg/operation_mode_state.hpp>
 #include <autoware_system_msgs/srv/change_autoware_control.hpp>
 #include <autoware_system_msgs/srv/change_operation_mode.hpp>
@@ -45,6 +46,7 @@ public:
   void change_command_filter(const CommandFilter & filter) override;
   void change_platform_mode(const PlatformMode & mode) override;
   void publish_operation_mode(const OperationModeState & state) const override;
+  void publish_mrm_state(const MrmState & state) const override;
   void publish_debug_status(const DebugStatus & status) const override;
 
 private:
@@ -53,6 +55,7 @@ private:
   using ChangeCommandFilterSrv = tier4_system_msgs::srv::ChangeCommandFilter;
   using ControlModeCommandSrv = autoware_vehicle_msgs::srv::ControlModeCommand;
   using OperationModeStateMsg = autoware_adapi_v1_msgs::msg::OperationModeState;
+  using MrmStateMsg = autoware_adapi_v1_msgs::msg::MrmState;
 
   using DrivingModeStatus = tier4_system_msgs::msg::DrivingModeStatus;
   using TrajectorySourceMsg = tier4_system_msgs::msg::TrajectorySourceStatus;
@@ -70,6 +73,7 @@ private:
   rclcpp::Client<ChangeCommandFilterSrv>::SharedPtr cli_command_filter_;
   rclcpp::Client<ControlModeCommandSrv>::SharedPtr cli_control_mode_command_;
   rclcpp::Publisher<OperationModeStateMsg>::SharedPtr pub_operation_mode_;
+  rclcpp::Publisher<MrmStateMsg>::SharedPtr pub_mrm_state_;
 
   rclcpp::Subscription<DrivingModeStatus>::SharedPtr sub_driving_mode_status_;
   rclcpp::Subscription<TrajectorySourceMsg>::SharedPtr sub_trajectory_source_;

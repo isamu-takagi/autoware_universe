@@ -50,6 +50,7 @@ public:
 private:
   void execute_tasks();
   void publish_operation_mode() const;
+  void publish_mrm_state() const;
   void publish_debug_status() const;
   void change_autoware_mode(const AutowareMode & mode);
 

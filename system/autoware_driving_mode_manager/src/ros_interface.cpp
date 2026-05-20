@@ -32,6 +32,8 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
     node->create_client<ControlModeCommandSrv>("~/vehicle/control_mode/command");
   pub_operation_mode_ = node->create_publisher<OperationModeStateMsg>(
     "~/system/operation_mode_state", rclcpp::QoS(1).transient_local());
+  pub_mrm_state_ =
+    node->create_publisher<MrmStateMsg>("~/system/mrm_state", rclcpp::QoS(1).transient_local());
 
   sub_driving_mode_status_ = node->create_subscription<DrivingModeStatus>(
     "~/system/driving_mode/status", rclcpp::QoS(1),
@@ -137,6 +139,27 @@ void RosInterface::publish_operation_mode(const OperationModeState & state) cons
   pub_operation_mode_->publish(msg);
 }
 
+void RosInterface::publish_mrm_state(const MrmState & state) const
+{
+  // clang-format off
+  const auto convert = [](const MrmState::State & state) {
+    switch (state) {
+      case MrmState::State::kNormal:    return MrmStateMsg::NORMAL;
+      case MrmState::State::kOperating: return MrmStateMsg::MRM_OPERATING;
+      case MrmState::State::kSucceeded: return MrmStateMsg::MRM_SUCCEEDED;
+      case MrmState::State::kFailed:    return MrmStateMsg::MRM_FAILED;
+      default:                          return MrmStateMsg::UNKNOWN;
+    }
+  };
+  // clang-format on
+
+  MrmStateMsg msg;
+  msg.stamp = now();
+  msg.state = convert(state.state);
+  msg.behavior = state.behavior;
+  pub_mrm_state_->publish(msg);
+}
+
 void RosInterface::publish_debug_status(const DebugStatus & status) const
 {
   using tier4_system_msgs::msg::DrivingModeStatusItem;
@@ -210,6 +233,7 @@ void RosInterface::on_control_mode_report(const ControlModeReport & msg)
     }
   };
   // clang-format on
+
   logic_->notify_vehicle_control_mode(convert(msg));
 }
 

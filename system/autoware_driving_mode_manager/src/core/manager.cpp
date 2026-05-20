@@ -86,6 +86,7 @@ void Manager::update()
   change_autoware_mode(plugin_->decide(request_, availables));
   execute_tasks();
   publish_operation_mode();
+  publish_mrm_state();
   publish_debug_status();
 }
 
@@ -161,6 +162,14 @@ void Manager::publish_operation_mode() const
   state.is_local_mode_available = is_available(OperationMode::kLocal);
   state.is_remote_mode_available = is_available(OperationMode::kRemote);
   interface_->publish_operation_mode(state);
+}
+
+void Manager::publish_mrm_state() const
+{
+  // TODO(isamu-takagi): publish mrm state;
+  MrmState state;
+  state.behavior = config_->to_mrm_behavior(request_.autoware_mode);
+  interface_->publish_mrm_state(state);
 }
 
 void Manager::publish_debug_status() const
