@@ -28,6 +28,7 @@
 #include <tier4_system_msgs/msg/command_source_status.hpp>
 #include <tier4_system_msgs/srv/change_command_filter.hpp>
 #include <tier4_system_msgs/srv/change_command_source.hpp>
+#include <tier4_system_msgs/srv/select_command_source.hpp>
 
 #include <memory>
 #include <string>
@@ -71,6 +72,13 @@ private:
 
   std::optional<uint16_t> current_source_;
   std::optional<bool> transition_flag_;
+
+  // Note: for compatibility.
+  using SelectCommandSource = tier4_system_msgs::srv::SelectCommandSource;
+  rclcpp::Service<SelectCommandSource>::SharedPtr srv_select_;
+  void on_select_source(
+    const SelectCommandSource::Request::SharedPtr req,
+    const SelectCommandSource::Response::SharedPtr res);
 };
 
 }  // namespace autoware::control_command_gate

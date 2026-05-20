@@ -67,6 +67,8 @@ ControlCmdGate::ControlCmdGate(const rclcpp::NodeOptions & options)
     "~/source/change", std::bind(&ControlCmdGate::on_change_source, this, _1, _2));
   srv_filter_ = create_service<ChangeCommandFilter>(
     "~/filter/change", std::bind(&ControlCmdGate::on_change_filter, this, _1, _2));
+  srv_select_ = create_service<SelectCommandSource>(
+    "~/source/select", std::bind(&ControlCmdGate::on_select_source, this, _1, _2));
 
   selector_ = std::make_unique<CommandSelector>(get_logger());
   diag_.setHardwareID("none");
@@ -170,6 +172,23 @@ void ControlCmdGate::on_change_filter(
 {
   output_filter_->set_transition_flag(req->filter);
   res->success = true;
+  publish_filter_status();
+}
+
+void ControlCmdGate::on_select_source(
+  const SelectCommandSource::Request::SharedPtr req,
+  const SelectCommandSource::Response::SharedPtr res)
+{
+  const auto error = selector_->select(req->source);
+  if (!error.empty()) {
+    res->status.success = false;
+    res->status.message = error;
+    RCLCPP_ERROR_STREAM(get_logger(), error);
+    return;
+  }
+  output_filter_->set_transition_flag(req->transition);
+  res->status.success = true;
+  publish_source_status();
   publish_filter_status();
 }
 
