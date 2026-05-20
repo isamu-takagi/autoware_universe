@@ -24,10 +24,10 @@
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include <autoware_driving_mode_msgs/msg/command_filter_status.hpp>
-#include <autoware_driving_mode_msgs/msg/command_source_status.hpp>
-#include <autoware_driving_mode_msgs/srv/change_command_filter.hpp>
-#include <autoware_driving_mode_msgs/srv/change_command_source.hpp>
+#include <tier4_system_msgs/msg/command_filter_status.hpp>
+#include <tier4_system_msgs/msg/command_source_status.hpp>
+#include <tier4_system_msgs/srv/change_command_filter.hpp>
+#include <tier4_system_msgs/srv/change_command_source.hpp>
 
 #include <memory>
 #include <string>
@@ -43,10 +43,10 @@ public:
 private:
   static constexpr uint16_t unknown = autoware::command_mode_types::sources::unknown;
   static constexpr uint16_t builtin = autoware::command_mode_types::sources::builtin;
-  using CommandSourceStatus = autoware_driving_mode_msgs::msg::CommandSourceStatus;
-  using CommandFilterStatus = autoware_driving_mode_msgs::msg::CommandFilterStatus;
-  using ChangeCommandSource = autoware_driving_mode_msgs::srv::ChangeCommandSource;
-  using ChangeCommandFilter = autoware_driving_mode_msgs::srv::ChangeCommandFilter;
+  using CommandSourceStatus = tier4_system_msgs::msg::CommandSourceStatus;
+  using CommandFilterStatus = tier4_system_msgs::msg::CommandFilterStatus;
+  using ChangeCommandSource = tier4_system_msgs::srv::ChangeCommandSource;
+  using ChangeCommandFilter = tier4_system_msgs::srv::ChangeCommandFilter;
 
   void on_timer();
   void publish_source_status();

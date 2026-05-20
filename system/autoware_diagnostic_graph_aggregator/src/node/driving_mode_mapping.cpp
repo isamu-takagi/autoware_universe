@@ -51,7 +51,7 @@ DrivingModeMapping::DrivingModeMapping(rclcpp::Node & node, const Graph & graph)
 
 void DrivingModeMapping::update(const rclcpp::Time & stamp) const
 {
-  using Item = autoware_driving_mode_msgs::msg::DrivingModeStatusItem;
+  using Item = tier4_system_msgs::msg::DrivingModeStatusItem;
   DrivingModeStatus message;
   for (const auto & [mode, unit] : mode_to_unit_) {
     for (const auto & type : {Item::AVAILABLE, Item::STABLE, Item::CONTINUABLE}) {

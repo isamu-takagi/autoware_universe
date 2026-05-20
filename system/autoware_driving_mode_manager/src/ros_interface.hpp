@@ -18,17 +18,17 @@
 #include "type/interface.hpp"
 
 #include <autoware_adapi_v1_msgs/msg/operation_mode_state.hpp>
-#include <autoware_driving_mode_msgs/msg/command_filter_status.hpp>
-#include <autoware_driving_mode_msgs/msg/command_source_status.hpp>
-#include <autoware_driving_mode_msgs/msg/driving_mode_status.hpp>
-#include <autoware_driving_mode_msgs/msg/trajectory_source_status.hpp>
-#include <autoware_driving_mode_msgs/srv/change_command_filter.hpp>
-#include <autoware_driving_mode_msgs/srv/change_command_source.hpp>
-#include <autoware_driving_mode_msgs/srv/change_trajectory_source.hpp>
 #include <autoware_system_msgs/srv/change_autoware_control.hpp>
 #include <autoware_system_msgs/srv/change_operation_mode.hpp>
 #include <autoware_vehicle_msgs/msg/control_mode_report.hpp>
 #include <autoware_vehicle_msgs/srv/control_mode_command.hpp>
+#include <tier4_system_msgs/msg/command_filter_status.hpp>
+#include <tier4_system_msgs/msg/command_source_status.hpp>
+#include <tier4_system_msgs/msg/driving_mode_status.hpp>
+#include <tier4_system_msgs/msg/trajectory_source_status.hpp>
+#include <tier4_system_msgs/srv/change_command_filter.hpp>
+#include <tier4_system_msgs/srv/change_command_source.hpp>
+#include <tier4_system_msgs/srv/change_trajectory_source.hpp>
 
 namespace autoware::driving_mode_manager
 {
@@ -48,16 +48,16 @@ public:
   void publish_debug_status(const DebugStatus & status) const override;
 
 private:
-  using TrajectorySourceSrv = autoware_driving_mode_msgs::srv::ChangeTrajectorySource;
-  using ChangeCommandSourceSrv = autoware_driving_mode_msgs::srv::ChangeCommandSource;
-  using ChangeCommandFilterSrv = autoware_driving_mode_msgs::srv::ChangeCommandFilter;
+  using TrajectorySourceSrv = tier4_system_msgs::srv::ChangeTrajectorySource;
+  using ChangeCommandSourceSrv = tier4_system_msgs::srv::ChangeCommandSource;
+  using ChangeCommandFilterSrv = tier4_system_msgs::srv::ChangeCommandFilter;
   using ControlModeCommandSrv = autoware_vehicle_msgs::srv::ControlModeCommand;
   using OperationModeStateMsg = autoware_adapi_v1_msgs::msg::OperationModeState;
 
-  using DrivingModeStatus = autoware_driving_mode_msgs::msg::DrivingModeStatus;
-  using TrajectorySourceMsg = autoware_driving_mode_msgs::msg::TrajectorySourceStatus;
-  using CommandSourceMsg = autoware_driving_mode_msgs::msg::CommandSourceStatus;
-  using CommandFilterMsg = autoware_driving_mode_msgs::msg::CommandFilterStatus;
+  using DrivingModeStatus = tier4_system_msgs::msg::DrivingModeStatus;
+  using TrajectorySourceMsg = tier4_system_msgs::msg::TrajectorySourceStatus;
+  using CommandSourceMsg = tier4_system_msgs::msg::CommandSourceStatus;
+  using CommandFilterMsg = tier4_system_msgs::msg::CommandFilterStatus;
   using ControlModeReport = autoware_vehicle_msgs::msg::ControlModeReport;
   using ChangeOperationMode = autoware_system_msgs::srv::ChangeOperationMode;
   using ChangeAutowareControl = autoware_system_msgs::srv::ChangeAutowareControl;

@@ -21,8 +21,8 @@
 #include <diagnostic_updater/diagnostic_updater.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include <autoware_driving_mode_msgs/msg/trajectory_source_status.hpp>
-#include <autoware_driving_mode_msgs/srv/change_trajectory_source.hpp>
+#include <tier4_system_msgs/msg/trajectory_source_status.hpp>
+#include <tier4_system_msgs/srv/change_trajectory_source.hpp>
 
 #include <memory>
 #include <vector>
@@ -36,8 +36,8 @@ public:
   explicit TrajectoryGate(const rclcpp::NodeOptions & options);
 
 private:
-  using TrajectorySourceStatus = autoware_driving_mode_msgs::msg::TrajectorySourceStatus;
-  using ChangeTrajectorySource = autoware_driving_mode_msgs::srv::ChangeTrajectorySource;
+  using TrajectorySourceStatus = tier4_system_msgs::msg::TrajectorySourceStatus;
+  using ChangeTrajectorySource = tier4_system_msgs::srv::ChangeTrajectorySource;
 
   diagnostic_updater::Updater diag_;
 

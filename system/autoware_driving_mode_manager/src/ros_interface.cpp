@@ -139,7 +139,7 @@ void RosInterface::publish_operation_mode(const OperationModeState & state) cons
 
 void RosInterface::publish_debug_status(const DebugStatus & status) const
 {
-  using autoware_driving_mode_msgs::msg::DrivingModeStatusItem;
+  using tier4_system_msgs::msg::DrivingModeStatusItem;
   const auto types_and_flags = {
     std::make_pair(DrivingModeStatusItem::AVAILABLE, status.availables),
     std::make_pair(DrivingModeStatusItem::STABLE, status.stables),
@@ -162,7 +162,7 @@ void RosInterface::publish_debug_status(const DebugStatus & status) const
 
 void RosInterface::on_driving_mode_status(const DrivingModeStatus & msg)
 {
-  using DrivingModeStatusItem = autoware_driving_mode_msgs::msg::DrivingModeStatusItem;
+  using DrivingModeStatusItem = tier4_system_msgs::msg::DrivingModeStatusItem;
 
   for (const auto & item : msg.items) {
     switch (item.type) {

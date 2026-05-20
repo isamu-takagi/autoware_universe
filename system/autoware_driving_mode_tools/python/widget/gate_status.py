@@ -13,12 +13,12 @@
 # limitations under the License.
 
 
-from autoware_driving_mode_msgs.msg import CommandFilterStatus
-from autoware_driving_mode_msgs.msg import CommandSourceStatus
-from autoware_driving_mode_msgs.msg import TrajectorySourceStatus
 from autoware_driving_mode_tools.utils import durable_qos
 from python_qt_binding import QtCore
 from python_qt_binding import QtWidgets
+from tier4_system_msgs.msg import CommandFilterStatus
+from tier4_system_msgs.msg import CommandSourceStatus
+from tier4_system_msgs.msg import TrajectorySourceStatus
 
 
 class TrajectorySourceDisplay(QtWidgets.QLabel):

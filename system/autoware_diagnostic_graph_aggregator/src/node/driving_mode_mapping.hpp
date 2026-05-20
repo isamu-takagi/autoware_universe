@@ -19,7 +19,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <autoware_driving_mode_msgs/msg/driving_mode_status.hpp>
+#include <tier4_system_msgs/msg/driving_mode_status.hpp>
 
 #include <unordered_map>
 
@@ -33,7 +33,7 @@ public:
   void update(const rclcpp::Time & stamp) const;
 
 private:
-  using DrivingModeStatus = autoware_driving_mode_msgs::msg::DrivingModeStatus;
+  using DrivingModeStatus = tier4_system_msgs::msg::DrivingModeStatus;
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<DrivingModeStatus>::SharedPtr pub_;
 
