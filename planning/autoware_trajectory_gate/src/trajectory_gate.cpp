@@ -19,6 +19,7 @@
 #include "core/subscription.hpp"
 
 #include <memory>
+#include <string>
 #include <utility>
 
 namespace autoware::trajectory_gate
@@ -38,26 +39,31 @@ TrajectoryGate::TrajectoryGate(const rclcpp::NodeOptions & options)
     "~/source/change", std::bind(&TrajectoryGate::on_change_source, this, _1, _2));
 
   // Create input streams.
-  for (const auto id : {100, 200, 300}) {
+  {
     using autoware_utils_diagnostics::TimeoutDiag;
-    const auto name = "id" + std::to_string(id);
 
     TimeoutDiag::Params param;
-    param.warn_duration_ = 1.0;
-    param.error_duration_ = 2.0;
+    param.warn_duration_ = declare_parameter<double>("trajectory_warn_duration");
+    param.error_duration_ = declare_parameter<double>("trajectory_error_duration");
 
-    auto timeout = std::make_unique<TimeoutDiag>(param, *this->get_clock(), name);
-    diag_.add(*timeout);
+    const auto ids = declare_parameter<std::vector<int>>("source_ids");
+    for (const auto id : ids) {
+      const auto ns = "source." + std::to_string(id);
+      const auto name = declare_parameter<std::string>(ns + ".name");
 
-    auto subscription = std::make_unique<TrajectorySubscription>(name, *this);
-    auto monitor = std::make_unique<TrajectoryMonitor>(std::move(timeout));
+      auto timeout = std::make_unique<TimeoutDiag>(param, *this->get_clock(), name);
+      diag_.add(*timeout);
 
-    subscription->set_output(monitor.get());
-    monitor->set_output(nullptr);
-    selector_.add_input(monitor.get(), id);
+      auto subscription = std::make_unique<TrajectorySubscription>(name, *this);
+      auto monitor = std::make_unique<TrajectoryMonitor>(std::move(timeout));
 
-    subscriptions_.push_back(std::move(subscription));
-    receivers_.push_back(std::move(monitor));
+      subscription->set_output(monitor.get());
+      monitor->set_output(nullptr);
+      selector_.add_input(monitor.get(), id);
+
+      subscriptions_.push_back(std::move(subscription));
+      receivers_.push_back(std::move(monitor));
+    }
   }
 
   // Create output stream.
