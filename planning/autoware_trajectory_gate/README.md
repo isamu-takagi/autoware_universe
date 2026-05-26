@@ -2,22 +2,14 @@
 
 ## Overview
 
-This package subscribes to multiple commands, selects one and publish it.
-Here, unless otherwise specified, command refers to a set of four commands: control, gear, turn_indicators, and hazard_lights.
-Each command input is identified as a command source, an arbitrary string.
-The node also applies a nominal filter to the selected commands to correct for obvious abnormal values.
+This package subscribes to multiple trajectory, selects one and publish it.
+The selector node monitors the interval of each trajectory topic, and publishes it as diagnostics.
 
-![dataflow](./doc/dataflow.drawio.svg)
+## Parameters
 
-## Requirements
-
-- Functional
-  - Subscribe to multiple commands as command source.
-  - Generate a builtin stop command as command source.
-  - Select one from the command sources and publish it.
-  - Filter abnormal values in the command selected.
-  - Filter the command selected smoothly on mode transition when requested.
-  - Support parking mode for humans to explicitly stop the vehicle (T.B.D.).
-- Safety
-  - Detect timeouts for each command source.
-  - Select builtin stop when selected command source is not available.
+| Name                      | Type      | Description                                  |
+| ------------------------- | --------- | -------------------------------------------- |
+| trajectory_warn_duration  | double    | Warning threshold of trajectory interval.    |
+| trajectory_error_duration | double    | Error threshold of trajectory interval.      |
+| source_ids                | list[int] | List of trajectory source IDs.               |
+| source.&lt;id&gt;.name    | string    | Name of the corresponding trajectory source. |

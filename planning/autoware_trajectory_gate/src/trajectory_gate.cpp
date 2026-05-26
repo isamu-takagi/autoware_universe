@@ -91,9 +91,10 @@ void TrajectoryGate::on_change_source(
   publish_source();
   res->success = success;
 
-  const auto result = success ? "succeeded" : "failed";
-  const auto source = std::to_string(req->source);
-  RCLCPP_INFO_STREAM(get_logger(), "source select " << result << " (" << source << ")");
+  if (!success) {
+    const auto source = std::to_string(req->source);
+    RCLCPP_ERROR_STREAM(get_logger(), "source select failed: " << source);
+  }
 }
 
 }  // namespace autoware::trajectory_gate
