@@ -40,7 +40,7 @@ public:
   Gates gates(const AutowareMode & mode) const;
   AutowareMode to_autoware_mode(const OperationMode & operation) const;
   OperationMode to_operation_mode(const AutowareMode & autoware) const;
-  MrmBehavior to_mrm_behavior(const AutowareMode & mode) const;
+  std::optional<MrmBehavior> to_mrm_behavior(const AutowareMode & mode) const;
 
 private:
   std::unordered_set<AutowareMode> autoware_modes_;

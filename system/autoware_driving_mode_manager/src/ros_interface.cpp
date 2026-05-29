@@ -148,6 +148,7 @@ void RosInterface::publish_mrm_state(const MrmState & state) const
       case MrmState::State::kOperating: return MrmStateMsg::MRM_OPERATING;
       case MrmState::State::kSucceeded: return MrmStateMsg::MRM_SUCCEEDED;
       case MrmState::State::kFailed:    return MrmStateMsg::MRM_FAILED;
+      case MrmState::State::kUnknown:   return MrmStateMsg::UNKNOWN;
       default:                          return MrmStateMsg::UNKNOWN;
     }
   };

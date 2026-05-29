@@ -92,9 +92,10 @@ OperationMode DrivingModeConfig::to_operation_mode(const AutowareMode & autoware
   return autoware_to_operation_.at(autoware_mode);
 }
 
-MrmBehavior DrivingModeConfig::to_mrm_behavior(const AutowareMode & mode) const
+std::optional<MrmBehavior> DrivingModeConfig::to_mrm_behavior(const AutowareMode & mode) const
 {
-  return mrm_behaviors_.at(mode);
+  const auto iter = mrm_behaviors_.find(mode);
+  return iter == mrm_behaviors_.end() ? std::nullopt : std::optional(iter->second);
 }
 
 }  // namespace autoware::driving_mode_manager

@@ -39,6 +39,7 @@ bool ManagerInit::is_ready() const
   if (!command_filter) return false;
   if (!platform_mode) return false;
   if (!status_->is_ready()) return false;
+  // TODO(isamu-takagi): check all mrm state
   return true;
 }
 
@@ -97,6 +98,11 @@ void ManagerInit::on_continuable_flag(const AutowareMode & mode, bool flag)
   if (const auto & data = status_->data(mode)) {
     data->continuable.update(interface_->now(), flag);
   }
+}
+
+void ManagerInit::on_mrm_state(const AutowareMode & mode, const MrmState::State & state)
+{
+  mrm_states_[mode] = state;
 }
 
 ServiceResponse ManagerInit::change_operation_mode(const OperationMode &)

@@ -23,6 +23,8 @@
 #include <autoware_driving_mode_manager/plugin.hpp>
 
 #include <memory>
+#include <optional>
+#include <unordered_map>
 
 namespace autoware::driving_mode_manager
 {
@@ -42,6 +44,7 @@ public:
   void on_available_flag(const AutowareMode & mode, bool flag) override;
   void on_stable_flag(const AutowareMode & mode, bool flag) override;
   void on_continuable_flag(const AutowareMode & mode, bool flag) override;
+  void on_mrm_state(const AutowareMode & mode, const MrmState::State & state) override;
   ServiceResponse change_operation_mode(const OperationMode & operation_mode) override;
   ServiceResponse change_autoware_control(const AutowareControl & autoware_control) override;
 
@@ -49,6 +52,7 @@ public:
   std::shared_ptr<Plugin> plugin_;
   std::unique_ptr<DrivingModeConfig> config_;
   std::unique_ptr<DrivingModeStatus> status_;
+  std::unordered_map<AutowareMode, MrmState::State> mrm_states_;
 
 private:
   void publish_debug_status() const;

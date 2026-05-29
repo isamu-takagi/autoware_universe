@@ -47,6 +47,7 @@ Manager::Manager(ManagerInit & init)
   plugin_ = std::move(init.plugin_);
   config_ = std::move(init.config_);
   status_ = std::move(init.status_);
+  mrm_states_ = std::move(init.mrm_states_);
 
   gates_.status = init.gates();
   gates_.expect = init.gates();
@@ -166,10 +167,14 @@ void Manager::publish_operation_mode() const
 
 void Manager::publish_mrm_state() const
 {
-  // TODO(isamu-takagi): publish mrm state;
-  MrmState state;
-  state.behavior = config_->to_mrm_behavior(request_.autoware_mode);
-  interface_->publish_mrm_state(state);
+  const auto behavior = config_->to_mrm_behavior(request_.autoware_mode);
+  if (behavior) {
+    const auto iter = mrm_states_.find(request_.autoware_mode);
+    const auto state = iter != mrm_states_.end() ? iter->second : MrmState::State::kUnknown;
+    interface_->publish_mrm_state(MrmState{state, behavior.value()});
+  } else {
+    interface_->publish_mrm_state(MrmState{MrmState::State::kNormal, MrmState::NoneBehavior});
+  }
 }
 
 void Manager::publish_debug_status() const
@@ -247,6 +252,11 @@ void Manager::on_continuable_flag(const AutowareMode & mode, bool flag)
   if (const auto & data = status_->data(mode)) {
     data->continuable.update(interface_->now(), flag);
   }
+}
+
+void Manager::on_mrm_state(const AutowareMode & mode, const MrmState::State & state)
+{
+  mrm_states_[mode] = state;
 }
 
 ServiceResponse Manager::change_operation_mode(const OperationMode & operation_mode)
