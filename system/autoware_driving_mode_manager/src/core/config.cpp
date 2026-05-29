@@ -21,9 +21,19 @@
 namespace autoware::driving_mode_manager
 {
 
-void DrivingModeConfig::define_autoware_mode(const AutowareMode & mode)
+void DrivingModeConfig::define_autoware_mode(
+  const AutowareMode & mode, const OperationMode & opmode)
 {
   autoware_modes_.insert(mode);
+  operation_to_autoware_[opmode] = mode;
+  autoware_to_operation_[mode] = opmode;
+}
+
+void DrivingModeConfig::define_autoware_mode(
+  const AutowareMode & mode, const MrmBehavior & behavior)
+{
+  autoware_modes_.insert(mode);
+  mrm_behaviors_[mode] = behavior;
 }
 
 void DrivingModeConfig::define_trajectory_source(const TrajectorySource & source)
@@ -53,24 +63,8 @@ void DrivingModeConfig::bind_gates(const AutowareMode & mode, const Gates & gate
   gates_mapping_[mode] = gates;
 }
 
-void DrivingModeConfig::bind_operation_mode(
-  const AutowareMode & mode, const OperationMode & operation)
+void DrivingModeConfig::validate() const
 {
-  if (autoware_modes_.count(mode) == 0) {
-    const auto id = std::to_string(mode.id);
-    throw std::invalid_argument("unknown autoware mode: " + id);
-  }
-  operation_to_autoware_[operation] = mode;
-  autoware_to_operation_[mode] = operation;
-}
-
-void DrivingModeConfig::bind_mrm_behavior(const AutowareMode & mode, const MrmBehavior & behavior)
-{
-  if (autoware_modes_.count(mode) == 0) {
-    const auto id = std::to_string(mode.id);
-    throw std::invalid_argument("unknown autoware mode: " + id);
-  }
-  mrm_behaviors_[mode] = behavior;
 }
 
 std::vector<AutowareMode> DrivingModeConfig::autoware_modes() const

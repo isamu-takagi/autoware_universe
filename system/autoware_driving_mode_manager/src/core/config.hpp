@@ -27,12 +27,13 @@ namespace autoware::driving_mode_manager
 class DrivingModeConfig : public DrivingModeConfigInterface
 {
 public:
-  void define_autoware_mode(const AutowareMode & mode) override;
+  void define_autoware_mode(const AutowareMode & mode, const OperationMode & opmode) override;
+  void define_autoware_mode(const AutowareMode & mode, const MrmBehavior & behavior) override;
   void define_trajectory_source(const TrajectorySource & source) override;
   void define_command_source(const CommandSource & source) override;
   void bind_gates(const AutowareMode & mode, const Gates & gates) override;
-  void bind_operation_mode(const AutowareMode & mode, const OperationMode & operation) override;
-  void bind_mrm_behavior(const AutowareMode & mode, const MrmBehavior & behavior) override;
+
+  void validate() const;
 
   std::vector<AutowareMode> autoware_modes() const;
   bool exists(const AutowareMode & mode) const;

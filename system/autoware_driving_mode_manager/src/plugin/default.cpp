@@ -66,12 +66,13 @@ AutowareMode DefaultPlugin::decide(const RequestModes & modes, const AutowareMod
 
 void DefaultPlugin::setup(DrivingModeConfigInterface & config) const
 {
-  config.define_autoware_mode(StopMode);
-  config.define_autoware_mode(AutonomousMode);
-  config.define_autoware_mode(LocalMode);
-  config.define_autoware_mode(RemoteMode);
-  config.define_autoware_mode(EmergencyStop);
-  config.define_autoware_mode(ComfortableStop);
+  config.define_autoware_mode(StopMode, OperationMode::kStop);
+  config.define_autoware_mode(AutonomousMode, OperationMode::kAutonomous);
+  config.define_autoware_mode(LocalMode, OperationMode::kLocal);
+  config.define_autoware_mode(RemoteMode, OperationMode::kRemote);
+
+  config.define_autoware_mode(EmergencyStop, MrmBehavior{2});
+  config.define_autoware_mode(ComfortableStop, MrmBehavior{3});
 
   config.define_trajectory_source(MainTrajectory);
 
@@ -87,14 +88,6 @@ void DefaultPlugin::setup(DrivingModeConfigInterface & config) const
   config.bind_gates(RemoteMode, {std::nullopt, RemoteCommand});
   config.bind_gates(EmergencyStop, {std::nullopt, EmergencyStopCommand});
   config.bind_gates(ComfortableStop, {MainTrajectory, MainCommand});
-
-  config.bind_operation_mode(StopMode, OperationMode::kStop);
-  config.bind_operation_mode(AutonomousMode, OperationMode::kAutonomous);
-  config.bind_operation_mode(LocalMode, OperationMode::kLocal);
-  config.bind_operation_mode(RemoteMode, OperationMode::kRemote);
-
-  config.bind_mrm_behavior(EmergencyStop, MrmBehavior{2});
-  config.bind_mrm_behavior(ComfortableStop, MrmBehavior{3});
 }
 
 }  // namespace autoware::driving_mode_manager

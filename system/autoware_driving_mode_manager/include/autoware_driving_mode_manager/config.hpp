@@ -31,12 +31,11 @@ struct DrivingModeConfigInterface
   };
 
   virtual ~DrivingModeConfigInterface() = default;
-  virtual void define_autoware_mode(const AutowareMode & mode) = 0;
+  virtual void define_autoware_mode(const AutowareMode & mode, const OperationMode & opmode) = 0;
+  virtual void define_autoware_mode(const AutowareMode & mode, const MrmBehavior & behavior) = 0;
   virtual void define_trajectory_source(const TrajectorySource & source) = 0;
   virtual void define_command_source(const CommandSource & source) = 0;
   virtual void bind_gates(const AutowareMode & mode, const Gates & gates) = 0;
-  virtual void bind_operation_mode(const AutowareMode & mode, const OperationMode & operation) = 0;
-  virtual void bind_mrm_behavior(const AutowareMode & mode, const MrmBehavior & behavior) = 0;
 };
 
 }  // namespace autoware::driving_mode_manager
