@@ -156,7 +156,7 @@ void RosInterface::publish_mrm_state(const MrmState & state) const
   MrmStateMsg msg;
   msg.stamp = now();
   msg.state = convert(state.state);
-  msg.behavior = state.behavior;
+  msg.behavior = state.behavior.id;
   pub_mrm_state_->publish(msg);
 }
 

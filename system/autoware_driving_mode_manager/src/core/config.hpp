@@ -32,14 +32,14 @@ public:
   void define_command_source(const CommandSource & source) override;
   void bind_gates(const AutowareMode & mode, const Gates & gates) override;
   void bind_operation_mode(const AutowareMode & mode, const OperationMode & operation) override;
-  void bind_mrm_behavior(const AutowareMode & mode, const uint16_t behavior) override;
+  void bind_mrm_behavior(const AutowareMode & mode, const MrmBehavior & behavior) override;
 
   std::vector<AutowareMode> autoware_modes() const;
   bool exists(const AutowareMode & mode) const;
   Gates gates(const AutowareMode & mode) const;
   AutowareMode to_autoware_mode(const OperationMode & operation) const;
   OperationMode to_operation_mode(const AutowareMode & autoware) const;
-  uint16_t to_mrm_behavior(const AutowareMode & mode) const;
+  MrmBehavior to_mrm_behavior(const AutowareMode & mode) const;
 
 private:
   std::unordered_set<AutowareMode> autoware_modes_;
@@ -48,7 +48,7 @@ private:
   std::unordered_map<AutowareMode, Gates> gates_mapping_;
   std::unordered_map<OperationMode, AutowareMode> operation_to_autoware_;
   std::unordered_map<AutowareMode, OperationMode> autoware_to_operation_;
-  std::unordered_map<AutowareMode, uint16_t> mrm_behaviors_;
+  std::unordered_map<AutowareMode, MrmBehavior> mrm_behaviors_;
 };
 
 }  // namespace autoware::driving_mode_manager

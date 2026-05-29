@@ -50,7 +50,7 @@ struct MrmState
     kFailed,
   };
   State state;
-  uint16_t behavior;
+  MrmBehavior behavior;
 };
 
 struct DebugStatus

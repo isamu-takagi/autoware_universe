@@ -51,6 +51,11 @@ struct AutowareMode
   bool operator!=(const AutowareMode & another) const { return id != another.id; }
 };
 
+struct MrmBehavior
+{
+  uint16_t id;
+};
+
 enum class PlatformMode {
   kUnknown,
   kAutoware,

@@ -64,7 +64,7 @@ void DrivingModeConfig::bind_operation_mode(
   autoware_to_operation_[mode] = operation;
 }
 
-void DrivingModeConfig::bind_mrm_behavior(const AutowareMode & mode, const uint16_t behavior)
+void DrivingModeConfig::bind_mrm_behavior(const AutowareMode & mode, const MrmBehavior & behavior)
 {
   if (autoware_modes_.count(mode) == 0) {
     const auto id = std::to_string(mode.id);
@@ -98,7 +98,7 @@ OperationMode DrivingModeConfig::to_operation_mode(const AutowareMode & autoware
   return autoware_to_operation_.at(autoware_mode);
 }
 
-uint16_t DrivingModeConfig::to_mrm_behavior(const AutowareMode & mode) const
+MrmBehavior DrivingModeConfig::to_mrm_behavior(const AutowareMode & mode) const
 {
   return mrm_behaviors_.at(mode);
 }
