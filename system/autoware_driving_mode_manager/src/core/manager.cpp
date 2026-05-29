@@ -48,8 +48,8 @@ Manager::Manager(ManagerInit & init)
   config_ = std::move(init.config_);
   status_ = std::move(init.status_);
 
-  gates_.status = init.gates_;
-  gates_.expect = init.gates_;
+  gates_.status = init.gates();
+  gates_.expect = init.gates();
 
   constexpr AutowareMode unknown_mode = AutowareMode{0};
   request_.operation_mode = config_->to_autoware_mode(OperationMode::kStop);

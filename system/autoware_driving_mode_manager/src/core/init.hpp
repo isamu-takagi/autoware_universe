@@ -32,6 +32,7 @@ class ManagerInit : public MainLogic
 public:
   ManagerInit(std::unique_ptr<Interface> && interface, std::shared_ptr<Plugin> plugin);
   bool is_ready() const;
+  GateStatusItem gates() const;
 
   void update() override;
   void notify_trajectory_source(const TrajectorySource & source) override;
@@ -48,10 +49,13 @@ public:
   std::shared_ptr<Plugin> plugin_;
   std::unique_ptr<DrivingModeConfig> config_;
   std::unique_ptr<DrivingModeStatus> status_;
-  GateStatusItem gates_;
 
 private:
   void publish_debug_status() const;
+  std::optional<TrajectorySource> trajectory_source;
+  std::optional<CommandSource> command_source;
+  std::optional<CommandFilter> command_filter;
+  std::optional<PlatformMode> platform_mode;
 };
 
 }  // namespace autoware::driving_mode_manager

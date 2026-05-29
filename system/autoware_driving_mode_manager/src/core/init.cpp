@@ -33,8 +33,22 @@ ManagerInit::ManagerInit(std::unique_ptr<Interface> && interface, std::shared_pt
 
 bool ManagerInit::is_ready() const
 {
+  if (!trajectory_source) return false;
+  if (!command_source) return false;
+  if (!command_filter) return false;
+  if (!platform_mode) return false;
   if (!status_->is_ready()) return false;
   return true;
+}
+
+GateStatusItem ManagerInit::gates() const
+{
+  GateStatusItem gates;
+  gates.trajectory_source = trajectory_source.value();
+  gates.command_source = command_source.value();
+  gates.command_filter = command_filter.value();
+  gates.platform_mode = platform_mode.value();
+  return gates;
 }
 
 void ManagerInit::update()
@@ -45,22 +59,22 @@ void ManagerInit::update()
 
 void ManagerInit::notify_trajectory_source(const TrajectorySource & source)
 {
-  gates_.trajectory_source = source;
+  trajectory_source = source;
 }
 
 void ManagerInit::notify_command_source(const CommandSource & source)
 {
-  gates_.command_source = source;
+  command_source = source;
 }
 
 void ManagerInit::notify_command_filter(const CommandFilter & filter)
 {
-  gates_.command_filter = filter;
+  command_filter = filter;
 }
 
 void ManagerInit::notify_vehicle_control_mode(const PlatformMode & mode)
 {
-  gates_.platform_mode = mode;
+  platform_mode = mode;
 }
 
 void ManagerInit::on_available_flag(const AutowareMode & mode, bool flag)
