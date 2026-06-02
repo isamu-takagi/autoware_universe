@@ -188,7 +188,7 @@ void Manager::publish_debug_status() const
   interface_->publish_debug_status(debug);
 }
 
-void Manager::notify_trajectory_source(const TrajectorySource & source)
+void Manager::on_trajectory_source(const TrajectorySource & source)
 {
   if (gates_.expect.trajectory_source != source) {
     RCLCPP_WARN_STREAM(logger, "trajectory source override: " << source.id);
@@ -198,7 +198,7 @@ void Manager::notify_trajectory_source(const TrajectorySource & source)
   execute_tasks();
 }
 
-void Manager::notify_command_source(const CommandSource & source)
+void Manager::on_command_source(const CommandSource & source)
 {
   if (gates_.expect.command_source != source) {
     RCLCPP_WARN_STREAM(logger, "command source override: " << source.id);
@@ -208,7 +208,7 @@ void Manager::notify_command_source(const CommandSource & source)
   execute_tasks();
 }
 
-void Manager::notify_command_filter(const CommandFilter & filter)
+void Manager::on_command_filter(const CommandFilter & filter)
 {
   if (gates_.expect.command_filter != filter) {
     RCLCPP_WARN_STREAM(logger, "command filter override: " << filter.flag);
@@ -218,7 +218,7 @@ void Manager::notify_command_filter(const CommandFilter & filter)
   execute_tasks();
 }
 
-void Manager::notify_vehicle_control_mode(const PlatformMode & mode)
+void Manager::on_vehicle_control_mode(const PlatformMode & mode)
 {
   if (gates_.expect.platform_mode != mode) {
     RCLCPP_WARN_STREAM(logger, "platform mode override: " << to_string(mode));

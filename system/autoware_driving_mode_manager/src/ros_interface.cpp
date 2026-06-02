@@ -208,17 +208,17 @@ void RosInterface::on_driving_mode_status(const DrivingModeStatus & msg)
 
 void RosInterface::on_trajectory_source(const TrajectorySourceMsg & msg)
 {
-  logic_->notify_trajectory_source(TrajectorySource{msg.source});
+  logic_->on_trajectory_source(TrajectorySource{msg.source});
 }
 
 void RosInterface::on_command_source(const CommandSourceMsg & msg)
 {
-  logic_->notify_command_source(CommandSource{msg.source});
+  logic_->on_command_source(CommandSource{msg.source});
 }
 
 void RosInterface::on_command_filter(const CommandFilterMsg & msg)
 {
-  logic_->notify_command_filter(CommandFilter{msg.filter});
+  logic_->on_command_filter(CommandFilter{msg.filter});
 }
 
 void RosInterface::on_control_mode_report(const ControlModeReport & msg)
@@ -235,7 +235,7 @@ void RosInterface::on_control_mode_report(const ControlModeReport & msg)
   };
   // clang-format on
 
-  logic_->notify_vehicle_control_mode(convert(msg));
+  logic_->on_vehicle_control_mode(convert(msg));
 }
 
 void RosInterface::on_change_operation_mode(

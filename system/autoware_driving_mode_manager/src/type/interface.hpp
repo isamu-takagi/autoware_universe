@@ -85,10 +85,10 @@ public:
   virtual ~MainLogic() = default;
 
   virtual void update() = 0;
-  virtual void notify_trajectory_source(const TrajectorySource & source) = 0;
-  virtual void notify_command_source(const CommandSource & source) = 0;
-  virtual void notify_command_filter(const CommandFilter & filter) = 0;
-  virtual void notify_vehicle_control_mode(const PlatformMode & mode) = 0;
+  virtual void on_trajectory_source(const TrajectorySource & source) = 0;
+  virtual void on_command_source(const CommandSource & source) = 0;
+  virtual void on_command_filter(const CommandFilter & filter) = 0;
+  virtual void on_vehicle_control_mode(const PlatformMode & mode) = 0;
   virtual void on_available_flag(const AutowareMode & mode, bool flag) = 0;
   virtual void on_stable_flag(const AutowareMode & mode, bool flag) = 0;
   virtual void on_continuable_flag(const AutowareMode & mode, bool flag) = 0;

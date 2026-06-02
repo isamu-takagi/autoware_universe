@@ -59,22 +59,22 @@ void ManagerInit::update()
   publish_debug_status();
 }
 
-void ManagerInit::notify_trajectory_source(const TrajectorySource & source)
+void ManagerInit::on_trajectory_source(const TrajectorySource & source)
 {
   trajectory_source = source;
 }
 
-void ManagerInit::notify_command_source(const CommandSource & source)
+void ManagerInit::on_command_source(const CommandSource & source)
 {
   command_source = source;
 }
 
-void ManagerInit::notify_command_filter(const CommandFilter & filter)
+void ManagerInit::on_command_filter(const CommandFilter & filter)
 {
   command_filter = filter;
 }
 
-void ManagerInit::notify_vehicle_control_mode(const PlatformMode & mode)
+void ManagerInit::on_vehicle_control_mode(const PlatformMode & mode)
 {
   platform_mode = mode;
 }
