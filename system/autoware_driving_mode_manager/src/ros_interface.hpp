@@ -25,6 +25,7 @@
 #include <autoware_vehicle_msgs/srv/control_mode_command.hpp>
 #include <tier4_system_msgs/msg/command_filter_status.hpp>
 #include <tier4_system_msgs/msg/command_source_status.hpp>
+#include <tier4_system_msgs/msg/driving_mode_mrm_state.hpp>
 #include <tier4_system_msgs/msg/driving_mode_status.hpp>
 #include <tier4_system_msgs/msg/trajectory_source_status.hpp>
 #include <tier4_system_msgs/srv/change_command_filter.hpp>
@@ -58,6 +59,7 @@ private:
   using MrmStateMsg = autoware_adapi_v1_msgs::msg::MrmState;
 
   using DrivingModeStatus = tier4_system_msgs::msg::DrivingModeStatus;
+  using DrivingModeMrmState = tier4_system_msgs::msg::DrivingModeMrmState;
   using TrajectorySourceMsg = tier4_system_msgs::msg::TrajectorySourceStatus;
   using CommandSourceMsg = tier4_system_msgs::msg::CommandSourceStatus;
   using CommandFilterMsg = tier4_system_msgs::msg::CommandFilterStatus;
@@ -76,6 +78,7 @@ private:
   rclcpp::Publisher<MrmStateMsg>::SharedPtr pub_mrm_state_;
 
   rclcpp::Subscription<DrivingModeStatus>::SharedPtr sub_driving_mode_status_;
+  rclcpp::Subscription<DrivingModeMrmState>::SharedPtr sub_driving_mode_mrm_state_;
   rclcpp::Subscription<TrajectorySourceMsg>::SharedPtr sub_trajectory_source_;
   rclcpp::Subscription<CommandSourceMsg>::SharedPtr sub_command_source_;
   rclcpp::Subscription<CommandFilterMsg>::SharedPtr sub_command_filter_;
@@ -86,6 +89,7 @@ private:
   rclcpp::Publisher<DrivingModeStatus>::SharedPtr pub_driving_mode_status_;
 
   void on_driving_mode_status(const DrivingModeStatus & msg);
+  void on_driving_mode_mrm_state(const DrivingModeMrmState & msg);
   void on_trajectory_source(const TrajectorySourceMsg & msg);
   void on_command_source(const CommandSourceMsg & msg);
   void on_command_filter(const CommandFilterMsg & msg);

@@ -36,8 +36,11 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
     node->create_publisher<MrmStateMsg>("~/system/mrm_state", rclcpp::QoS(1).transient_local());
 
   sub_driving_mode_status_ = node->create_subscription<DrivingModeStatus>(
-    "~/system/driving_mode/status", rclcpp::QoS(1),
+    "~/system/driving_mode/status", rclcpp::QoS(10),
     std::bind(&RosInterface::on_driving_mode_status, this, _1));
+  sub_driving_mode_mrm_state_ = node->create_subscription<DrivingModeMrmState>(
+    "~/debug/driving_mode/mrm_state", rclcpp::QoS(10),
+    std::bind(&RosInterface::on_driving_mode_mrm_state, this, _1));
   sub_trajectory_source_ = node->create_subscription<TrajectorySourceMsg>(
     "~/trajectory/source/status", rclcpp::QoS(1).transient_local(),
     std::bind(&RosInterface::on_trajectory_source, this, _1));
@@ -203,6 +206,27 @@ void RosInterface::on_driving_mode_status(const DrivingModeStatus & msg)
         RCLCPP_WARN_STREAM(node_->get_logger(), "unknown status type: " << item.type);
         break;
     }
+  }
+}
+
+void RosInterface::on_driving_mode_mrm_state(const DrivingModeMrmState & msg)
+{
+  using Item = tier4_system_msgs::msg::DrivingModeMrmStateItem;
+
+  // clang-format off
+  const auto convert = [](const uint16_t & state) {
+    switch (state) {
+      case Item::NORMAL:    return MrmState::State::kNormal;
+      case Item::OPERATING: return MrmState::State::kOperating;
+      case Item::SUCCEEDED: return MrmState::State::kSucceeded;
+      case Item::FAILED:    return MrmState::State::kFailed;
+      default:              return MrmState::State::kUnknown;
+    }
+  };
+  // clang-format on
+
+  for (const auto & item : msg.items) {
+    logic_->on_mrm_state(AutowareMode{item.mode}, convert(item.state));
   }
 }
 
