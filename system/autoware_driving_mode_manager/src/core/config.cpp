@@ -33,7 +33,8 @@ void DrivingModeConfig::define_autoware_mode(
   const AutowareMode & mode, const MrmBehavior & behavior)
 {
   autoware_modes_.insert(mode);
-  mrm_behaviors_[mode] = behavior;
+  autoware_to_mrm_[mode] = behavior;
+  mrm_to_autoware_[behavior] = mode;
 }
 
 void DrivingModeConfig::define_trajectory_source(const TrajectorySource & source)
@@ -87,6 +88,12 @@ AutowareMode DrivingModeConfig::to_autoware_mode(const OperationMode & operation
   return operation_to_autoware_.at(operation_mode);
 }
 
+std::optional<AutowareMode> DrivingModeConfig::to_autoware_mode(const MrmBehavior & behavior) const
+{
+  const auto iter = mrm_to_autoware_.find(behavior);
+  return iter == mrm_to_autoware_.end() ? std::nullopt : std::optional(iter->second);
+}
+
 OperationMode DrivingModeConfig::to_operation_mode(const AutowareMode & autoware_mode) const
 {
   return autoware_to_operation_.at(autoware_mode);
@@ -94,8 +101,8 @@ OperationMode DrivingModeConfig::to_operation_mode(const AutowareMode & autoware
 
 std::optional<MrmBehavior> DrivingModeConfig::to_mrm_behavior(const AutowareMode & mode) const
 {
-  const auto iter = mrm_behaviors_.find(mode);
-  return iter == mrm_behaviors_.end() ? std::nullopt : std::optional(iter->second);
+  const auto iter = autoware_to_mrm_.find(mode);
+  return iter == autoware_to_mrm_.end() ? std::nullopt : std::optional(iter->second);
 }
 
 }  // namespace autoware::driving_mode_manager

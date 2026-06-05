@@ -39,6 +39,7 @@ public:
   bool exists(const AutowareMode & mode) const;
   Gates gates(const AutowareMode & mode) const;
   AutowareMode to_autoware_mode(const OperationMode & operation) const;
+  std::optional<AutowareMode> to_autoware_mode(const MrmBehavior & behavior) const;
   OperationMode to_operation_mode(const AutowareMode & autoware) const;
   std::optional<MrmBehavior> to_mrm_behavior(const AutowareMode & mode) const;
 
@@ -49,7 +50,8 @@ private:
   std::unordered_map<AutowareMode, Gates> gates_mapping_;
   std::unordered_map<OperationMode, AutowareMode> operation_to_autoware_;
   std::unordered_map<AutowareMode, OperationMode> autoware_to_operation_;
-  std::unordered_map<AutowareMode, MrmBehavior> mrm_behaviors_;
+  std::unordered_map<MrmBehavior, AutowareMode> mrm_to_autoware_;
+  std::unordered_map<AutowareMode, MrmBehavior> autoware_to_mrm_;
 };
 
 }  // namespace autoware::driving_mode_manager

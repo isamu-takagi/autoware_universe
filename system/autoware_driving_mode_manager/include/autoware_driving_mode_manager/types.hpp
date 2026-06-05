@@ -54,6 +54,8 @@ struct AutowareMode
 struct MrmBehavior
 {
   uint16_t id;
+  bool operator==(const MrmBehavior & another) const { return id == another.id; }
+  bool operator!=(const MrmBehavior & another) const { return id != another.id; }
 };
 
 enum class PlatformMode {
@@ -107,6 +109,15 @@ struct hash<autoware::driving_mode_manager::AutowareMode>
   size_t operator()(const autoware::driving_mode_manager::AutowareMode & mode) const
   {
     return hash<uint32_t>{}(mode.id);
+  }
+};
+
+template <>
+struct hash<autoware::driving_mode_manager::MrmBehavior>
+{
+  size_t operator()(const autoware::driving_mode_manager::MrmBehavior & behavior) const
+  {
+    return hash<uint16_t>{}(behavior.id);
   }
 };
 

@@ -50,7 +50,11 @@ void print_modes(const std::string & title, const std::vector<AutowareMode> & mo
 AutowareMode DefaultPlugin::decide(const RequestModes & modes, const AutowareModeSet & availables)
 {
   std::vector<AutowareMode> candidates;
-  candidates.push_back(modes.operation_mode);
+
+  if (modes.mrm_strategy == MrmStrategy::kNone) {
+    candidates.push_back(modes.operation_mode);
+  }
+
   candidates.push_back(EmergencyStop);
   candidates.push_back(ComfortableStop);
   // print_modes("Candidates", candidates);

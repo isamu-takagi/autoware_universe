@@ -28,6 +28,7 @@ namespace autoware::driving_mode_manager
 {
 
 const auto logger = rclcpp::get_logger("Manager");
+constexpr AutowareMode unknown_mode = AutowareMode{0};
 
 template <typename ModeIterable>
 void print_modes(const std::string & title, const ModeIterable & modes)
@@ -52,7 +53,6 @@ Manager::Manager(ManagerInit & init)
   gates_.status = init.gates();
   gates_.expect = init.gates();
 
-  constexpr AutowareMode unknown_mode = AutowareMode{0};
   request_.operation_mode = config_->to_autoware_mode(OperationMode::kStop);
   request_.platform_mode = init.platform_mode.value();
   request_.mrm_strategy = MrmStrategy::kNone;
@@ -260,6 +260,25 @@ void Manager::on_mrm_state(const AutowareMode & mode, const MrmState::State & st
   mrm_states_[mode] = state;
 }
 
+ServiceResponse Manager::change_mrm_request(const MrmRequest & request)
+{
+  if (request.strategy == MrmStrategy::kNone || request.strategy == MrmStrategy::kDelegate) {
+    request_.mrm_strategy = request.strategy;
+    request_.mrm_behavior = unknown_mode;
+    return ServiceResponse{true, ""};
+  }
+  if (request.strategy == MrmStrategy::kBehavior) {
+    const auto behavior = config_->to_autoware_mode(request.behavior);
+    if (!behavior) {
+      return ServiceResponse{false, "unknown behavior"};
+    }
+    request_.mrm_strategy = request.strategy;
+    request_.mrm_behavior = behavior.value();
+    return ServiceResponse{true, ""};
+  }
+  return ServiceResponse{false, "unknown strategy"};
+}
+
 ServiceResponse Manager::change_operation_mode(const OperationMode & operation_mode)
 {
   const auto mode = config_->to_autoware_mode(operation_mode);
@@ -323,12 +342,6 @@ void Manager::change_autoware_mode(const AutowareMode & mode)
   if (gates.command) tasks.push(std::make_unique<CommandSourceTask>(*gates.command));
   tasks_.swap(tasks);
   phase_ = TaskPhase::kAutowareMode;
-}
-
-ServiceResponse Manager::change_mrm_request(const MrmRequest & request)
-{
-  (void)request;
-  return ServiceResponse{false, "not implemented"};
 }
 
 }  // namespace autoware::driving_mode_manager
