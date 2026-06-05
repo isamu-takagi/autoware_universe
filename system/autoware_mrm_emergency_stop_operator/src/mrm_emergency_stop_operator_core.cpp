@@ -47,6 +47,7 @@ MrmEmergencyStopOperator::MrmEmergencyStopOperator(const rclcpp::NodeOptions & n
   // Publisher
   pub_status_ = create_publisher<MrmBehaviorStatus>("~/output/mrm/emergency_stop/status", 1);
   pub_control_cmd_ = create_publisher<Control>("~/output/mrm/emergency_stop/control_cmd", 1);
+  pub_mrm_state_ = create_publisher<DrivingModeMrmState>("~/output/mrm_state", 1);
 
   // Timer
   const auto update_period_ns = rclcpp::Rate(params_.update_rate).period();
@@ -106,9 +107,29 @@ void MrmEmergencyStopOperator::operateEmergencyStop(
 
 void MrmEmergencyStopOperator::publishStatus() const
 {
+  using tier4_system_msgs::msg::DrivingModeMrmStateItem;
+  const auto convert_mrm_state = [](const uint8_t state) {
+    // clang-format off
+    switch (state) {
+      case MrmBehaviorStatus::AVAILABLE: return DrivingModeMrmStateItem::NORMAL;
+      case MrmBehaviorStatus::OPERATING: return DrivingModeMrmStateItem::OPERATING;
+      default:                           return DrivingModeMrmStateItem::UNKNOWN;
+    }
+    // clang-format on
+  };
+
   auto status = status_;
   status.stamp = this->now();
   pub_status_->publish(status);
+
+  DrivingModeMrmStateItem item;
+  item.mode = params_.driving_mode_id;
+  item.state = convert_mrm_state(status_.state);
+
+  DrivingModeMrmState msg;
+  msg.stamp = this->now();
+  msg.items = {item};
+  pub_mrm_state_->publish(msg);
 }
 
 void MrmEmergencyStopOperator::publishControlCommand(const Control & command) const

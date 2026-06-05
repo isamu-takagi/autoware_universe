@@ -39,7 +39,7 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
     "~/system/driving_mode/status", rclcpp::QoS(10),
     std::bind(&RosInterface::on_driving_mode_status, this, _1));
   sub_driving_mode_mrm_state_ = node->create_subscription<DrivingModeMrmState>(
-    "~/debug/driving_mode/mrm_state", rclcpp::QoS(10),
+    "~/system/driving_mode/mrm_state", rclcpp::QoS(10),
     std::bind(&RosInterface::on_driving_mode_mrm_state, this, _1));
   sub_trajectory_source_ = node->create_subscription<TrajectorySourceMsg>(
     "~/trajectory/source/status", rclcpp::QoS(1).transient_local(),

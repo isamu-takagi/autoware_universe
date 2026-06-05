@@ -21,6 +21,7 @@
 
 // Autoware
 #include <autoware_control_msgs/msg/control.hpp>
+#include <tier4_system_msgs/msg/driving_mode_mrm_state.hpp>
 #include <tier4_system_msgs/msg/driving_mode_request.hpp>
 #include <tier4_system_msgs/msg/mrm_behavior_status.hpp>
 #include <tier4_system_msgs/srv/operate_mrm.hpp>
@@ -32,6 +33,7 @@
 namespace autoware::mrm_emergency_stop_operator
 {
 using autoware_control_msgs::msg::Control;
+using tier4_system_msgs::msg::DrivingModeMrmState;
 using tier4_system_msgs::msg::DrivingModeRequest;
 using tier4_system_msgs::msg::MrmBehaviorStatus;
 using tier4_system_msgs::srv::OperateMrm;
@@ -73,6 +75,7 @@ private:
   // Publisher
   rclcpp::Publisher<MrmBehaviorStatus>::SharedPtr pub_status_;
   rclcpp::Publisher<Control>::SharedPtr pub_control_cmd_;
+  rclcpp::Publisher<DrivingModeMrmState>::SharedPtr pub_mrm_state_;
 
   void publishStatus() const;
   void publishControlCommand(const Control & command) const;
