@@ -79,9 +79,10 @@ enum class AutowareControl {
 };
 
 enum class MrmStrategy {
+  kUnknown,
   kNone,
   kDelegate,
-  kTarget,
+  kBehavior,
 };
 
 struct RequestModes

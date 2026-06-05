@@ -55,6 +55,12 @@ struct MrmState
   MrmBehavior behavior;
 };
 
+struct MrmRequest
+{
+  MrmStrategy strategy;
+  MrmBehavior behavior;
+};
+
 struct DebugStatus
 {
   std::unordered_map<AutowareMode, bool> availables;
@@ -95,6 +101,7 @@ public:
   virtual void on_mrm_state(const AutowareMode & mode, const MrmState::State & state) = 0;
   virtual ServiceResponse change_operation_mode(const OperationMode & operation_mode) = 0;
   virtual ServiceResponse change_autoware_control(const AutowareControl & autoware_control) = 0;
+  virtual ServiceResponse change_mrm_request(const MrmRequest & request) = 0;
 };
 
 }  // namespace autoware::driving_mode_manager

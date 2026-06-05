@@ -30,6 +30,7 @@
 #include <tier4_system_msgs/msg/trajectory_source_status.hpp>
 #include <tier4_system_msgs/srv/change_command_filter.hpp>
 #include <tier4_system_msgs/srv/change_command_source.hpp>
+#include <tier4_system_msgs/srv/change_mrm_request.hpp>
 #include <tier4_system_msgs/srv/change_trajectory_source.hpp>
 
 namespace autoware::driving_mode_manager
@@ -66,6 +67,7 @@ private:
   using ControlModeReport = autoware_vehicle_msgs::msg::ControlModeReport;
   using ChangeOperationMode = autoware_system_msgs::srv::ChangeOperationMode;
   using ChangeAutowareControl = autoware_system_msgs::srv::ChangeAutowareControl;
+  using ChangeMrmRequest = tier4_system_msgs::srv::ChangeMrmRequest;
 
   MainLogic * logic_;
 
@@ -85,7 +87,7 @@ private:
   rclcpp::Subscription<ControlModeReport>::SharedPtr sub_control_mode_report_;
   rclcpp::Service<ChangeOperationMode>::SharedPtr srv_operation_mode_;
   rclcpp::Service<ChangeAutowareControl>::SharedPtr srv_autoware_control_;
-
+  rclcpp::Service<ChangeMrmRequest>::SharedPtr srv_mrm_request_;
   rclcpp::Publisher<DrivingModeStatus>::SharedPtr pub_driving_mode_status_;
 
   void on_driving_mode_status(const DrivingModeStatus & msg);
@@ -98,6 +100,8 @@ private:
     ChangeOperationMode::Request::SharedPtr req, ChangeOperationMode::Response::SharedPtr res);
   void on_change_autoware_control(
     ChangeAutowareControl::Request::SharedPtr req, ChangeAutowareControl::Response::SharedPtr res);
+  void on_change_mrm_request(
+    ChangeMrmRequest::Request::SharedPtr req, ChangeMrmRequest::Response::SharedPtr res);
 };
 
 }  // namespace autoware::driving_mode_manager

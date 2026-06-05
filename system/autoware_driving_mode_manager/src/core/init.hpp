@@ -47,6 +47,7 @@ public:
   void on_mrm_state(const AutowareMode & mode, const MrmState::State & state) override;
   ServiceResponse change_operation_mode(const OperationMode & operation_mode) override;
   ServiceResponse change_autoware_control(const AutowareControl & autoware_control) override;
+  ServiceResponse change_mrm_request(const MrmRequest & request) override;
 
   std::unique_ptr<Interface> interface_;
   std::shared_ptr<Plugin> plugin_;

@@ -324,4 +324,10 @@ void Manager::change_autoware_mode(const AutowareMode & mode)
   phase_ = TaskPhase::kAutowareMode;
 }
 
+ServiceResponse ManagerInit::change_mrm_request(const MrmRequest & request)
+{
+  (void)request;
+  return ServiceResponse{false, "not implemented"};
+}
+
 }  // namespace autoware::driving_mode_manager

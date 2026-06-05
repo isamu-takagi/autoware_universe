@@ -294,4 +294,23 @@ void RosInterface::on_change_autoware_control(
   res->status.message = status.message;
 }
 
+void RosInterface::on_change_mrm_request(
+  ChangeMrmRequest::Request::SharedPtr req, ChangeMrmRequest::Response::SharedPtr res)
+{
+  const auto convert = [](const ChangeMrmRequest::Request & req) {
+    // clang-format off
+    switch (req.strategy) {
+      case ChangeMrmRequest::Request::CANCEL:   return MrmStrategy::kNone;
+      case ChangeMrmRequest::Request::DELEGATE: return MrmStrategy::kDelegate;
+      case ChangeMrmRequest::Request::BEHAVIOR: return MrmStrategy::kBehavior;
+      default:                                  return MrmStrategy::kUnknown;
+    }
+    // clang-format on
+  };
+
+  const auto status = logic_->change_mrm_request({convert(*req), {req->behavior}});
+  res->status.success = status.success;
+  res->status.message = status.message;
+}
+
 }  // namespace autoware::driving_mode_manager

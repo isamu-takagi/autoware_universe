@@ -115,6 +115,11 @@ ServiceResponse ManagerInit::change_autoware_control(const AutowareControl &)
   return ServiceResponse{false, "driving mode manager is not ready"};
 }
 
+ServiceResponse ManagerInit::change_mrm_request(const MrmRequest &)
+{
+  return ServiceResponse{false, "driving mode manager is not ready"};
+}
+
 void ManagerInit::publish_debug_status() const
 {
   DebugStatus debug;
