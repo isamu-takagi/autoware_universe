@@ -7,6 +7,7 @@
     <remap from="~/system/change_autoware_control" to="/system/operation_mode/change_autoware_control"/>
     <remap from="~/system/operation_mode_state" to="/system/operation_mode/state"/>
     <remap from="~/system/mrm_state" to="/system/fail_safe/mrm_state"/>
+    <remap from="~/system/driving_mode/request" to="/system/driving_mode/request"/>
     <remap from="~/system/driving_mode/status" to="/system/driving_mode/status"/>
     <remap from="~/trajectory/source/status" to="/planning/trajectory_gate/source/status"/>
     <remap from="~/trajectory/source/change" to="/planning/trajectory_gate/source/change"/>

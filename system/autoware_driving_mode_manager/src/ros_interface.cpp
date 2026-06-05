@@ -63,6 +63,9 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
   srv_mrm_request_ = node->create_service<ChangeMrmRequest>(
     "~/system/change_mrm_request", std::bind(&RosInterface::on_change_mrm_request, this, _1, _2));
 
+  pub_driving_mode_request_ =
+    node->create_publisher<DrivingModeRequest>("~/system/driving_mode/request", rclcpp::QoS(1));
+
   pub_driving_mode_status_ =
     node->create_publisher<DrivingModeStatus>("~/debug/driving_mode/status", rclcpp::QoS(1));
   pub_debug_request_ = node->create_publisher<DebugRequestModes>("~/debug/request", rclcpp::QoS(1));
@@ -243,6 +246,14 @@ void RosInterface::on_driving_mode_mrm_state(const DrivingModeMrmState & msg)
   for (const auto & item : msg.items) {
     logic_->on_mrm_state(AutowareMode{item.mode}, convert(item.state));
   }
+}
+
+void RosInterface::publish_driving_mode_request(const AutowareMode & mode) const
+{
+  DrivingModeRequest msg;
+  msg.stamp = now();
+  msg.mode = mode.id;
+  pub_driving_mode_request_->publish(msg);
 }
 
 void RosInterface::on_trajectory_source(const TrajectorySourceMsg & msg)

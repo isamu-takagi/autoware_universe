@@ -88,6 +88,7 @@ void Manager::update()
   execute_tasks();
   publish_operation_mode();
   publish_mrm_state();
+  publish_driving_mode_request();
   publish_debug_status();
 }
 
@@ -175,6 +176,11 @@ void Manager::publish_mrm_state() const
   } else {
     interface_->publish_mrm_state(MrmState{MrmState::State::kNormal, MrmState::NoneBehavior});
   }
+}
+
+void Manager::publish_driving_mode_request() const
+{
+  interface_->publish_driving_mode_request(request_.autoware_mode);
 }
 
 void Manager::publish_debug_status() const

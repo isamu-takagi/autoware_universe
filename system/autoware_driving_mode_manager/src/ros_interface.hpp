@@ -28,6 +28,7 @@
 #include <tier4_system_msgs/msg/command_filter_status.hpp>
 #include <tier4_system_msgs/msg/command_source_status.hpp>
 #include <tier4_system_msgs/msg/driving_mode_mrm_state.hpp>
+#include <tier4_system_msgs/msg/driving_mode_request.hpp>
 #include <tier4_system_msgs/msg/driving_mode_status.hpp>
 #include <tier4_system_msgs/msg/trajectory_source_status.hpp>
 #include <tier4_system_msgs/srv/change_command_filter.hpp>
@@ -51,6 +52,7 @@ public:
   void change_platform_mode(const PlatformMode & mode) override;
   void publish_operation_mode(const OperationModeState & state) const override;
   void publish_mrm_state(const MrmState & state) const override;
+  void publish_driving_mode_request(const AutowareMode & mode) const override;
   void publish_debug_status(const DebugStatus & status) const override;
   void publish_debug_status(const RequestModes & request) const override;
 
@@ -62,6 +64,7 @@ private:
   using OperationModeStateMsg = autoware_adapi_v1_msgs::msg::OperationModeState;
   using MrmStateMsg = autoware_adapi_v1_msgs::msg::MrmState;
 
+  using DrivingModeRequest = tier4_system_msgs::msg::DrivingModeRequest;
   using DrivingModeStatus = tier4_system_msgs::msg::DrivingModeStatus;
   using DrivingModeMrmState = tier4_system_msgs::msg::DrivingModeMrmState;
   using TrajectorySourceMsg = tier4_system_msgs::msg::TrajectorySourceStatus;
@@ -93,6 +96,7 @@ private:
   rclcpp::Service<ChangeOperationMode>::SharedPtr srv_operation_mode_;
   rclcpp::Service<ChangeAutowareControl>::SharedPtr srv_autoware_control_;
   rclcpp::Service<ChangeMrmRequest>::SharedPtr srv_mrm_request_;
+  rclcpp::Publisher<DrivingModeRequest>::SharedPtr pub_driving_mode_request_;
   rclcpp::Publisher<DrivingModeStatus>::SharedPtr pub_driving_mode_status_;
   rclcpp::Publisher<DebugRequestModes>::SharedPtr pub_debug_request_;
 

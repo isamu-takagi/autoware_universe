@@ -82,6 +82,7 @@ public:
   virtual void change_platform_mode(const PlatformMode & mode) = 0;
   virtual void publish_operation_mode(const OperationModeState & state) const = 0;
   virtual void publish_mrm_state(const MrmState & state) const = 0;
+  virtual void publish_driving_mode_request(const AutowareMode & mode) const = 0;
   virtual void publish_debug_status(const DebugStatus & status) const = 0;
   virtual void publish_debug_status(const RequestModes & request) const = 0;
 };
