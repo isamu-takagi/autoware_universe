@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef AUTOWARE__MRM_EMERGENCY_STOP_OPERATOR__MRM_EMERGENCY_STOP_OPERATOR_CORE_HPP_
-#define AUTOWARE__MRM_EMERGENCY_STOP_OPERATOR__MRM_EMERGENCY_STOP_OPERATOR_CORE_HPP_
+#ifndef MRM_EMERGENCY_STOP_OPERATOR_CORE_HPP_
+#define MRM_EMERGENCY_STOP_OPERATOR_CORE_HPP_
 
 // Core
 #include <functional>
@@ -21,6 +21,7 @@
 
 // Autoware
 #include <autoware_control_msgs/msg/control.hpp>
+#include <tier4_system_msgs/msg/driving_mode_request.hpp>
 #include <tier4_system_msgs/msg/mrm_behavior_status.hpp>
 #include <tier4_system_msgs/srv/operate_mrm.hpp>
 
@@ -31,11 +32,13 @@
 namespace autoware::mrm_emergency_stop_operator
 {
 using autoware_control_msgs::msg::Control;
+using tier4_system_msgs::msg::DrivingModeRequest;
 using tier4_system_msgs::msg::MrmBehaviorStatus;
 using tier4_system_msgs::srv::OperateMrm;
 
 struct Parameters
 {
+  uint32_t driving_mode_id;
   int update_rate;             // [Hz]
   double target_acceleration;  // [m/s^2]
   double target_jerk;          // [m/s^3]
@@ -56,8 +59,10 @@ private:
 
   // Subscriber
   rclcpp::Subscription<Control>::SharedPtr sub_control_cmd_;
+  rclcpp::Subscription<DrivingModeRequest>::SharedPtr sub_driving_mode_request_;
 
   void onControlCommand(Control::ConstSharedPtr msg);
+  void onDrivingModeRequest(DrivingModeRequest::ConstSharedPtr msg);
 
   // Server
   rclcpp::Service<OperateMrm>::SharedPtr service_operation_;
@@ -88,4 +93,4 @@ private:
 
 }  // namespace autoware::mrm_emergency_stop_operator
 
-#endif  // AUTOWARE__MRM_EMERGENCY_STOP_OPERATOR__MRM_EMERGENCY_STOP_OPERATOR_CORE_HPP_
+#endif  // MRM_EMERGENCY_STOP_OPERATOR_CORE_HPP_

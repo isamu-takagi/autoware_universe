@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "autoware/mrm_emergency_stop_operator/mrm_emergency_stop_operator_core.hpp"
+#include "mrm_emergency_stop_operator_core.hpp"
 
 #include <autoware_utils/ros/update_param.hpp>
 
@@ -25,6 +25,7 @@ MrmEmergencyStopOperator::MrmEmergencyStopOperator(const rclcpp::NodeOptions & n
 : Node("mrm_emergency_stop_operator", node_options)
 {
   // Parameter
+  params_.driving_mode_id = declare_parameter<int>("driving_mode_id");
   params_.update_rate = declare_parameter<int>("update_rate");
   params_.target_acceleration = declare_parameter<double>("target_acceleration");
   params_.target_jerk = declare_parameter<double>("target_jerk");
@@ -33,6 +34,9 @@ MrmEmergencyStopOperator::MrmEmergencyStopOperator(const rclcpp::NodeOptions & n
   sub_control_cmd_ = create_subscription<Control>(
     "~/input/control/control_cmd", 1,
     std::bind(&MrmEmergencyStopOperator::onControlCommand, this, std::placeholders::_1));
+  sub_driving_mode_request_ = create_subscription<DrivingModeRequest>(
+    "~/input/driving_mode_request", 1,
+    std::bind(&MrmEmergencyStopOperator::onDrivingModeRequest, this, std::placeholders::_1));
 
   // Server
   service_operation_ = create_service<OperateMrm>(
@@ -76,6 +80,15 @@ void MrmEmergencyStopOperator::onControlCommand(Control::ConstSharedPtr msg)
   if (status_.state != MrmBehaviorStatus::OPERATING) {
     prev_control_cmd_ = *msg;
     is_prev_control_cmd_subscribed_ = true;
+  }
+}
+
+void MrmEmergencyStopOperator::onDrivingModeRequest(DrivingModeRequest::ConstSharedPtr msg)
+{
+  if (msg->mode == params_.driving_mode_id) {
+    status_.state = MrmBehaviorStatus::OPERATING;
+  } else {
+    status_.state = MrmBehaviorStatus::AVAILABLE;
   }
 }
 
