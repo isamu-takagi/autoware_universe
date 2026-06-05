@@ -60,9 +60,12 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
   srv_autoware_control_ = node->create_service<ChangeAutowareControl>(
     "~/system/change_autoware_control",
     std::bind(&RosInterface::on_change_autoware_control, this, _1, _2));
+  srv_mrm_request_ = node->create_service<ChangeMrmRequest>(
+    "~/system/change_mrm_request", std::bind(&RosInterface::on_change_mrm_request, this, _1, _2));
 
   pub_driving_mode_status_ =
     node->create_publisher<DrivingModeStatus>("~/debug/driving_mode/status", rclcpp::QoS(1));
+  pub_debug_request_ = node->create_publisher<DebugRequestModes>("~/debug/request", rclcpp::QoS(1));
 }
 
 rclcpp::Time RosInterface::now() const
@@ -185,6 +188,18 @@ void RosInterface::publish_debug_status(const DebugStatus & status) const
     }
   }
   pub_driving_mode_status_->publish(msg);
+}
+
+void RosInterface::publish_debug_status(const RequestModes & request) const
+{
+  DebugRequestModes msg;
+  msg.stamp = now();
+  msg.operation_mode = request.operation_mode.id;
+  msg.platform_mode = static_cast<std::underlying_type_t<PlatformMode>>(request.platform_mode);
+  msg.mrm_strategy = static_cast<std::underlying_type_t<MrmStrategy>>(request.mrm_strategy);
+  msg.mrm_behavior = request.mrm_behavior.id;
+  msg.autoware_mode = request.autoware_mode.id;
+  pub_debug_request_->publish(msg);
 }
 
 void RosInterface::on_driving_mode_status(const DrivingModeStatus & msg)

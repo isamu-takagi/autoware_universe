@@ -17,6 +17,8 @@
 
 #include "type/interface.hpp"
 
+#include <autoware_driving_mode_manager/msg/debug_request_modes.hpp>
+
 #include <autoware_adapi_v1_msgs/msg/mrm_state.hpp>
 #include <autoware_adapi_v1_msgs/msg/operation_mode_state.hpp>
 #include <autoware_system_msgs/srv/change_autoware_control.hpp>
@@ -50,6 +52,7 @@ public:
   void publish_operation_mode(const OperationModeState & state) const override;
   void publish_mrm_state(const MrmState & state) const override;
   void publish_debug_status(const DebugStatus & status) const override;
+  void publish_debug_status(const RequestModes & request) const override;
 
 private:
   using TrajectorySourceSrv = tier4_system_msgs::srv::ChangeTrajectorySource;
@@ -68,6 +71,8 @@ private:
   using ChangeOperationMode = autoware_system_msgs::srv::ChangeOperationMode;
   using ChangeAutowareControl = autoware_system_msgs::srv::ChangeAutowareControl;
   using ChangeMrmRequest = tier4_system_msgs::srv::ChangeMrmRequest;
+
+  using DebugRequestModes = autoware_driving_mode_manager::msg::DebugRequestModes;
 
   MainLogic * logic_;
 
@@ -89,6 +94,7 @@ private:
   rclcpp::Service<ChangeAutowareControl>::SharedPtr srv_autoware_control_;
   rclcpp::Service<ChangeMrmRequest>::SharedPtr srv_mrm_request_;
   rclcpp::Publisher<DrivingModeStatus>::SharedPtr pub_driving_mode_status_;
+  rclcpp::Publisher<DebugRequestModes>::SharedPtr pub_debug_request_;
 
   void on_driving_mode_status(const DrivingModeStatus & msg);
   void on_driving_mode_mrm_state(const DrivingModeMrmState & msg);

@@ -54,7 +54,7 @@ Manager::Manager(ManagerInit & init)
 
   constexpr AutowareMode unknown_mode = AutowareMode{0};
   request_.operation_mode = config_->to_autoware_mode(OperationMode::kStop);
-  request_.platform_mode = PlatformMode::kUnknown;
+  request_.platform_mode = init.platform_mode.value();
   request_.mrm_strategy = MrmStrategy::kNone;
   request_.mrm_behavior = unknown_mode;
   request_.autoware_mode = unknown_mode;
@@ -186,6 +186,7 @@ void Manager::publish_debug_status() const
     debug.continuables[mode] = status_->is_continuable(mode);
   }
   interface_->publish_debug_status(debug);
+  interface_->publish_debug_status(request_);
 }
 
 void Manager::on_trajectory_source(const TrajectorySource & source)
@@ -324,7 +325,7 @@ void Manager::change_autoware_mode(const AutowareMode & mode)
   phase_ = TaskPhase::kAutowareMode;
 }
 
-ServiceResponse ManagerInit::change_mrm_request(const MrmRequest & request)
+ServiceResponse Manager::change_mrm_request(const MrmRequest & request)
 {
   (void)request;
   return ServiceResponse{false, "not implemented"};
