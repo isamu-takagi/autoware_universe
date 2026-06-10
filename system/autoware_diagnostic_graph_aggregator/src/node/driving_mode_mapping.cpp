@@ -46,24 +46,24 @@ DrivingModeMapping::DrivingModeMapping(rclcpp::Node & node, const Graph & graph)
     }
   }
 
-  pub_ = node.create_publisher<DrivingModeStatus>("/system/driving_mode/status", rclcpp::QoS(1));
+  pub_available_ =
+    node.create_publisher<DrivingModeFlag>("/system/driving_mode/available", rclcpp::QoS(1));
+  pub_continuable_ =
+    node.create_publisher<DrivingModeFlag>("/system/driving_mode/continuable", rclcpp::QoS(1));
 }
 
 void DrivingModeMapping::update(const rclcpp::Time & stamp) const
 {
-  using Item = tier4_system_msgs::msg::DrivingModeStatusItem;
-  DrivingModeStatus message;
+  DrivingModeFlag message;
   for (const auto & [mode, unit] : mode_to_unit_) {
-    for (const auto & type : {Item::AVAILABLE, Item::STABLE, Item::CONTINUABLE}) {
-      Item item;
-      item.mode = mode;
-      item.type = type;
-      item.status = unit->level() == DiagnosticStatus::OK;
-      message.items.push_back(item);
-    }
+    tier4_system_msgs::msg::DrivingModeFlagItem item;
+    item.mode = mode;
+    item.flag = unit->level() == DiagnosticStatus::OK;
+    message.items.push_back(item);
   }
   message.stamp = stamp;
-  pub_->publish(message);
+  pub_available_->publish(message);
+  pub_continuable_->publish(message);
 }
 
 }  // namespace autoware::diagnostic_graph_aggregator

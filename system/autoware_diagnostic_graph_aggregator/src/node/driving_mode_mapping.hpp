@@ -19,7 +19,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <tier4_system_msgs/msg/driving_mode_status.hpp>
+#include <tier4_system_msgs/msg/driving_mode_flag.hpp>
 
 #include <unordered_map>
 
@@ -33,9 +33,10 @@ public:
   void update(const rclcpp::Time & stamp) const;
 
 private:
-  using DrivingModeStatus = tier4_system_msgs::msg::DrivingModeStatus;
+  using DrivingModeFlag = tier4_system_msgs::msg::DrivingModeFlag;
   rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Publisher<DrivingModeStatus>::SharedPtr pub_;
+  rclcpp::Publisher<DrivingModeFlag>::SharedPtr pub_available_;
+  rclcpp::Publisher<DrivingModeFlag>::SharedPtr pub_continuable_;
 
   std::unordered_map<uint32_t, BaseUnit *> mode_to_unit_;
 };
