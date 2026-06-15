@@ -126,7 +126,10 @@ void ManagerInit::publish_driving_mode_info() const
 {
   ModeInfo info;
   for (const auto & mode : config_->autoware_modes()) {
-    info.names[mode] = config_->name(mode);
+    const auto name = config_->name(mode);
+    if (!name.empty()) {
+      info.names[mode] = name;
+    }
   }
   interface_->publish_driving_mode_info(info);
 }
