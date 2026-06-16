@@ -17,6 +17,7 @@
 
 #include "interface.hpp"
 
+#include <cstdint>
 #include <memory>
 #include <unordered_map>
 
@@ -36,7 +37,6 @@ private:
   static constexpr uint32_t invalid_source_id = 0;
   uint32_t current_source_id_;
   std::unordered_map<uint32_t, TrajectorySender *> inputs_;
-  std::unique_ptr<TrajectoryReceiver> ignore_;
   TrajectoryReceiver * output_;
 };
 
