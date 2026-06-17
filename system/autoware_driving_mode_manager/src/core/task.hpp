@@ -26,6 +26,18 @@
 namespace autoware::driving_mode_manager
 {
 
+enum class TaskType {
+  kNone,
+  kFilterEnable,
+  kFilterDisable,
+  kChangeTrajectory,
+  kChangeCommand,
+  kChangeControlMode,
+  kWaitModeReady,
+  kWaitModeStable,
+  kOverridden,
+};
+
 enum class TaskPhase {
   kAutowareMode,
   kPlatformMode,
