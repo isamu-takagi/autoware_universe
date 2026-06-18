@@ -110,6 +110,7 @@ private:
   rclcpp::Publisher<DebugModeRequest>::SharedPtr pub_debug_request_;
 
   void on_driving_mode_available(const DrivingModeFlag & msg);
+  void on_driving_mode_active(const DrivingModeFlag & msg);
   void on_driving_mode_stable(const DrivingModeFlag & msg);
   void on_driving_mode_continuable(const DrivingModeFlag & msg);
   void on_driving_mode_mrm_state(const DrivingModeMrmState & msg);
