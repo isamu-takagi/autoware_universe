@@ -35,19 +35,19 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
   pub_mrm_state_ =
     node->create_publisher<MrmStateMsg>("~/system/mrm_state", rclcpp::QoS(1).transient_local());
 
-  sub_driving_mode_available_ = node->create_subscription<DrivingModeFlag>(
+  sub_driving_mode_available_ = node->create_subscription<DrivingModeFlagMsg>(
     "~/system/driving_mode/available", rclcpp::QoS(10),
     std::bind(&RosInterface::on_driving_mode_available, this, _1));
-  sub_driving_mode_active_ = node->create_subscription<DrivingModeFlag>(
+  sub_driving_mode_active_ = node->create_subscription<DrivingModeFlagMsg>(
     "~/system/driving_mode/active", rclcpp::QoS(10),
     std::bind(&RosInterface::on_driving_mode_active, this, _1));
-  sub_driving_mode_stable_ = node->create_subscription<DrivingModeFlag>(
+  sub_driving_mode_stable_ = node->create_subscription<DrivingModeFlagMsg>(
     "~/system/driving_mode/stable", rclcpp::QoS(10),
     std::bind(&RosInterface::on_driving_mode_stable, this, _1));
-  sub_driving_mode_continuable_ = node->create_subscription<DrivingModeFlag>(
+  sub_driving_mode_continuable_ = node->create_subscription<DrivingModeFlagMsg>(
     "~/system/driving_mode/continuable", rclcpp::QoS(10),
     std::bind(&RosInterface::on_driving_mode_continuable, this, _1));
-  sub_driving_mode_mrm_state_ = node->create_subscription<DrivingModeMrmState>(
+  sub_driving_mode_mrm_state_ = node->create_subscription<DrivingModeMrmStateMsg>(
     "~/system/driving_mode/mrm_state", rclcpp::QoS(10),
     std::bind(&RosInterface::on_driving_mode_mrm_state, this, _1));
   sub_trajectory_source_ = node->create_subscription<TrajectorySourceMsg>(
@@ -59,26 +59,27 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
   sub_command_filter_ = node->create_subscription<CommandFilterMsg>(
     "~/command/filter/status", rclcpp::QoS(1).transient_local(),
     std::bind(&RosInterface::on_command_filter, this, _1));
-  sub_control_mode_report_ = node->create_subscription<ControlModeReport>(
+  sub_control_mode_report_ = node->create_subscription<ControlModeReportMsg>(
     "~/vehicle/control_mode/report", rclcpp::QoS(1).durability_volatile(),
     std::bind(&RosInterface::on_control_mode_report, this, _1));
 
-  srv_operation_mode_ = node->create_service<ChangeOperationMode>(
+  srv_operation_mode_ = node->create_service<ChangeOperationModeSrv>(
     "~/system/change_operation_mode",
     std::bind(&RosInterface::on_change_operation_mode, this, _1, _2));
-  srv_autoware_control_ = node->create_service<ChangeAutowareControl>(
+  srv_autoware_control_ = node->create_service<ChangeAutowareControlSrv>(
     "~/system/change_autoware_control",
     std::bind(&RosInterface::on_change_autoware_control, this, _1, _2));
-  srv_mrm_request_ = node->create_service<ChangeMrmRequest>(
+  srv_mrm_request_ = node->create_service<ChangeMrmRequestSrv>(
     "~/system/change_mrm_request", std::bind(&RosInterface::on_change_mrm_request, this, _1, _2));
 
   pub_driving_mode_request_ =
-    node->create_publisher<DrivingModeRequest>("~/system/driving_mode/request", rclcpp::QoS(1));
-  pub_driving_mode_info_ = node->create_publisher<DrivingModeInfo>(
+    node->create_publisher<DrivingModeRequestMsg>("~/system/driving_mode/request", rclcpp::QoS(1));
+  pub_driving_mode_info_ = node->create_publisher<DrivingModeInfoMsg>(
     "~/system/driving_mode/info", rclcpp::QoS(1).transient_local());
 
-  pub_debug_status_ = node->create_publisher<DebugModeFlag>("~/debug/status", rclcpp::QoS(1));
-  pub_debug_request_ = node->create_publisher<DebugModeRequest>("~/debug/request", rclcpp::QoS(1));
+  pub_debug_status_ = node->create_publisher<DebugModeFlagMsg>("~/debug/status", rclcpp::QoS(1));
+  pub_debug_request_ =
+    node->create_publisher<DebugModeRequestMsg>("~/debug/request", rclcpp::QoS(1));
 }
 
 rclcpp::Time RosInterface::now() const
@@ -182,7 +183,7 @@ void RosInterface::publish_mrm_state(const MrmState & state) const
 
 void RosInterface::publish_debug(const DebugStatus & status) const
 {
-  DebugModeFlag msg;
+  DebugModeFlagMsg msg;
   msg.stamp = now();
   for (const auto & [mode, flag] : status.flags) {
     autoware_driving_mode_manager::msg::DebugModeFlagItem item;
@@ -198,7 +199,7 @@ void RosInterface::publish_debug(const DebugStatus & status) const
 
 void RosInterface::publish_driving_mode_info(const ModeInfo & info) const
 {
-  DrivingModeInfo msg;
+  DrivingModeInfoMsg msg;
   msg.stamp = now();
   for (const auto & [mode, name] : info.names) {
     tier4_system_msgs::msg::DrivingModeInfoItem item;
@@ -211,7 +212,7 @@ void RosInterface::publish_driving_mode_info(const ModeInfo & info) const
 
 void RosInterface::publish_debug(const RequestModes & request) const
 {
-  DebugModeRequest msg;
+  DebugModeRequestMsg msg;
   msg.stamp = now();
   msg.operation_mode = request.operation_mode.id;
   msg.platform_mode = static_cast<std::underlying_type_t<PlatformMode>>(request.platform_mode);
@@ -221,39 +222,38 @@ void RosInterface::publish_debug(const RequestModes & request) const
   pub_debug_request_->publish(msg);
 }
 
-void RosInterface::on_driving_mode_available(const DrivingModeFlag & msg)
+void RosInterface::on_driving_mode_available(const DrivingModeFlagMsg & msg)
 {
   for (const auto & item : msg.items) {
     logic_->on_available_flag(AutowareMode{item.mode}, item.flag);
   }
 }
 
-void RosInterface::on_driving_mode_active(const DrivingModeFlag & msg)
+void RosInterface::on_driving_mode_active(const DrivingModeFlagMsg & msg)
 {
   for (const auto & item : msg.items) {
     logic_->on_active_flag(AutowareMode{item.mode}, item.flag);
   }
 }
 
-void RosInterface::on_driving_mode_stable(const DrivingModeFlag & msg)
+void RosInterface::on_driving_mode_stable(const DrivingModeFlagMsg & msg)
 {
   for (const auto & item : msg.items) {
     logic_->on_stable_flag(AutowareMode{item.mode}, item.flag);
   }
 }
 
-void RosInterface::on_driving_mode_continuable(const DrivingModeFlag & msg)
+void RosInterface::on_driving_mode_continuable(const DrivingModeFlagMsg & msg)
 {
   for (const auto & item : msg.items) {
     logic_->on_continuable_flag(AutowareMode{item.mode}, item.flag);
   }
 }
 
-void RosInterface::on_driving_mode_mrm_state(const DrivingModeMrmState & msg)
+void RosInterface::on_driving_mode_mrm_state(const DrivingModeMrmStateMsg & msg)
 {
-  using Item = tier4_system_msgs::msg::DrivingModeMrmStateItem;
-
   const auto convert = [](const uint16_t & state) {
+    using Item = tier4_system_msgs::msg::DrivingModeMrmStateItem;
     // clang-format off
     switch (state) {
       case Item::NORMAL:    return MrmState::State::kNormal;
@@ -272,7 +272,7 @@ void RosInterface::on_driving_mode_mrm_state(const DrivingModeMrmState & msg)
 
 void RosInterface::publish_driving_mode_request(const AutowareMode & mode) const
 {
-  DrivingModeRequest msg;
+  DrivingModeRequestMsg msg;
   msg.stamp = now();
   msg.mode = mode.id;
   pub_driving_mode_request_->publish(msg);
@@ -293,16 +293,16 @@ void RosInterface::on_command_filter(const CommandFilterMsg & msg)
   logic_->on_command_filter(CommandFilter{msg.filter});
 }
 
-void RosInterface::on_control_mode_report(const ControlModeReport & msg)
+void RosInterface::on_control_mode_report(const ControlModeReportMsg & msg)
 {
-  const auto convert = [](const ControlModeReport & msg) {
+  const auto convert = [](const ControlModeReportMsg & msg) {
     // clang-format off
     switch (msg.mode) {
-      case ControlModeReport::AUTONOMOUS:               return PlatformMode::kAutoware;
-      case ControlModeReport::AUTONOMOUS_STEER_ONLY:    return PlatformMode::kAutowareSteering;
-      case ControlModeReport::AUTONOMOUS_VELOCITY_ONLY: return PlatformMode::kAutowareVelocity;
-      case ControlModeReport::MANUAL:                   return PlatformMode::kManual;
-      default:                                          return PlatformMode::kUnknown;
+      case ControlModeReportMsg::AUTONOMOUS:               return PlatformMode::kAutoware;
+      case ControlModeReportMsg::AUTONOMOUS_STEER_ONLY:    return PlatformMode::kAutowareSteering;
+      case ControlModeReportMsg::AUTONOMOUS_VELOCITY_ONLY: return PlatformMode::kAutowareVelocity;
+      case ControlModeReportMsg::MANUAL:                   return PlatformMode::kManual;
+      default:                                             return PlatformMode::kUnknown;
     }
     // clang-format on
   };
@@ -311,16 +311,16 @@ void RosInterface::on_control_mode_report(const ControlModeReport & msg)
 }
 
 void RosInterface::on_change_operation_mode(
-  ChangeOperationMode::Request::SharedPtr req, ChangeOperationMode::Response::SharedPtr res)
+  ChangeOperationModeSrv::Request::SharedPtr req, ChangeOperationModeSrv::Response::SharedPtr res)
 {
-  const auto convert = [](const ChangeOperationMode::Request & req) {
+  const auto convert = [](const ChangeOperationModeSrv::Request & req) {
     // clang-format off
     switch (req.mode) {
-      case ChangeOperationMode::Request::STOP:       return OperationMode::kStop;
-      case ChangeOperationMode::Request::AUTONOMOUS: return OperationMode::kAutonomous;
-      case ChangeOperationMode::Request::LOCAL:      return OperationMode::kLocal;
-      case ChangeOperationMode::Request::REMOTE:     return OperationMode::kRemote;
-      default:                                       return OperationMode::kUnknown;
+      case ChangeOperationModeSrv::Request::STOP:       return OperationMode::kStop;
+      case ChangeOperationModeSrv::Request::AUTONOMOUS: return OperationMode::kAutonomous;
+      case ChangeOperationModeSrv::Request::LOCAL:      return OperationMode::kLocal;
+      case ChangeOperationModeSrv::Request::REMOTE:     return OperationMode::kRemote;
+      default:                                          return OperationMode::kUnknown;
     }
     // clang-format on
   };
@@ -331,9 +331,10 @@ void RosInterface::on_change_operation_mode(
 }
 
 void RosInterface::on_change_autoware_control(
-  ChangeAutowareControl::Request::SharedPtr req, ChangeAutowareControl::Response::SharedPtr res)
+  ChangeAutowareControlSrv::Request::SharedPtr req,
+  ChangeAutowareControlSrv::Response::SharedPtr res)
 {
-  const auto convert = [](const ChangeAutowareControl::Request & req) {
+  const auto convert = [](const ChangeAutowareControlSrv::Request & req) {
     return req.autoware_control ? AutowareControl::kEnable : AutowareControl::kDisable;
   };
 
@@ -343,15 +344,15 @@ void RosInterface::on_change_autoware_control(
 }
 
 void RosInterface::on_change_mrm_request(
-  ChangeMrmRequest::Request::SharedPtr req, ChangeMrmRequest::Response::SharedPtr res)
+  ChangeMrmRequestSrv::Request::SharedPtr req, ChangeMrmRequestSrv::Response::SharedPtr res)
 {
-  const auto convert = [](const ChangeMrmRequest::Request & req) {
+  const auto convert = [](const ChangeMrmRequestSrv::Request & req) {
     // clang-format off
     switch (req.strategy) {
-      case ChangeMrmRequest::Request::CANCEL:   return MrmStrategy::kNone;
-      case ChangeMrmRequest::Request::DELEGATE: return MrmStrategy::kDelegate;
-      case ChangeMrmRequest::Request::BEHAVIOR: return MrmStrategy::kBehavior;
-      default:                                  return MrmStrategy::kUnknown;
+      case ChangeMrmRequestSrv::Request::CANCEL:   return MrmStrategy::kNone;
+      case ChangeMrmRequestSrv::Request::DELEGATE: return MrmStrategy::kDelegate;
+      case ChangeMrmRequestSrv::Request::BEHAVIOR: return MrmStrategy::kBehavior;
+      default:                                     return MrmStrategy::kUnknown;
     }
     // clang-format on
   };
