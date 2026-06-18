@@ -60,20 +60,9 @@ void ManagerMain::update()
   // Detect status timeout.
   status_->update(interface_->now(), 1.0);
 
-  // List available modes.
-  AutowareModeSet availables;
-  for (const auto & mode : config_->autoware_modes()) {
-    if (temporary_unavailable_modes_.count(mode) == 0) {
-      if (mode.id != request_.autoware_mode.id) {
-        if (status_->is_available(mode)) availables.insert(mode);
-      } else {
-        if (status_->is_continuable(mode)) availables.insert(mode);
-      }
-    }
-  }
-
-  change_autoware_mode(plugin_->decide(request_, availables));
+  update_autoware_mode();
   execute_tasks();
+
   publish_operation_mode();
   publish_mrm_state();
   publish_driving_mode_request();
@@ -178,6 +167,9 @@ void ManagerMain::on_available_flag(const AutowareMode & mode, bool flag)
   if (const auto & data = status_->data(mode)) {
     data->available.update(interface_->now(), flag);
   }
+  // This flag affects the decide function of the plugin.
+  update_autoware_mode();
+  execute_tasks();
 }
 
 void ManagerMain::on_active_flag(const AutowareMode & mode, bool flag)
@@ -185,6 +177,8 @@ void ManagerMain::on_active_flag(const AutowareMode & mode, bool flag)
   if (const auto & data = status_->data(mode)) {
     data->active.update(interface_->now(), flag);
   }
+  // This flag only affects transition tasks.
+  execute_tasks();
 }
 
 void ManagerMain::on_stable_flag(const AutowareMode & mode, bool flag)
@@ -192,6 +186,8 @@ void ManagerMain::on_stable_flag(const AutowareMode & mode, bool flag)
   if (const auto & data = status_->data(mode)) {
     data->stable.update(interface_->now(), flag);
   }
+  // This flag only affects transition tasks.
+  execute_tasks();
 }
 
 void ManagerMain::on_continuable_flag(const AutowareMode & mode, bool flag)
@@ -199,6 +195,9 @@ void ManagerMain::on_continuable_flag(const AutowareMode & mode, bool flag)
   if (const auto & data = status_->data(mode)) {
     data->continuable.update(interface_->now(), flag);
   }
+  // This flag affects the decide function of the plugin.
+  update_autoware_mode();
+  execute_tasks();
 }
 
 void ManagerMain::on_mrm_state(const AutowareMode & mode, const MrmState::State & state)
@@ -287,9 +286,21 @@ ServiceResponse ManagerMain::change_autoware_control(const AutowareControl & aut
   return ServiceResponse{true, ""};
 }
 
-void ManagerMain::change_autoware_mode(const AutowareMode & mode)
+void ManagerMain::update_autoware_mode()
 {
-  AutowareMode & prev = request_.autoware_mode;
+  AutowareModeSet availables;
+  for (const auto & mode : config_->autoware_modes()) {
+    if (temporary_unavailable_modes_.count(mode) == 0) {
+      if (mode.id != request_.autoware_mode.id) {
+        if (status_->is_available(mode)) availables.insert(mode);
+      } else {
+        if (status_->is_continuable(mode)) availables.insert(mode);
+      }
+    }
+  }
+
+  const auto mode = plugin_->decide(request_, availables);
+  const auto prev = request_.autoware_mode;
   if (prev.id == mode.id) {
     return;
   }
@@ -299,7 +310,7 @@ void ManagerMain::change_autoware_mode(const AutowareMode & mode)
     interface_->log_error("decision logic returns unknown mode: " + mode_text);
     return;
   }
-  prev = mode;
+  request_.autoware_mode = mode;
   interface_->log_info("Change Autoware mode: " + prev_text + " -> " + mode_text);
 
   const auto gates = config_->gates(mode);

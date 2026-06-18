@@ -52,7 +52,7 @@ public:
   ServiceResponse change_autoware_control(const AutowareControl & autoware_control) override;
 
 private:
-  void change_autoware_mode(const AutowareMode & mode);
+  void update_autoware_mode();
   void execute_tasks();
   void publish_operation_mode() const;
   void publish_mrm_state() const;
