@@ -15,37 +15,19 @@
 #ifndef CORE__TASK_HPP_
 #define CORE__TASK_HPP_
 
+#include "core/status.hpp"
 #include "type/data.hpp"
 #include "type/interface.hpp"
 
 #include <rclcpp/time.hpp>
 
 #include <optional>
+#include <queue>
 #include <string>
+#include <utility>
 
 namespace autoware::driving_mode_manager
 {
-
-enum class TaskType {
-  kNone,
-  kFilterEnable,
-  kFilterDisable,
-  kChangeTrajectory,
-  kChangeCommand,
-  kChangeControlMode,
-  kWaitModeReady,
-  kWaitModeStable,
-  kOverridden,
-};
-
-enum class TaskPhase {
-  kAutowareMode,
-  kPlatformMode,
-  kWaitStable,
-  kOverridden,
-  kAborted,
-  kCompleted,
-};
 
 enum class TaskResult {
   kFinished,
@@ -57,15 +39,52 @@ class Task
 {
 public:
   virtual ~Task() = default;
-  virtual TaskResult execute(Interface & interface, GateStatus & gates) = 0;
+  virtual TaskResult execute(
+    Interface & interface, GateStatus & gates, const DrivingModeStatus & status) = 0;
   virtual std::string describe() const = 0;
+};
+
+class TaskList
+{
+public:
+  Task * get() const;
+  void pop();
+  bool interruptible() const;
+  bool empty() const;
+
+  void clear_platform_tasks() { platform_ = std::queue<std::unique_ptr<Task>>(); }
+  void clear_autoware_tasks() { autoware_ = std::queue<std::unique_ptr<Task>>(); }
+  void clear_finalize_tasks() { finalize_ = std::queue<std::unique_ptr<Task>>(); }
+  void add_platform_tasks(std::unique_ptr<Task> && task) { platform_.push(std::move(task)); }
+  void add_autoware_tasks(std::unique_ptr<Task> && task) { autoware_.push(std::move(task)); }
+  void add_finalize_tasks(std::unique_ptr<Task> && task) { finalize_.push(std::move(task)); }
+
+private:
+  std::queue<std::unique_ptr<Task>> platform_;
+  std::queue<std::unique_ptr<Task>> autoware_;
+  std::queue<std::unique_ptr<Task>> finalize_;
+};
+
+class PlatformModeTask : public Task
+{
+public:
+  explicit PlatformModeTask(const PlatformMode & target) : target_(target) {}
+  TaskResult execute(
+    Interface & interface, GateStatus & gates, const DrivingModeStatus & status) override;
+  std::string describe() const override;
+
+private:
+  static constexpr double timeout = 3.0;
+  const PlatformMode target_;
+  std::optional<rclcpp::Time> stamp_;
 };
 
 class TrajectorySourceTask : public Task
 {
 public:
   explicit TrajectorySourceTask(const TrajectorySource & target) : target_(target) {}
-  TaskResult execute(Interface & interface, GateStatus & gates) override;
+  TaskResult execute(
+    Interface & interface, GateStatus & gates, const DrivingModeStatus & status) override;
   std::string describe() const override;
 
 private:
@@ -78,7 +97,8 @@ class CommandSourceTask : public Task
 {
 public:
   explicit CommandSourceTask(const CommandSource & target) : target_(target) {}
-  TaskResult execute(Interface & interface, GateStatus & gates) override;
+  TaskResult execute(
+    Interface & interface, GateStatus & gates, const DrivingModeStatus & status) override;
   std::string describe() const override;
 
 private:
@@ -87,24 +107,12 @@ private:
   std::optional<rclcpp::Time> stamp_;
 };
 
-class PlatformModeTask : public Task
+class CommandFilterTask : public Task
 {
 public:
-  explicit PlatformModeTask(const PlatformMode & target) : target_(target) {}
-  TaskResult execute(Interface & interface, GateStatus & gates) override;
-  std::string describe() const override;
-
-private:
-  static constexpr double timeout = 3.0;
-  const PlatformMode target_;
-  std::optional<rclcpp::Time> stamp_;
-};
-
-class TransitionFilterTask : public Task
-{
-public:
-  explicit TransitionFilterTask(const CommandFilter & target) : target_(target) {}
-  TaskResult execute(Interface & interface, GateStatus & gates) override;
+  explicit CommandFilterTask(const CommandFilter & target) : target_(target) {}
+  TaskResult execute(
+    Interface & interface, GateStatus & gates, const DrivingModeStatus & status) override;
   std::string describe() const override;
 
 private:
@@ -117,7 +125,8 @@ class WaitModeReadyTask : public Task
 {
 public:
   explicit WaitModeReadyTask(const AutowareMode & mode) : mode_(mode) {}
-  TaskResult execute(Interface & interface, GateStatus & gates) override;
+  TaskResult execute(
+    Interface & interface, GateStatus & gates, const DrivingModeStatus & status) override;
   std::string describe() const override;
 
 private:
@@ -128,7 +137,8 @@ class WaitModeStableTask : public Task
 {
 public:
   explicit WaitModeStableTask(const AutowareMode & mode) : mode_(mode) {}
-  TaskResult execute(Interface & interface, GateStatus & gates) override;
+  TaskResult execute(
+    Interface & interface, GateStatus & gates, const DrivingModeStatus & status) override;
   std::string describe() const override;
 
 private:
