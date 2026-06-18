@@ -54,6 +54,7 @@ void DrivingModeStatus::update(const rclcpp::Time & now, double timeout)
 {
   for (auto & [id, status] : modes_) {
     status.available.update(now, timeout);
+    status.active.update(now, timeout);
     status.stable.update(now, timeout);
     status.continuable.update(now, timeout);
   }
@@ -69,6 +70,7 @@ bool DrivingModeStatus::is_ready() const
 {
   for (const auto & [id, status] : modes_) {
     if (status.available.timeout()) return false;
+    if (status.active.timeout()) return false;
     if (status.stable.timeout()) return false;
     if (status.continuable.timeout()) return false;
   }
