@@ -71,6 +71,7 @@ struct DebugStatus
   struct Flag
   {
     bool available;
+    bool active;
     bool stable;
     bool continuable;
   };

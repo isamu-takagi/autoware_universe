@@ -80,13 +80,13 @@ class DrivingModeControl(QtWidgets.QWidget):
         self.create_widget(modes)
 
     def on_msg(self, msg):
-        for item in zip(msg.mode, msg.available, msg.stable, msg.continuable):
-            mode, available, stable, continuable = item
+        for item in msg.items:
             text = ""
-            text += "C" if continuable else "-"
-            text += "A" if available else "-"
-            text += "S" if stable else "-"
-            self.flags[mode].setText(text)
+            text += "A" if item.available else "-"
+            text += "R" if item.active else "-"
+            text += "S" if item.stable else "-"
+            text += "C" if item.continuable else "-"
+            self.flags[item.mode].setText(text)
 
     def on_timer(self):
         self.publish(FlagType.Available)
@@ -147,7 +147,7 @@ class DrivingModeControl(QtWidgets.QWidget):
     def create_widget(self, modes):
         layout = QtWidgets.QGridLayout()
         layout.setSpacing(0)
-        layout.addWidget(centered_label("Autoware Mode"), 1, 0)
+        layout.addWidget(QtWidgets.QLabel("Autoware Mode"), 1, 0)
         layout.addWidget(centered_label("  Flags  "), 1, 1)
         layout.addWidget(centered_label("Available"), 1, 2, 1, 2)
         layout.addWidget(centered_label("Active"), 1, 4, 1, 2)
@@ -164,6 +164,6 @@ class DrivingModeControl(QtWidgets.QWidget):
             self.create_button(FlagType.Active, mode, layout, row, 4)
             self.create_button(FlagType.Stable, mode, layout, row, 6)
             self.create_button(FlagType.Continuable, mode, layout, row, 8)
-            label = centered_label("---")
+            label = centered_label("----")
             layout.addWidget(label, row, 1)
             self.flags[mode] = label

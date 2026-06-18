@@ -8,6 +8,7 @@ rosidl_generate_interfaces(
   ${PROJECT_NAME}
   "msg/DebugModeRequest.msg"
   "msg/DebugModeFlag.msg"
+  "msg/DebugModeFlagItem.msg"
   DEPENDENCIES builtin_interfaces
 )
 rosidl_get_typesupport_target(

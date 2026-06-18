@@ -132,6 +132,7 @@ void ManagerMain::publish_debug() const
   for (const auto & mode : config_->autoware_modes()) {
     DebugStatus::Flag flag;
     flag.available = status_->is_available(mode);
+    flag.active = status_->is_active(mode);
     flag.stable = status_->is_stable(mode);
     flag.continuable = status_->is_continuable(mode);
     debug.flags[mode] = flag;

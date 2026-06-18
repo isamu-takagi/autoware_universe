@@ -182,10 +182,13 @@ void RosInterface::publish_debug(const DebugStatus & status) const
   DebugModeFlag msg;
   msg.stamp = now();
   for (const auto & [mode, flag] : status.flags) {
-    msg.mode.push_back(mode.id);
-    msg.available.push_back(flag.available);
-    msg.stable.push_back(flag.stable);
-    msg.continuable.push_back(flag.continuable);
+    autoware_driving_mode_manager::msg::DebugModeFlagItem item;
+    item.mode = mode.id;
+    item.available = flag.available;
+    item.active = flag.active;
+    item.stable = flag.stable;
+    item.continuable = flag.continuable;
+    msg.items.push_back(item);
   }
   pub_debug_status_->publish(msg);
 }
