@@ -15,68 +15,13 @@
 #ifndef TYPE__INTERFACE_HPP_
 #define TYPE__INTERFACE_HPP_
 
+#include "type/types.hpp"
+
 #include <autoware_driving_mode_manager/types.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include <string>
-#include <unordered_map>
-
 namespace autoware::driving_mode_manager
 {
-
-struct ServiceResponse
-{
-  bool success;
-  std::string message;
-};
-
-struct OperationModeState
-{
-  OperationMode mode;
-  bool is_autoware_control_enabled;
-  bool is_in_transition;
-  bool is_stop_mode_available;
-  bool is_autonomous_mode_available;
-  bool is_local_mode_available;
-  bool is_remote_mode_available;
-};
-
-struct MrmState
-{
-  enum class State {
-    kUnknown,
-    kNormal,
-    kOperating,
-    kSucceeded,
-    kFailed,
-  };
-  static constexpr MrmBehavior NoneBehavior{1};
-  State state;
-  MrmBehavior behavior;
-};
-
-struct MrmRequest
-{
-  MrmStrategy strategy;
-  MrmBehavior behavior;
-};
-
-struct ModeInfo
-{
-  std::unordered_map<AutowareMode, std::string> names;
-};
-
-struct DebugStatus
-{
-  struct Flag
-  {
-    bool available;
-    bool active;
-    bool stable;
-    bool continuable;
-  };
-  std::unordered_map<AutowareMode, Flag> flags;
-};
 
 class MainLogic;
 class Interface

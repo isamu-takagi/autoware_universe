@@ -17,7 +17,6 @@
 
 #include "core/config.hpp"
 #include "core/status.hpp"
-#include "type/data.hpp"
 #include "type/interface.hpp"
 
 #include <autoware_driving_mode_manager/plugin.hpp>

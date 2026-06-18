@@ -16,7 +16,6 @@
 #define CORE__TASK_HPP_
 
 #include "core/status.hpp"
-#include "type/data.hpp"
 #include "type/interface.hpp"
 
 #include <rclcpp/time.hpp>
