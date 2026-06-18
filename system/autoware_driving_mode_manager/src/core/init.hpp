@@ -42,6 +42,7 @@ public:
   void on_command_filter(const CommandFilter & filter) override;
   void on_vehicle_control_mode(const PlatformMode & mode) override;
   void on_available_flag(const AutowareMode & mode, bool flag) override;
+  void on_active_flag(const AutowareMode & mode, bool flag) override;
   void on_stable_flag(const AutowareMode & mode, bool flag) override;
   void on_continuable_flag(const AutowareMode & mode, bool flag) override;
   void on_mrm_state(const AutowareMode & mode, const MrmState::State & state) override;

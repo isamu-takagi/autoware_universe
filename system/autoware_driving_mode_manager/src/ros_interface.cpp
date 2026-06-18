@@ -38,6 +38,9 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
   sub_driving_mode_available_ = node->create_subscription<DrivingModeFlag>(
     "~/system/driving_mode/available", rclcpp::QoS(10),
     std::bind(&RosInterface::on_driving_mode_available, this, _1));
+  sub_driving_mode_active_ = node->create_subscription<DrivingModeFlag>(
+    "~/system/driving_mode/active", rclcpp::QoS(10),
+    std::bind(&RosInterface::on_driving_mode_active, this, _1));
   sub_driving_mode_stable_ = node->create_subscription<DrivingModeFlag>(
     "~/system/driving_mode/stable", rclcpp::QoS(10),
     std::bind(&RosInterface::on_driving_mode_stable, this, _1));
@@ -222,6 +225,13 @@ void RosInterface::on_driving_mode_available(const DrivingModeFlag & msg)
 {
   for (const auto & item : msg.items) {
     logic_->on_available_flag(AutowareMode{item.mode}, item.flag);
+  }
+}
+
+void RosInterface::on_driving_mode_active(const DrivingModeFlag & msg)
+{
+  for (const auto & item : msg.items) {
+    logic_->on_active_flag(AutowareMode{item.mode}, item.flag);
   }
 }
 

@@ -88,6 +88,13 @@ void ManagerInit::on_available_flag(const AutowareMode & mode, bool flag)
   }
 }
 
+void ManagerInit::on_active_flag(const AutowareMode & mode, bool flag)
+{
+  if (const auto & data = status_->data(mode)) {
+    data->active.update(interface_->now(), flag);
+  }
+}
+
 void ManagerInit::on_stable_flag(const AutowareMode & mode, bool flag)
 {
   if (const auto & data = status_->data(mode)) {

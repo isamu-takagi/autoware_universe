@@ -109,6 +109,7 @@ public:
   virtual void on_command_filter(const CommandFilter & filter) = 0;
   virtual void on_vehicle_control_mode(const PlatformMode & mode) = 0;
   virtual void on_available_flag(const AutowareMode & mode, bool flag) = 0;
+  virtual void on_active_flag(const AutowareMode & mode, bool flag) = 0;
   virtual void on_stable_flag(const AutowareMode & mode, bool flag) = 0;
   virtual void on_continuable_flag(const AutowareMode & mode, bool flag) = 0;
   virtual void on_mrm_state(const AutowareMode & mode, const MrmState::State & state) = 0;

@@ -93,6 +93,7 @@ private:
   rclcpp::Publisher<MrmStateMsg>::SharedPtr pub_mrm_state_;
 
   rclcpp::Subscription<DrivingModeFlag>::SharedPtr sub_driving_mode_available_;
+  rclcpp::Subscription<DrivingModeFlag>::SharedPtr sub_driving_mode_active_;
   rclcpp::Subscription<DrivingModeFlag>::SharedPtr sub_driving_mode_stable_;
   rclcpp::Subscription<DrivingModeFlag>::SharedPtr sub_driving_mode_continuable_;
   rclcpp::Subscription<DrivingModeMrmState>::SharedPtr sub_driving_mode_mrm_state_;
