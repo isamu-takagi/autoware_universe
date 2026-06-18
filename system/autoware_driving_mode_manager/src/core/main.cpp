@@ -231,8 +231,11 @@ ServiceResponse ManagerMain::change_mrm_request(const MrmRequest & request)
 
 ServiceResponse ManagerMain::change_operation_mode(const OperationMode & operation_mode)
 {
-  const auto mode = config_->to_autoware_mode(operation_mode);
+  if (!tasks_.interruptible()) {
+    return ServiceResponse{false, "mode transition is in progress"};
+  }
 
+  const auto mode = config_->to_autoware_mode(operation_mode);
   if (!status_->is_available(mode)) {
     return ServiceResponse{false, "operation mode is not available"};
   }
@@ -253,11 +256,17 @@ ServiceResponse ManagerMain::change_autoware_control(const AutowareControl & aut
     return ServiceResponse{true, ""};
   }
 
+  if (!tasks_.interruptible()) {
+    return ServiceResponse{false, "mode transition is in progress"};
+  }
+
   // The check target is the normal behavior, operation mode. MRM is not included.
   const auto mode = request_.operation_mode;
-
   if (!status_->is_available(mode)) {
     return ServiceResponse{false, "operation mode is not available"};
+  }
+  if (!status_->is_active(mode)) {
+    return ServiceResponse{false, "operation mode is not activated"};
   }
 
   tasks_.clear_platform_tasks();
@@ -282,14 +291,13 @@ void ManagerMain::change_autoware_mode(const AutowareMode & mode)
     RCLCPP_ERROR_STREAM(logger, "decision logic returns unknown mode: " << mode.id);
     return;
   }
-
   RCLCPP_INFO_STREAM(logger, "Change Autoware Mode: " << prev.id << " -> " << mode.id);
   prev = mode;
 
   const auto gates = config_->gates(mode);
   tasks_.clear_autoware_tasks();
   tasks_.add_autoware_tasks(std::make_unique<CommandFilterTask>(CommandFilter{true}));
-  tasks_.add_autoware_tasks(std::make_unique<WaitModeReadyTask>(mode));
+  tasks_.add_autoware_tasks(std::make_unique<WaitModeActiveTask>(mode));
   if (gates.trajectory) {
     tasks_.add_autoware_tasks(std::make_unique<TrajectorySourceTask>(gates.trajectory.value()));
   }

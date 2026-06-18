@@ -81,6 +81,12 @@ bool DrivingModeStatus::is_available(const AutowareMode & mode) const
   return iter == modes_.end() ? false : iter->second.available.status();
 }
 
+bool DrivingModeStatus::is_active(const AutowareMode & mode) const
+{
+  const auto iter = modes_.find(mode.id);
+  return iter == modes_.end() ? false : iter->second.active.status();
+}
+
 bool DrivingModeStatus::is_stable(const AutowareMode & mode) const
 {
   const auto iter = modes_.find(mode.id);

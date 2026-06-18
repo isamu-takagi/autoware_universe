@@ -39,9 +39,9 @@ class Task
 {
 public:
   virtual ~Task() = default;
+  virtual std::string describe() const = 0;
   virtual TaskResult execute(
     Interface & interface, GateStatus & gates, const DrivingModeStatus & status) = 0;
-  virtual std::string describe() const = 0;
 };
 
 class TaskList
@@ -69,12 +69,12 @@ class PlatformModeTask : public Task
 {
 public:
   explicit PlatformModeTask(const PlatformMode & target) : target_(target) {}
+  std::string describe() const override;
   TaskResult execute(
     Interface & interface, GateStatus & gates, const DrivingModeStatus & status) override;
-  std::string describe() const override;
 
 private:
-  static constexpr double timeout = 3.0;
+  static constexpr double timeout = 1.0;
   const PlatformMode target_;
   std::optional<rclcpp::Time> stamp_;
 };
@@ -83,12 +83,12 @@ class TrajectorySourceTask : public Task
 {
 public:
   explicit TrajectorySourceTask(const TrajectorySource & target) : target_(target) {}
+  std::string describe() const override;
   TaskResult execute(
     Interface & interface, GateStatus & gates, const DrivingModeStatus & status) override;
-  std::string describe() const override;
 
 private:
-  static constexpr double timeout = 3.0;
+  static constexpr double timeout = 1.0;
   const TrajectorySource target_;
   std::optional<rclcpp::Time> stamp_;
 };
@@ -97,12 +97,12 @@ class CommandSourceTask : public Task
 {
 public:
   explicit CommandSourceTask(const CommandSource & target) : target_(target) {}
+  std::string describe() const override;
   TaskResult execute(
     Interface & interface, GateStatus & gates, const DrivingModeStatus & status) override;
-  std::string describe() const override;
 
 private:
-  static constexpr double timeout = 3.0;
+  static constexpr double timeout = 1.0;
   const CommandSource target_;
   std::optional<rclcpp::Time> stamp_;
 };
@@ -111,9 +111,9 @@ class CommandFilterTask : public Task
 {
 public:
   explicit CommandFilterTask(const CommandFilter & target) : target_(target) {}
+  std::string describe() const override;
   TaskResult execute(
     Interface & interface, GateStatus & gates, const DrivingModeStatus & status) override;
-  std::string describe() const override;
 
 private:
   static constexpr double timeout = 3.0;
@@ -121,28 +121,32 @@ private:
   std::optional<rclcpp::Time> stamp_;
 };
 
-class WaitModeReadyTask : public Task
+class WaitModeActiveTask : public Task
 {
 public:
-  explicit WaitModeReadyTask(const AutowareMode & mode) : mode_(mode) {}
+  explicit WaitModeActiveTask(const AutowareMode & mode) : mode_(mode) {}
+  std::string describe() const override;
   TaskResult execute(
     Interface & interface, GateStatus & gates, const DrivingModeStatus & status) override;
-  std::string describe() const override;
 
 private:
+  static constexpr double timeout = 1.0;
   const AutowareMode mode_;
+  std::optional<rclcpp::Time> stamp_;
 };
 
 class WaitModeStableTask : public Task
 {
 public:
   explicit WaitModeStableTask(const AutowareMode & mode) : mode_(mode) {}
+  std::string describe() const override;
   TaskResult execute(
     Interface & interface, GateStatus & gates, const DrivingModeStatus & status) override;
-  std::string describe() const override;
 
 private:
+  static constexpr double timeout = 5.0;
   const AutowareMode mode_;
+  std::optional<rclcpp::Time> stamp_;
 };
 
 }  // namespace autoware::driving_mode_manager

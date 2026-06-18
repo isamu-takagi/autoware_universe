@@ -136,32 +136,42 @@ std::string CommandFilterTask::describe() const
   return "CommandFilterTask[" + std::string(target_.flag ? "true" : "false") + "]";
 }
 
-TaskResult WaitModeReadyTask::execute(
-  Interface & interface, GateStatus & gates, const DrivingModeStatus & status)
+TaskResult WaitModeActiveTask::execute(
+  Interface & interface, GateStatus &, const DrivingModeStatus & status)
 {
-  (void)interface;
-  (void)gates;
-  (void)status;
-  return TaskResult::kFinished;
+  if (status.is_active(mode_)) {
+    return TaskResult::kFinished;
+  }
+  if (stamp_) {
+    const auto duration = (interface.now() - stamp_.value()).seconds();
+    return timeout < duration ? TaskResult::kTimeout : TaskResult::kRunning;
+  }
+  stamp_ = interface.now();
+  return TaskResult::kRunning;
 }
 
-std::string WaitModeReadyTask::describe() const
+std::string WaitModeActiveTask::describe() const
 {
-  return "WaitModeReadyTask";
+  return "WaitModeActiveTask[" + std::to_string(mode_.id) + "]";
 }
 
 TaskResult WaitModeStableTask::execute(
-  Interface & interface, GateStatus & gates, const DrivingModeStatus & status)
+  Interface & interface, GateStatus &, const DrivingModeStatus & status)
 {
-  (void)interface;
-  (void)gates;
-  (void)status;
-  return TaskResult::kFinished;
+  if (status.is_stable(mode_)) {
+    return TaskResult::kFinished;
+  }
+  if (stamp_) {
+    const auto duration = (interface.now() - stamp_.value()).seconds();
+    return timeout < duration ? TaskResult::kTimeout : TaskResult::kRunning;
+  }
+  stamp_ = interface.now();
+  return TaskResult::kRunning;
 }
 
 std::string WaitModeStableTask::describe() const
 {
-  return "WaitModeStableTask";
+  return "WaitModeStableTask[" + std::to_string(mode_.id) + "]";
 }
 
 }  // namespace autoware::driving_mode_manager
