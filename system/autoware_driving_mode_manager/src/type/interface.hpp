@@ -20,6 +20,8 @@
 #include <autoware_driving_mode_manager/types.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+#include <string>
+
 namespace autoware::driving_mode_manager
 {
 
@@ -41,6 +43,11 @@ public:
   virtual void publish_driving_mode_info(const ModeInfo & info) const = 0;
   virtual void publish_debug(const DebugStatus & status) const = 0;
   virtual void publish_debug(const RequestModes & request) const = 0;
+
+  virtual void log_info(const std::string & message) const = 0;
+  virtual void log_warn(const std::string & message) const = 0;
+  virtual void log_error(const std::string & message) const = 0;
+  virtual void log_debug(const std::string & message) const = 0;
 };
 
 class MainLogic

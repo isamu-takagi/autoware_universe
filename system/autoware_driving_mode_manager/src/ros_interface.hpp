@@ -38,6 +38,8 @@
 #include <tier4_system_msgs/srv/change_mrm_request.hpp>
 #include <tier4_system_msgs/srv/change_trajectory_source.hpp>
 
+#include <string>
+
 namespace autoware::driving_mode_manager
 {
 
@@ -58,6 +60,11 @@ public:
   void publish_driving_mode_info(const ModeInfo & info) const override;
   void publish_debug(const DebugStatus & status) const override;
   void publish_debug(const RequestModes & request) const override;
+
+  void log_info(const std::string & message) const override;
+  void log_warn(const std::string & message) const override;
+  void log_error(const std::string & message) const override;
+  void log_debug(const std::string & message) const override;
 
 private:
   using TrajectorySourceSrv = tier4_system_msgs::srv::ChangeTrajectorySource;

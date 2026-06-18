@@ -15,6 +15,7 @@
 #include "ros_interface.hpp"
 
 #include <memory>
+#include <string>
 #include <utility>
 
 namespace autoware::driving_mode_manager
@@ -125,7 +126,7 @@ void RosInterface::change_platform_mode(const PlatformMode & mode)
 
   const auto command = convert(mode);
   if (!command) {
-    RCLCPP_ERROR_STREAM(node_->get_logger(), "unknown platform mode");
+    this->log_error("unknown platform mode");
     return;
   }
   const auto request = std::make_shared<ControlModeCommandSrv::Request>();
@@ -360,6 +361,26 @@ void RosInterface::on_change_mrm_request(
   const auto status = logic_->change_mrm_request({convert(*req), {req->behavior}});
   res->status.success = status.success;
   res->status.message = status.message;
+}
+
+void RosInterface::log_info(const std::string & message) const
+{
+  RCLCPP_INFO_STREAM(node_->get_logger(), message);
+}
+
+void RosInterface::log_warn(const std::string & message) const
+{
+  RCLCPP_WARN_STREAM(node_->get_logger(), message);
+}
+
+void RosInterface::log_error(const std::string & message) const
+{
+  RCLCPP_ERROR_STREAM(node_->get_logger(), message);
+}
+
+void RosInterface::log_debug(const std::string & message) const
+{
+  RCLCPP_DEBUG_STREAM(node_->get_logger(), message);
 }
 
 }  // namespace autoware::driving_mode_manager

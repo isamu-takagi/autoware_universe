@@ -70,6 +70,8 @@ private:
   RequestModes request_;
   GateStatus gates_;
   TaskList tasks_;
+
+  static constexpr AutowareMode unknown_mode = AutowareMode{0};
 };
 
 }  // namespace autoware::driving_mode_manager

@@ -27,19 +27,6 @@
 namespace autoware::driving_mode_manager
 {
 
-const auto logger = rclcpp::get_logger("ManagerMain");
-constexpr AutowareMode unknown_mode = AutowareMode{0};
-
-template <typename ModeIterable>
-void print_modes(const std::string & title, const ModeIterable & modes)
-{
-  std::string text;
-  for (const auto & mode : modes) {
-    text = text + " " + std::to_string(mode.id);
-  }
-  RCLCPP_INFO_STREAM(logger, title << ":" << text);
-}
-
 ManagerMain::ManagerMain(ManagerInit & init)
 {
   interface_ = std::move(init.interface_);
@@ -58,6 +45,8 @@ ManagerMain::ManagerMain(ManagerInit & init)
   request_.mrm_strategy = MrmStrategy::kNone;
   request_.mrm_behavior = unknown_mode;
   request_.autoware_mode = unknown_mode;
+
+  interface_->log_debug("Driving mode manager is ready");
 }
 
 bool ManagerMain::is_ready() const
@@ -143,7 +132,7 @@ void ManagerMain::publish_debug() const
 void ManagerMain::on_trajectory_source(const TrajectorySource & source)
 {
   if (gates_.expect.trajectory_source != source) {
-    RCLCPP_WARN_STREAM(logger, "trajectory source override: " << source.id);
+    interface_->log_warn("trajectory source override: " + std::to_string(source.id));
   }
   gates_.status.trajectory_source = source;
   gates_.expect.trajectory_source = source;
@@ -153,7 +142,7 @@ void ManagerMain::on_trajectory_source(const TrajectorySource & source)
 void ManagerMain::on_command_source(const CommandSource & source)
 {
   if (gates_.expect.command_source != source) {
-    RCLCPP_WARN_STREAM(logger, "command source override: " << source.id);
+    interface_->log_warn("command source override: " + std::to_string(source.id));
   }
   gates_.status.command_source = source;
   gates_.expect.command_source = source;
@@ -163,7 +152,7 @@ void ManagerMain::on_command_source(const CommandSource & source)
 void ManagerMain::on_command_filter(const CommandFilter & filter)
 {
   if (gates_.expect.command_filter != filter) {
-    RCLCPP_WARN_STREAM(logger, "command filter override: " << filter.flag);
+    interface_->log_warn("command filter override: " + std::to_string(filter.flag));
   }
   gates_.status.command_filter = filter;
   gates_.expect.command_filter = filter;
@@ -173,7 +162,7 @@ void ManagerMain::on_command_filter(const CommandFilter & filter)
 void ManagerMain::on_vehicle_control_mode(const PlatformMode & mode)
 {
   if (gates_.expect.platform_mode != mode) {
-    RCLCPP_WARN_STREAM(logger, "platform mode override: " << to_string(mode));
+    interface_->log_warn("platform mode override: " + to_string(mode));
     request_.platform_mode = mode;
     tasks_.clear_platform_tasks();
     tasks_.clear_finalize_tasks();
@@ -267,7 +256,6 @@ ServiceResponse ManagerMain::change_autoware_control(const AutowareControl & aut
 
   // If disable, request the manual mode immediately.
   if (platform_mode == PlatformMode::kManual) {
-    RCLCPP_INFO_STREAM(logger, "accept autoware control disable");
     request_.platform_mode = platform_mode;
     interface_->change_platform_mode(platform_mode);
     return ServiceResponse{true, ""};
@@ -280,10 +268,10 @@ ServiceResponse ManagerMain::change_autoware_control(const AutowareControl & aut
   // The check target is the normal behavior, operation mode. MRM is not included.
   const auto mode = request_.operation_mode;
   if (!status_->is_available(mode)) {
-    return ServiceResponse{false, "operation mode is not available"};
+    return ServiceResponse{false, "current mode is not available"};
   }
   if (!status_->is_active(mode)) {
-    return ServiceResponse{false, "operation mode is not activated"};
+    return ServiceResponse{false, "current mode is not activated"};
   }
 
   tasks_.clear_platform_tasks();
@@ -305,12 +293,14 @@ void ManagerMain::change_autoware_mode(const AutowareMode & mode)
   if (prev.id == mode.id) {
     return;
   }
+  const auto prev_text = std::to_string(prev.id);
+  const auto mode_text = std::to_string(mode.id);
   if (!config_->exists(mode)) {
-    RCLCPP_ERROR_STREAM(logger, "decision logic returns unknown mode: " << mode.id);
+    interface_->log_error("decision logic returns unknown mode: " + mode_text);
     return;
   }
-  RCLCPP_INFO_STREAM(logger, "Change Autoware Mode: " << prev.id << " -> " << mode.id);
   prev = mode;
+  interface_->log_info("Change Autoware mode: " + prev_text + " -> " + mode_text);
 
   const auto gates = config_->gates(mode);
   tasks_.clear_autoware_tasks();
@@ -336,14 +326,14 @@ void ManagerMain::execute_tasks()
     const auto result = tasks_.get()->execute(*interface_, gates_, *status_);
     switch (result) {
       case TaskResult::kFinished:
-        RCLCPP_INFO_STREAM(logger, tasks_.get()->describe() << ": finished");
+        interface_->log_debug(tasks_.get()->describe() + ": finished");
         tasks_.pop();
         break;
       case TaskResult::kRunning:
-        RCLCPP_INFO_STREAM(logger, tasks_.get()->describe() << ": running");
+        interface_->log_debug(tasks_.get()->describe() + ": running");
         return;
       case TaskResult::kTimeout:
-        RCLCPP_WARN_STREAM(logger, tasks_.get()->describe() << ": timeout");
+        interface_->log_warn(tasks_.get()->describe() + ": timeout");
         temporary_unavailable_modes_.insert(request_.autoware_mode);
         return;
       default:
