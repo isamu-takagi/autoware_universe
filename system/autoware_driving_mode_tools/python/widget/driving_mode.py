@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from enum import Enum
+from itertools import product
 
 from autoware_driving_mode_manager.msg import DebugModeFlag
 from autoware_driving_mode_tools.utils import default_qos
@@ -30,8 +31,21 @@ def centered_label(text):
 
 class FlagType(Enum):
     Available = 1
-    Stable = 2
-    Continuable = 3
+    Active = 2
+    Stable = 3
+    Continuable = 4
+
+
+class FlagStatus:
+    def __init__(self):
+        self.send = False
+        self.data = False
+
+
+class FlagButton:
+    def __init__(self):
+        self.send = None
+        self.data = None
 
 
 class DrivingModeControl(QtWidgets.QWidget):
@@ -39,20 +53,23 @@ class DrivingModeControl(QtWidgets.QWidget):
         super().__init__()
         self.modes = [mode for mode, name in modes]
         self.clock = node.get_clock()
-        self.button = {}
-        self.status = {}
+        self.status = {pair: FlagStatus() for pair in product(self.modes, FlagType)}
+        self.button = {pair: FlagButton() for pair in product(self.modes, FlagType)}
         self.flags = {}
         self.timer = node.create_timer(0.5, self.on_timer)
 
         self.publishers = {}
-        self.publishers[FlagType.Continuable] = node.create_publisher(
-            DrivingModeFlag, "/system/driving_mode/continuable", default_qos(1)
-        )
         self.publishers[FlagType.Available] = node.create_publisher(
             DrivingModeFlag, "/system/driving_mode/available", default_qos(1)
         )
+        self.publishers[FlagType.Active] = node.create_publisher(
+            DrivingModeFlag, "/system/driving_mode/active", default_qos(1)
+        )
         self.publishers[FlagType.Stable] = node.create_publisher(
             DrivingModeFlag, "/system/driving_mode/stable", default_qos(1)
+        )
+        self.publishers[FlagType.Continuable] = node.create_publisher(
+            DrivingModeFlag, "/system/driving_mode/continuable", default_qos(1)
         )
         self.subscription = node.create_subscription(
             DebugModeFlag,
@@ -72,74 +89,81 @@ class DrivingModeControl(QtWidgets.QWidget):
             self.flags[mode].setText(text)
 
     def on_timer(self):
-        self.publish(FlagType.Continuable)
         self.publish(FlagType.Available)
+        self.publish(FlagType.Active)
         self.publish(FlagType.Stable)
+        self.publish(FlagType.Continuable)
 
     def publish(self, flag):
         items = []
         for mode in self.modes:
             status = self.status.get((mode, flag))
-            if status is not None:
-                items.append(DrivingModeFlagItem(mode=mode, flag=status))
+            if status.send:
+                items.append(DrivingModeFlagItem(mode=mode, flag=status.data))
         msg = DrivingModeFlag(stamp=self.clock.now().to_msg(), items=items)
         self.publishers[flag].publish(msg)
 
-    def set_status(self, mode, flag, status):
-        self.status[(mode, flag)] = status
+    def set_flag_send(self, mode, flag, send):
+        self.status[(mode, flag)].send = send
         self.publish(flag)
 
-    def set_all_status(self, flag, status):
+    def set_flag_data(self, mode, flag, data):
+        self.status[(mode, flag)].data = data
+        self.publish(flag)
+
+    def set_flag_send_all(self, flag, send):
         for mode in self.modes:
-            self.button[(mode, flag, status)].setChecked(True)
-            self.status[(mode, flag)] = status
+            self.button[(mode, flag)].send.setChecked(send)
+            self.status[(mode, flag)].send = send
+        self.publish(flag)
+
+    def set_flag_data_all(self, flag, data):
+        print(flag, data)
+        for mode in self.modes:
+            self.button[(mode, flag)].data.setChecked(data)
+            self.status[(mode, flag)].data = data
         self.publish(flag)
 
     def create_button(self, flag, mode, layout, row, col):
-        button_none = QtWidgets.QPushButton("None")
-        button_true = QtWidgets.QPushButton("True")
-        button_false = QtWidgets.QPushButton("False")
-        button_group = QtWidgets.QButtonGroup(self)
-        button_none.clicked.connect(lambda: self.set_status(mode, flag, None))
-        button_true.clicked.connect(lambda: self.set_status(mode, flag, True))
-        button_false.clicked.connect(lambda: self.set_status(mode, flag, False))
-        buttons = [button_none, button_true, button_false]
-        for index, button in enumerate(buttons):
-            button_group.addButton(button)
+        button = self.button[(mode, flag)]
+        button.send = QtWidgets.QPushButton("Send")
+        button.data = QtWidgets.QPushButton("Data")
+        button.send.clicked.connect(lambda clicked: self.set_flag_send(mode, flag, clicked))
+        button.data.clicked.connect(lambda clicked: self.set_flag_data(mode, flag, clicked))
+        for index, button in enumerate((button.send, button.data)):
             button.setCheckable(True)
             layout.addWidget(button, row, col + index)
-        self.button[(mode, flag, None)] = button_none
-        self.button[(mode, flag, True)] = button_true
-        self.button[(mode, flag, False)] = button_false
 
     def create_all_buttons(self, flag, layout, row, col):
-        button_none = QtWidgets.QPushButton("None")
-        button_true = QtWidgets.QPushButton("True")
-        button_false = QtWidgets.QPushButton("False")
-        button_none.clicked.connect(lambda: self.set_all_status(flag, None))
-        button_true.clicked.connect(lambda: self.set_all_status(flag, True))
-        button_false.clicked.connect(lambda: self.set_all_status(flag, False))
-        buttons = [button_none, button_true, button_false]
-        for index, button in enumerate(buttons):
+        button = FlagButton()
+        button.send = QtWidgets.QPushButton("Send")
+        button.data = QtWidgets.QPushButton("Data")
+        button.send.clicked.connect(lambda clicked: self.set_flag_send_all(flag, clicked))
+        button.data.clicked.connect(lambda clicked: self.set_flag_data_all(flag, clicked))
+        for index, button in enumerate((button.send, button.data)):
+            button.setCheckable(True)
             layout.addWidget(button, row, col + index)
 
     def create_widget(self, modes):
         layout = QtWidgets.QGridLayout()
         layout.setSpacing(0)
-        layout.addWidget(QtWidgets.QLabel("Autoware Mode"), 1, 0)
+        layout.addWidget(centered_label("Autoware Mode"), 1, 0)
         layout.addWidget(centered_label("  Flags  "), 1, 1)
-        layout.addWidget(centered_label("Continuable"), 1, 2, 1, 3)
-        layout.addWidget(centered_label("Available"), 1, 5, 1, 3)
-        layout.addWidget(centered_label("Stable"), 1, 8, 1, 3)
+        layout.addWidget(centered_label("Available"), 1, 2, 1, 2)
+        layout.addWidget(centered_label("Active"), 1, 4, 1, 2)
+        layout.addWidget(centered_label("Stable"), 1, 6, 1, 2)
+        layout.addWidget(centered_label("Continuable"), 1, 8, 1, 2)
         self.setLayout(layout)
-        self.create_all_buttons(FlagType.Continuable, layout, 0, 2)
-        self.create_all_buttons(FlagType.Available, layout, 0, 5)
-        self.create_all_buttons(FlagType.Stable, layout, 0, 8)
+        self.create_all_buttons(FlagType.Available, layout, 0, 2)
+        self.create_all_buttons(FlagType.Active, layout, 0, 4)
+        self.create_all_buttons(FlagType.Stable, layout, 0, 6)
+        self.create_all_buttons(FlagType.Continuable, layout, 0, 8)
         for row, (mode, name) in enumerate(modes, start=2):
             layout.addWidget(QtWidgets.QLabel(f"{name} ({mode})"), row, 0)
-            self.create_button(FlagType.Continuable, mode, layout, row, 2)
-            self.create_button(FlagType.Available, mode, layout, row, 5)
-            self.create_button(FlagType.Stable, mode, layout, row, 8)
+            self.create_button(FlagType.Available, mode, layout, row, 2)
+            self.create_button(FlagType.Active, mode, layout, row, 4)
+            self.create_button(FlagType.Stable, mode, layout, row, 6)
+            self.create_button(FlagType.Continuable, mode, layout, row, 8)
             label = centered_label("---")
             layout.addWidget(label, row, 1)
             self.flags[mode] = label
