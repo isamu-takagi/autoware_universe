@@ -249,6 +249,7 @@ ServiceResponse ManagerMain::change_operation_mode(const OperationMode & operati
   }
 
   request_.operation_mode = mode;
+  temporary_unavailable_modes_.clear();
   return ServiceResponse{true, ""};
 }
 
@@ -286,6 +287,7 @@ ServiceResponse ManagerMain::change_autoware_control(const AutowareControl & aut
   tasks_.add_finalize_tasks(std::make_unique<CommandFilterTask>(CommandFilter{false}));
 
   request_.platform_mode = platform_mode;
+  temporary_unavailable_modes_.clear();
   return ServiceResponse{true, ""};
 }
 
