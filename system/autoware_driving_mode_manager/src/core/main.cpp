@@ -306,8 +306,8 @@ void ManagerMain::change_autoware_mode(const AutowareMode & mode)
 
   const auto gates = config_->gates(mode);
   tasks_.clear_autoware_tasks();
-  tasks_.add_autoware_tasks(std::make_unique<CommandFilterTask>(CommandFilter{true}));
   tasks_.add_autoware_tasks(std::make_unique<WaitModeActiveTask>(mode));
+  tasks_.add_autoware_tasks(std::make_unique<CommandFilterTask>(CommandFilter{true}));
   if (gates.trajectory) {
     tasks_.add_autoware_tasks(std::make_unique<TrajectorySourceTask>(gates.trajectory.value()));
   }

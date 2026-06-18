@@ -56,7 +56,7 @@ Additionally, source interface for switching trajectory and command, filter inte
 | Flags       | Description                                                                                             |
 | ----------- | ------------------------------------------------------------------------------------------------------- |
 | available   | Whether it is possible to switch to the mode. This does not guarantee that output is actually produced. |
-| ready       | Whether the mode output is actually being produced.                                                     |
+| active      | Whether the mode output is actually being produced.                                                     |
 | stable      | Whether the mode operation is stable and the transition can be completed.                               |
 | continuable | Whether the vehicle is currently driving in the mode and can continue to do so.                         |
 
@@ -75,5 +75,11 @@ When the autoware mode changes, the following steps are used to switch modes.
 Switching to a state where Autoware control is not applied is performed immediately.
 Switching to a state where Autoware control is applied uses the following steps.
 If additional conditions are required while driving, include them in available status.
+
+| Event                | Platform Task | Autoware Task | Finalize Task              |
+| -------------------- | ------------- | ------------- | -------------------------- |
+| Change platform mode | set           | keep          | set                        |
+| Change autoware mode | keep          | set           | set                        |
+| Detect override      | clear         | keep          | set (without stable check) |
 
 ![transition-logic](./doc/transition-logic.drawio.svg)

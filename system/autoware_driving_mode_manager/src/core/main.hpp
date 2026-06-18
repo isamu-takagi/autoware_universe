@@ -52,12 +52,12 @@ public:
   ServiceResponse change_autoware_control(const AutowareControl & autoware_control) override;
 
 private:
+  void change_autoware_mode(const AutowareMode & mode);
   void execute_tasks();
   void publish_operation_mode() const;
   void publish_mrm_state() const;
   void publish_driving_mode_request() const;
   void publish_debug() const;
-  void change_autoware_mode(const AutowareMode & mode);
 
   std::unique_ptr<Interface> interface_;
   std::shared_ptr<Plugin> plugin_;
