@@ -19,9 +19,9 @@ ament_auto_add_library(${PROJECT_NAME}_common SHARED
   "src/core/config.cpp"
   "src/core/status.cpp"
   "src/core/task.cpp"
-  "src/core/values.cpp"
   "src/core/init.cpp"
   "src/core/main.cpp"
+  "src/core/debug.cpp"
   "src/ros_interface.cpp"
   "src/driving_mode_manager.cpp"
 )

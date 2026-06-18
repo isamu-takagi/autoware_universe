@@ -14,7 +14,7 @@
 
 #include "main.hpp"
 
-#include "values.hpp"
+#include "debug.hpp"
 
 #include <rclcpp/logging.hpp>
 
@@ -254,6 +254,15 @@ ServiceResponse ManagerMain::change_operation_mode(const OperationMode & operati
 
 ServiceResponse ManagerMain::change_autoware_control(const AutowareControl & autoware_control)
 {
+  const auto to_platform_mode = [](const AutowareControl & autoware_control) {
+    // clang-format off
+    switch (autoware_control) {
+      case AutowareControl::kEnable:  return PlatformMode::kAutoware;
+      case AutowareControl::kDisable: return PlatformMode::kManual;
+      default:                        return PlatformMode::kUnknown;
+    }
+    // clang-format on
+  };
   const auto platform_mode = to_platform_mode(autoware_control);
 
   // If disable, request the manual mode immediately.

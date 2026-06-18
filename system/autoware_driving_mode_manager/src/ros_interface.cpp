@@ -109,9 +109,9 @@ void RosInterface::change_command_filter(const CommandFilter & filter)
 
 void RosInterface::change_platform_mode(const PlatformMode & mode)
 {
-  // clang-format off
   const auto convert = [](const PlatformMode & mode) -> std::optional<uint8_t> {
     using Command = ControlModeCommandSrv::Request;
+    // clang-format off
     switch (mode) {
       case PlatformMode::kAutoware:         return Command::AUTONOMOUS;
       case PlatformMode::kAutowareSteering: return Command::AUTONOMOUS_STEER_ONLY;
@@ -119,8 +119,8 @@ void RosInterface::change_platform_mode(const PlatformMode & mode)
       case PlatformMode::kManual:           return Command::MANUAL;
       default:                              return std::nullopt;
     }
+    // clang-format on
   };
-  // clang-format on
 
   const auto command = convert(mode);
   if (!command) {
@@ -160,8 +160,8 @@ void RosInterface::publish_operation_mode(const OperationModeState & state) cons
 
 void RosInterface::publish_mrm_state(const MrmState & state) const
 {
-  // clang-format off
   const auto convert = [](const MrmState::State & state) {
+    // clang-format off
     switch (state) {
       case MrmState::State::kNormal:    return MrmStateMsg::NORMAL;
       case MrmState::State::kOperating: return MrmStateMsg::MRM_OPERATING;
@@ -170,8 +170,8 @@ void RosInterface::publish_mrm_state(const MrmState & state) const
       case MrmState::State::kUnknown:   return MrmStateMsg::UNKNOWN;
       default:                          return MrmStateMsg::UNKNOWN;
     }
+    // clang-format on
   };
-  // clang-format on
 
   MrmStateMsg msg;
   msg.stamp = now();
@@ -253,8 +253,8 @@ void RosInterface::on_driving_mode_mrm_state(const DrivingModeMrmState & msg)
 {
   using Item = tier4_system_msgs::msg::DrivingModeMrmStateItem;
 
-  // clang-format off
   const auto convert = [](const uint16_t & state) {
+    // clang-format off
     switch (state) {
       case Item::NORMAL:    return MrmState::State::kNormal;
       case Item::OPERATING: return MrmState::State::kOperating;
@@ -262,8 +262,8 @@ void RosInterface::on_driving_mode_mrm_state(const DrivingModeMrmState & msg)
       case Item::FAILED:    return MrmState::State::kFailed;
       default:              return MrmState::State::kUnknown;
     }
+    // clang-format on
   };
-  // clang-format on
 
   for (const auto & item : msg.items) {
     logic_->on_mrm_state(AutowareMode{item.mode}, convert(item.state));
@@ -295,8 +295,8 @@ void RosInterface::on_command_filter(const CommandFilterMsg & msg)
 
 void RosInterface::on_control_mode_report(const ControlModeReport & msg)
 {
-  // clang-format off
   const auto convert = [](const ControlModeReport & msg) {
+    // clang-format off
     switch (msg.mode) {
       case ControlModeReport::AUTONOMOUS:               return PlatformMode::kAutoware;
       case ControlModeReport::AUTONOMOUS_STEER_ONLY:    return PlatformMode::kAutowareSteering;
@@ -304,8 +304,8 @@ void RosInterface::on_control_mode_report(const ControlModeReport & msg)
       case ControlModeReport::MANUAL:                   return PlatformMode::kManual;
       default:                                          return PlatformMode::kUnknown;
     }
+    // clang-format on
   };
-  // clang-format on
 
   logic_->on_vehicle_control_mode(convert(msg));
 }
@@ -313,8 +313,8 @@ void RosInterface::on_control_mode_report(const ControlModeReport & msg)
 void RosInterface::on_change_operation_mode(
   ChangeOperationMode::Request::SharedPtr req, ChangeOperationMode::Response::SharedPtr res)
 {
-  // clang-format off
   const auto convert = [](const ChangeOperationMode::Request & req) {
+    // clang-format off
     switch (req.mode) {
       case ChangeOperationMode::Request::STOP:       return OperationMode::kStop;
       case ChangeOperationMode::Request::AUTONOMOUS: return OperationMode::kAutonomous;
@@ -322,8 +322,8 @@ void RosInterface::on_change_operation_mode(
       case ChangeOperationMode::Request::REMOTE:     return OperationMode::kRemote;
       default:                                       return OperationMode::kUnknown;
     }
+    // clang-format on
   };
-  // clang-format on
 
   const auto status = logic_->change_operation_mode(convert(*req));
   res->status.success = status.success;
