@@ -41,7 +41,6 @@ bool ManagerInit::is_ready() const
   if (!command_filter) return false;
   if (!platform_mode) return false;
   if (!status_->is_ready()) return false;
-  // TODO(isamu-takagi): check all mrm state
   return true;
 }
 

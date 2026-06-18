@@ -58,7 +58,7 @@ Additionally, source interface for switching trajectory and command, filter inte
 | available   | Whether it is possible to switch to the mode. This does not guarantee that output is actually produced. |
 | active      | Whether the mode output is actually being produced.                                                     |
 | stable      | Whether the mode operation is stable and the transition can be completed.                               |
-| continuable | Whether the vehicle is currently driving in the mode and can continue to do so.                         |
+| continuable | Whether mode operation can continue if the vehicle is currently driving in the mode.                    |
 
 ## Implementation
 
@@ -71,15 +71,20 @@ and then the transition logic operates the gate node and vehicle interface.
 
 ## Mode Transition
 
-When the autoware mode changes, the following steps are used to switch modes.
-Switching to a state where Autoware control is not applied is performed immediately.
-Switching to a state where Autoware control is applied uses the following steps.
-If additional conditions are required while driving, include them in available status.
+Mode transitions are managed by three queues, platform tasks, autoware tasks, and finalize tasks, and the elements of each queue are updated by the events shown in the table below.
+If disabling the autoware control is requested, the control mode will be immediately set to manual. If enabling is requested, it will trigger the change platform mode event.
 
-| Event                | Platform Task | Autoware Task | Finalize Task              |
-| -------------------- | ------------- | ------------- | -------------------------- |
-| Change platform mode | set           | keep          | set                        |
-| Change autoware mode | keep          | set           | set                        |
-| Detect override      | clear         | keep          | set (without stable check) |
+If a change in operation mode is requested, the target mode is updated first, and then the timer process triggers the change autoware mode event.
+This is because autoware mode can switch to MRM due to changes in the driving mode flag, even outside of service calls.
+
+| Event                | Platform Tasks | Autoware Tasks | Finalize Tasks             |
+| -------------------- | -------------- | -------------- | -------------------------- |
+| Change platform mode | set            | keep           | set                        |
+| Change autoware mode | keep           | set            | set                        |
+| Detect override      | clear          | keep           | set (without stable check) |
+
+The following are examples of mode transition sequences for different situations.
+A platform mode change while an autoware mode change is in progress will be rejected, but the reverse is possible.
+In that case, the autoware mode change task will be reserved.
 
 ![transition-logic](./doc/transition-logic.drawio.svg)

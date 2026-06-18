@@ -83,7 +83,6 @@ void ManagerMain::update()
     }
   }
 
-  // TODO(isamu-takagi): Check frequently mode change.
   change_autoware_mode(plugin_->decide(request_, availables));
   execute_tasks();
   publish_operation_mode();
@@ -316,7 +315,9 @@ void ManagerMain::change_autoware_mode(const AutowareMode & mode)
   }
 
   tasks_.clear_finalize_tasks();
-  tasks_.add_finalize_tasks(std::make_unique<WaitModeStableTask>(mode));
+  if (request_.platform_mode != PlatformMode::kManual) {
+    tasks_.add_finalize_tasks(std::make_unique<WaitModeStableTask>(mode));
+  }
   tasks_.add_finalize_tasks(std::make_unique<CommandFilterTask>(CommandFilter{false}));
 }
 
