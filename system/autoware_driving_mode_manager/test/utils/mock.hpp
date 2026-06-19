@@ -17,10 +17,31 @@
 
 #include "type/interface.hpp"
 
-bool foo();
+#include <string>
 
-class MockInterface : public autoware::driving_mode_manager::Interface
+using namespace autoware::driving_mode_manager;  // NOLINT(build/namespaces)
+
+class MockInterface : public Interface
 {
+public:
+  void init(MainLogic * logic) override;
+
+  rclcpp::Time now() const override;
+  void change_trajectory_source(const TrajectorySource & source) override;
+  void change_command_source(const CommandSource & source) override;
+  void change_command_filter(const CommandFilter & filter) override;
+  void change_platform_mode(const PlatformMode & mode) override;
+  void publish_operation_mode(const OperationModeState & state) const override;
+  void publish_mrm_state(const MrmState & state) const override;
+  void publish_driving_mode_request(const AutowareMode & mode) const override;
+  void publish_driving_mode_info(const ModeInfo & info) const override;
+  void publish_debug(const DebugStatus & status) const override;
+  void publish_debug(const RequestModes & request) const override;
+
+  void log_info(const std::string & message) const override;
+  void log_warn(const std::string & message) const override;
+  void log_error(const std::string & message) const override;
+  void log_debug(const std::string & message) const override;
 };
 
 #endif  // UTILS__MOCK_HPP_

@@ -18,10 +18,8 @@
 
 TEST(TestSuite, TestCase1)
 {
-  EXPECT_TRUE(foo());
 }
 
 TEST(TestSuite, TestCase2)
 {
-  EXPECT_FALSE(foo());
 }

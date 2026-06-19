@@ -14,7 +14,69 @@
 
 #include "mock.hpp"
 
-bool foo()
+#include <string>
+
+void MockInterface::init(MainLogic * logic)
 {
-  return true;
+}
+
+rclcpp::Time MockInterface::now() const
+{
+  return rclcpp::Time{};
+}
+
+void MockInterface::change_trajectory_source(const TrajectorySource & source)
+{
+}
+
+void MockInterface::change_command_source(const CommandSource & source)
+{
+}
+
+void MockInterface::change_command_filter(const CommandFilter & filter)
+{
+}
+
+void MockInterface::change_platform_mode(const PlatformMode & mode)
+{
+}
+
+void MockInterface::publish_operation_mode(const OperationModeState & state) const
+{
+}
+
+void MockInterface::publish_mrm_state(const MrmState & state) const
+{
+}
+
+void MockInterface::publish_driving_mode_request(const AutowareMode & mode) const
+{
+}
+
+void MockInterface::publish_driving_mode_info(const ModeInfo & info) const
+{
+}
+
+void MockInterface::publish_debug(const DebugStatus & status) const
+{
+}
+
+void MockInterface::publish_debug(const RequestModes & request) const
+{
+}
+
+void MockInterface::log_info(const std::string & message) const
+{
+}
+
+void MockInterface::log_warn(const std::string & message) const
+{
+}
+
+void MockInterface::log_error(const std::string & message) const
+{
+}
+
+void MockInterface::log_debug(const std::string & message) const
+{
 }
