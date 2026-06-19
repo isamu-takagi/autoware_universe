@@ -45,6 +45,12 @@ rclcpp_components_register_node(${PROJECT_NAME}_common
 )
 
 if(BUILD_TESTING)
+  ament_auto_add_gtest(test_${PROJECT_NAME}
+    "test/test.cpp"
+  )
+  target_include_directories(test_${PROJECT_NAME} PRIVATE
+    "src"
+  )
 endif()
 
 pluginlib_export_plugin_description_file(autoware_driving_mode_manager plugins.xml)
