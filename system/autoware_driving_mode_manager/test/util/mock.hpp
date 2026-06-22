@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef UTILS__MOCK_HPP_
-#define UTILS__MOCK_HPP_
+#ifndef UTIL__MOCK_HPP_
+#define UTIL__MOCK_HPP_
 
 #include "type/interface.hpp"
 
@@ -44,4 +44,4 @@ public:
   void log_debug(const std::string & message) const override;
 };
 
-#endif  // UTILS__MOCK_HPP_
+#endif  // UTIL__MOCK_HPP_

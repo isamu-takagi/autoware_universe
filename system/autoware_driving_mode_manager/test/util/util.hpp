@@ -12,13 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef UTILS__UTIL_HPP_
-#define UTILS__UTIL_HPP_
+#ifndef UTIL__UTIL_HPP_
+#define UTIL__UTIL_HPP_
 
 #include "mock.hpp"
 
 #include <memory>
 
-std::unique_ptr<MainLogic> create_main_logic();
+struct InitData
+{
+  MockInterface * mock;
+  std::unique_ptr<ManagerInit> init;
+};
 
-#endif  // UTILS__UTIL_HPP_
+struct MainData
+{
+  MockInterface * mock;
+  std::unique_ptr<ManagerMain> main;
+};
+
+InitData create_init_logic();
+MainData create_main_logic();
+void init_logic(ManagerInit & init);
+
+#endif  // UTIL__UTIL_HPP_
