@@ -47,6 +47,7 @@ rclcpp_components_register_node(${PROJECT_NAME}_common
 if(BUILD_TESTING)
   ament_auto_add_gtest(test_${PROJECT_NAME}
     "test/utils/mock.cpp"
+    "test/utils/util.cpp"
     "test/test.cpp"
   )
   target_include_directories(test_${PROJECT_NAME} PRIVATE

@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "utils/util.hpp"
+#ifndef UTILS__UTIL_HPP_
+#define UTILS__UTIL_HPP_
 
-#include <gtest/gtest.h>
+#include "mock.hpp"
 
-TEST(TestSuite, TestCase1)
-{
-  auto logic = create_main_logic();
-}
+#include <memory>
 
-TEST(TestSuite, TestCase2)
-{
-}
+std::unique_ptr<MainLogic> create_main_logic();
+
+#endif  // UTILS__UTIL_HPP_
