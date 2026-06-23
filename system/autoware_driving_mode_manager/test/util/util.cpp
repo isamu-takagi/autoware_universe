@@ -14,8 +14,6 @@
 
 #include "util.hpp"
 
-#include "core/init.hpp"
-#include "core/main.hpp"
 #include "plugin/default.hpp"
 
 #include <gtest/gtest.h>
@@ -50,7 +48,7 @@ void init_logic(ManagerInit & init)
   }
   init.on_trajectory_source(TrajectorySource{0});
   init.on_command_source(CommandSource{0});
-  init.on_command_filter(CommandFilter{true});
+  init.on_command_filter(CommandFilter{false});
   init.on_vehicle_control_mode(PlatformMode::kAutoware);
   EXPECT_TRUE(init.is_ready());
 }

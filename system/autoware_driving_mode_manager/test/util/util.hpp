@@ -15,6 +15,8 @@
 #ifndef UTIL__UTIL_HPP_
 #define UTIL__UTIL_HPP_
 
+#include "core/init.hpp"
+#include "core/main.hpp"
 #include "mock.hpp"
 
 #include <memory>

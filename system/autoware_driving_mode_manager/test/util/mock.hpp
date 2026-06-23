@@ -42,6 +42,13 @@ public:
   void log_warn(const std::string & message) const override;
   void log_error(const std::string & message) const override;
   void log_debug(const std::string & message) const override;
+
+  MainLogic * logic_ = nullptr;
+
+  TrajectorySource trajectory_source = TrajectorySource{0};
+  CommandSource command_source = CommandSource{0};
+  CommandFilter command_filter = CommandFilter{false};
+  PlatformMode platform_mode = PlatformMode::kUnknown;
 };
 
 #endif  // UTIL__MOCK_HPP_

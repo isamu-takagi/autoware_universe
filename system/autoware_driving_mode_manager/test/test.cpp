@@ -12,15 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "utils/util.hpp"
+#include "util/util.hpp"
 
 #include <gtest/gtest.h>
 
-TEST(TestSuite, TestCase1)
+#include <iostream>
+
+TEST(TestSuite, ChangeStopMode)
 {
-  auto logic = create_main_logic();
+  auto [mock, main] = create_main_logic();
+  std::cerr << mock->logic_ << std::endl;
+  main->update();
+  EXPECT_EQ(mock->command_source.id, 11);
 }
 
-TEST(TestSuite, TestCase2)
+TEST(TestSuite, ChangeAutonomousMode)
 {
+  auto [mock, main] = create_main_logic();
+  std::cerr << mock->logic_ << std::endl;
+
+  main->change_operation_mode(OperationMode::kAutonomous);
+  main->update();
+  EXPECT_EQ(mock->trajectory_source.id, 100);
+  EXPECT_EQ(mock->command_source.id, 12);
 }
