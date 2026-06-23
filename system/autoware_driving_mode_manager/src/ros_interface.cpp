@@ -134,7 +134,7 @@ void RosInterface::change_platform_mode(const PlatformMode & mode)
   cli_control_mode_command_->async_send_request(request);
 }
 
-void RosInterface::publish_operation_mode(const OperationModeState & state) const
+void RosInterface::publish_operation_mode(const OperationModeState & state)
 {
   const auto convert = [](const OperationMode & mode) {
     // clang-format off

@@ -18,21 +18,28 @@
 
 #include <iostream>
 
+constexpr int loop_limit = 10;
+
 TEST(TestSuite, ChangeStopMode)
 {
   auto [mock, main] = create_main_logic();
-  std::cerr << mock->logic_ << std::endl;
-  main->update();
+  for (int i = 0; i < loop_limit; ++i) {
+    main->update();
+    mock->update();
+    if (mock->operation_mode_state && !mock->operation_mode_state->is_in_transition) break;
+  }
   EXPECT_EQ(mock->command_source.id, 11);
 }
 
 TEST(TestSuite, ChangeAutonomousMode)
 {
   auto [mock, main] = create_main_logic();
-  std::cerr << mock->logic_ << std::endl;
-
   main->change_operation_mode(OperationMode::kAutonomous);
-  main->update();
+  for (int i = 0; i < loop_limit; ++i) {
+    main->update();
+    mock->update();
+    if (mock->operation_mode_state && !mock->operation_mode_state->is_in_transition) break;
+  }
   EXPECT_EQ(mock->trajectory_source.id, 100);
   EXPECT_EQ(mock->command_source.id, 12);
 }

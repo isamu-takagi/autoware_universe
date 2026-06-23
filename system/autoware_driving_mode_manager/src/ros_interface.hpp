@@ -54,7 +54,7 @@ public:
   void change_command_source(const CommandSource & source) override;
   void change_command_filter(const CommandFilter & filter) override;
   void change_platform_mode(const PlatformMode & mode) override;
-  void publish_operation_mode(const OperationModeState & state) const override;
+  void publish_operation_mode(const OperationModeState & state) override;
   void publish_mrm_state(const MrmState & state) const override;
   void publish_driving_mode_request(const AutowareMode & mode) const override;
   void publish_driving_mode_info(const ModeInfo & info) const override;

@@ -37,7 +37,7 @@ public:
   virtual void change_command_source(const CommandSource & source) = 0;
   virtual void change_command_filter(const CommandFilter & filter) = 0;
   virtual void change_platform_mode(const PlatformMode & mode) = 0;
-  virtual void publish_operation_mode(const OperationModeState & state) const = 0;
+  virtual void publish_operation_mode(const OperationModeState & state) = 0;
   virtual void publish_mrm_state(const MrmState & state) const = 0;
   virtual void publish_driving_mode_request(const AutowareMode & mode) const = 0;
   virtual void publish_driving_mode_info(const ModeInfo & info) const = 0;

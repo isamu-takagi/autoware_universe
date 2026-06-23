@@ -31,7 +31,7 @@ public:
   void change_command_source(const CommandSource & source) override;
   void change_command_filter(const CommandFilter & filter) override;
   void change_platform_mode(const PlatformMode & mode) override;
-  void publish_operation_mode(const OperationModeState & state) const override;
+  void publish_operation_mode(const OperationModeState & state) override;
   void publish_mrm_state(const MrmState & state) const override;
   void publish_driving_mode_request(const AutowareMode & mode) const override;
   void publish_driving_mode_info(const ModeInfo & info) const override;
@@ -43,12 +43,22 @@ public:
   void log_error(const std::string & message) const override;
   void log_debug(const std::string & message) const override;
 
+private:
   MainLogic * logic_ = nullptr;
+
+public:
+  void update();
 
   TrajectorySource trajectory_source = TrajectorySource{0};
   CommandSource command_source = CommandSource{0};
   CommandFilter command_filter = CommandFilter{false};
   PlatformMode platform_mode = PlatformMode::kUnknown;
+  std::optional<OperationModeState> operation_mode_state;
+
+  std::optional<TrajectorySource> response_trajectory_source;
+  std::optional<CommandSource> response_command_source;
+  std::optional<CommandFilter> response_command_filter;
+  std::optional<PlatformMode> response_platform_mode;
 };
 
 #endif  // UTIL__MOCK_HPP_
