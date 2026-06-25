@@ -61,9 +61,9 @@ void MockInterface::publish_mrm_state(const MrmState & state) const
   (void)state;
 }
 
-void MockInterface::publish_driving_mode_request(const AutowareMode & mode) const
+void MockInterface::publish_driving_mode_request(const ModeRequest & request) const
 {
-  (void)mode;
+  (void)request;
 }
 
 void MockInterface::publish_driving_mode_info(const ModeInfo & info) const
