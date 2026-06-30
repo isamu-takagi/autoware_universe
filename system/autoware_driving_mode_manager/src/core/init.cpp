@@ -36,10 +36,10 @@ ManagerInit::ManagerInit(std::unique_ptr<Interface> && interface, std::shared_pt
 
 bool ManagerInit::is_ready() const
 {
-  if (!trajectory_source) return false;
-  if (!command_source) return false;
-  if (!command_filter) return false;
-  if (!platform_mode) return false;
+  if (!trajectory_source_) return false;
+  if (!command_source_) return false;
+  if (!command_filter_) return false;
+  if (!platform_mode_) return false;
   if (!status_->is_ready()) return false;
   return true;
 }
@@ -47,37 +47,42 @@ bool ManagerInit::is_ready() const
 GateStatusItem ManagerInit::gates() const
 {
   GateStatusItem gates;
-  gates.trajectory_source = trajectory_source.value();
-  gates.command_source = command_source.value();
-  gates.command_filter = command_filter.value();
-  gates.platform_mode = platform_mode.value();
+  gates.trajectory_source = trajectory_source_.value();
+  gates.command_source = command_source_.value();
+  gates.command_filter = command_filter_.value();
+  gates.platform_mode = platform_mode_.value();
   return gates;
 }
 
 void ManagerInit::update()
 {
+  // Detect status timeout.
   status_->update(interface_->now(), 1.0);
-  publish_debug();
+
+  // Publish debug topics.
+  if (interface_->get_enable_debug_topics()) {
+    publish_debug_flags();
+  }
 }
 
 void ManagerInit::on_trajectory_source(const TrajectorySource & source)
 {
-  trajectory_source = source;
+  trajectory_source_ = source;
 }
 
 void ManagerInit::on_command_source(const CommandSource & source)
 {
-  command_source = source;
+  command_source_ = source;
 }
 
 void ManagerInit::on_command_filter(const CommandFilter & filter)
 {
-  command_filter = filter;
+  command_filter_ = filter;
 }
 
 void ManagerInit::on_vehicle_control_mode(const PlatformMode & mode)
 {
-  platform_mode = mode;
+  platform_mode_ = mode;
 }
 
 void ManagerInit::on_available_flag(const AutowareMode & mode, bool flag)
@@ -140,18 +145,18 @@ void ManagerInit::publish_driving_mode_info() const
   interface_->publish_driving_mode_info(info);
 }
 
-void ManagerInit::publish_debug() const
+void ManagerInit::publish_debug_flags() const
 {
-  DebugStatus debug;
+  DebugFlags flags;
   for (const auto & mode : config_->autoware_modes()) {
-    DebugStatus::Flag flag;
-    flag.available = status_->is_available(mode);
-    flag.active = status_->is_active(mode);
-    flag.stable = status_->is_stable(mode);
-    flag.continuable = status_->is_continuable(mode);
-    debug.flags[mode] = flag;
+    DebugFlags::Item item;
+    item.available = status_->is_available(mode);
+    item.active = status_->is_active(mode);
+    item.stable = status_->is_stable(mode);
+    item.continuable = status_->is_continuable(mode);
+    flags.items[mode] = item;
   }
-  interface_->publish_debug(debug);
+  interface_->publish_debug_flags(flags);
 }
 
 }  // namespace autoware::driving_mode_manager

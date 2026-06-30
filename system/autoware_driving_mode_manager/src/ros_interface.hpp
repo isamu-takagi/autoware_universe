@@ -17,7 +17,7 @@
 
 #include "type/interface.hpp"
 
-#include <autoware_driving_mode_manager/msg/debug_mode_flag.hpp>
+#include <autoware_driving_mode_manager/msg/debug_mode_flags.hpp>
 #include <autoware_driving_mode_manager/msg/debug_mode_request.hpp>
 
 #include <autoware_adapi_v1_msgs/msg/mrm_state.hpp>
@@ -49,6 +49,8 @@ public:
   explicit RosInterface(rclcpp::Node * node);
   void init(MainLogic * logic) override { logic_ = logic; }
 
+  bool get_enable_debug_topics() const override { return enable_debug_topics_; }
+
   rclcpp::Time now() const override;
   void change_trajectory_source(const TrajectorySource & source) override;
   void change_command_source(const CommandSource & source) override;
@@ -58,8 +60,8 @@ public:
   void publish_mrm_state(const MrmState & state) const override;
   void publish_driving_mode_request(const ModeRequest & request) const override;
   void publish_driving_mode_info(const ModeInfo & info) const override;
-  void publish_debug(const DebugStatus & status) const override;
-  void publish_debug(const RequestModes & request) const override;
+  void publish_debug_flags(const DebugFlags & flags) const override;
+  void publish_debug_request(const RequestModes & request) const override;
 
   void log_info(const std::string & message) const override;
   void log_warn(const std::string & message) const override;
@@ -86,17 +88,18 @@ private:
   using ChangeAutowareControlSrv = autoware_system_msgs::srv::ChangeAutowareControl;
   using ChangeMrmRequestSrv = tier4_system_msgs::srv::ChangeMrmRequest;
 
-  using DebugModeFlagMsg = autoware_driving_mode_manager::msg::DebugModeFlag;
+  using DebugModeFlagsMsg = autoware_driving_mode_manager::msg::DebugModeFlags;
   using DebugModeRequestMsg = autoware_driving_mode_manager::msg::DebugModeRequest;
 
   MainLogic * logic_;
+  bool enable_debug_topics_;
 
   rclcpp::Node * node_;
   rclcpp::Client<TrajectorySourceSrv>::SharedPtr cli_trajectory_source_;
   rclcpp::Client<ChangeCommandSourceSrv>::SharedPtr cli_command_source_;
   rclcpp::Client<ChangeCommandFilterSrv>::SharedPtr cli_command_filter_;
   rclcpp::Client<ControlModeCommandSrv>::SharedPtr cli_control_mode_command_;
-  rclcpp::Publisher<OperationModeStateMsg>::SharedPtr pub_operation_mode_;
+  rclcpp::Publisher<OperationModeStateMsg>::SharedPtr pub_operation_mode_state_;
   rclcpp::Publisher<MrmStateMsg>::SharedPtr pub_mrm_state_;
 
   rclcpp::Subscription<DrivingModeFlagMsg>::SharedPtr sub_driving_mode_available_;
@@ -113,8 +116,8 @@ private:
   rclcpp::Service<ChangeMrmRequestSrv>::SharedPtr srv_mrm_request_;
   rclcpp::Publisher<DrivingModeRequestMsg>::SharedPtr pub_driving_mode_request_;
   rclcpp::Publisher<DrivingModeInfoMsg>::SharedPtr pub_driving_mode_info_;
-  rclcpp::Publisher<DebugModeFlagMsg>::SharedPtr pub_debug_status_;
-  rclcpp::Publisher<DebugModeRequestMsg>::SharedPtr pub_debug_request_;
+  rclcpp::Publisher<DebugModeFlagsMsg>::SharedPtr pub_debug_mode_flag_;
+  rclcpp::Publisher<DebugModeRequestMsg>::SharedPtr pub_debug_mode_request_;
 
   void on_driving_mode_available(const DrivingModeFlagMsg & msg);
   void on_driving_mode_active(const DrivingModeFlagMsg & msg);

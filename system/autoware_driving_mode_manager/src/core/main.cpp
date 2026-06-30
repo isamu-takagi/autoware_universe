@@ -42,7 +42,7 @@ ManagerMain::ManagerMain(ManagerInit & init)
   gates_.expect = init.gates();
 
   request_.operation_mode = config_->to_autoware_mode(OperationMode::kStop);
-  request_.platform_mode = init.platform_mode.value();
+  request_.platform_mode = init.platform_mode_.value();
   request_.mrm_strategy = MrmStrategy::kNone;
   request_.mrm_behavior = unknown_mode;
   request_.autoware_mode = unknown_mode;
@@ -61,13 +61,20 @@ void ManagerMain::update()
   // Detect status timeout.
   status_->update(interface_->now(), 1.0);
 
+  // Handle mode transition.
   update_autoware_mode();
   execute_tasks();
 
+  // Publish status and request topics.
   publish_operation_mode();
   publish_mrm_state();
   publish_driving_mode_request();
-  publish_debug();
+
+  // Publish debug topics.
+  if (interface_->get_enable_debug_topics()) {
+    publish_debug_flags();
+    publish_debug_request();
+  }
 }
 
 void ManagerMain::publish_operation_mode() const
@@ -105,19 +112,23 @@ void ManagerMain::publish_driving_mode_request() const
   interface_->publish_driving_mode_request({mode, config_->priority(mode)});
 }
 
-void ManagerMain::publish_debug() const
+void ManagerMain::publish_debug_flags() const
 {
-  DebugStatus debug;
+  DebugFlags flags;
   for (const auto & mode : config_->autoware_modes()) {
-    DebugStatus::Flag flag;
-    flag.available = status_->is_available(mode);
-    flag.active = status_->is_active(mode);
-    flag.stable = status_->is_stable(mode);
-    flag.continuable = status_->is_continuable(mode);
-    debug.flags[mode] = flag;
+    DebugFlags::Item item;
+    item.available = status_->is_available(mode);
+    item.active = status_->is_active(mode);
+    item.stable = status_->is_stable(mode);
+    item.continuable = status_->is_continuable(mode);
+    flags.items[mode] = item;
   }
-  interface_->publish_debug(debug);
-  interface_->publish_debug(request_);
+  interface_->publish_debug_flags(flags);
+}
+
+void ManagerMain::publish_debug_request() const
+{
+  interface_->publish_debug_request(request_);
 }
 
 void ManagerMain::on_trajectory_source(const TrajectorySource & source)
