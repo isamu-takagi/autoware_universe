@@ -22,6 +22,11 @@ void MockInterface::init(MainLogic * logic)
   logic_ = logic;
 }
 
+bool MockInterface::get_enable_debug_topics() const
+{
+  return true;
+}
+
 rclcpp::Time MockInterface::now() const
 {
   return rclcpp::Time{};
@@ -71,12 +76,12 @@ void MockInterface::publish_driving_mode_info(const ModeInfo & info) const
   (void)info;
 }
 
-void MockInterface::publish_debug(const DebugStatus & status) const
+void MockInterface::publish_debug_flags(const DebugFlags & flags) const
 {
-  (void)status;
+  (void)flags;
 }
 
-void MockInterface::publish_debug(const RequestModes & request) const
+void MockInterface::publish_debug_request(const RequestModes & request) const
 {
   (void)request;
 }

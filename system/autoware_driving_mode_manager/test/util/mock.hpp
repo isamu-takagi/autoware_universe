@@ -26,6 +26,8 @@ class MockInterface : public Interface
 public:
   void init(MainLogic * logic) override;
 
+  bool get_enable_debug_topics() const override;
+
   rclcpp::Time now() const override;
   void change_trajectory_source(const TrajectorySource & source) override;
   void change_command_source(const CommandSource & source) override;
@@ -35,8 +37,8 @@ public:
   void publish_mrm_state(const MrmState & state) const override;
   void publish_driving_mode_request(const ModeRequest & request) const override;
   void publish_driving_mode_info(const ModeInfo & info) const override;
-  void publish_debug(const DebugStatus & status) const override;
-  void publish_debug(const RequestModes & request) const override;
+  void publish_debug_flags(const DebugFlags & flags) const override;
+  void publish_debug_request(const RequestModes & request) const override;
 
   void log_info(const std::string & message) const override;
   void log_warn(const std::string & message) const override;
