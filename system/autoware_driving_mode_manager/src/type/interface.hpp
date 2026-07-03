@@ -42,6 +42,7 @@ public:
   virtual void publish_operation_mode(const OperationModeState & state) = 0;
   virtual void publish_mrm_state(const MrmState & state) const = 0;
   virtual void publish_driving_mode_request(const ModeRequest & request) const = 0;
+  virtual void publish_driving_mode_sync(const AutowareModeSet & modes) const = 0;
   virtual void publish_driving_mode_info(const ModeInfo & info) const = 0;
   virtual void publish_debug_flags(const DebugFlags & flags) const = 0;
   virtual void publish_debug_request(const RequestModes & request) const = 0;
@@ -66,6 +67,7 @@ public:
   virtual void on_active_flag(const AutowareMode & mode, bool flag) = 0;
   virtual void on_stable_flag(const AutowareMode & mode, bool flag) = 0;
   virtual void on_continuable_flag(const AutowareMode & mode, bool flag) = 0;
+  virtual void on_driving_mode_sync(const AutowareMode & mode, bool flag) = 0;
   virtual void on_mrm_state(const AutowareMode & mode, const MrmState::State & state) = 0;
   virtual ServiceResponse change_operation_mode(const OperationMode & operation_mode) = 0;
   virtual ServiceResponse change_autoware_control(const AutowareControl & autoware_control) = 0;

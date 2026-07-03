@@ -52,6 +52,9 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
   sub_driving_mode_continuable_ = node->create_subscription<DrivingModeFlagMsg>(
     "~/system/driving_mode/continuable", rclcpp::QoS(10),
     std::bind(&RosInterface::on_driving_mode_continuable, this, _1));
+  sub_driving_mode_sync_ = node->create_subscription<DrivingModeFlagMsg>(
+    "~/system/driving_mode/sync", rclcpp::QoS(10),
+    std::bind(&RosInterface::on_driving_mode_sync, this, _1));
   sub_driving_mode_mrm_state_ = node->create_subscription<DrivingModeMrmStateMsg>(
     "~/system/driving_mode/mrm_state", rclcpp::QoS(10),
     std::bind(&RosInterface::on_driving_mode_mrm_state, this, _1));
@@ -79,6 +82,8 @@ RosInterface::RosInterface(rclcpp::Node * node) : node_(node)
 
   pub_driving_mode_request_ =
     node->create_publisher<DrivingModeRequestMsg>("~/system/driving_mode/request", rclcpp::QoS(1));
+  pub_driving_mode_sync_ =
+    node->create_publisher<DrivingModeFlagMsg>("~/system/driving_mode/sync", rclcpp::QoS(1));
   pub_driving_mode_info_ = node->create_publisher<DrivingModeInfoMsg>(
     "~/system/driving_mode/info", rclcpp::QoS(1).transient_local());
 
@@ -186,6 +191,19 @@ void RosInterface::publish_mrm_state(const MrmState & state) const
   pub_mrm_state_->publish(msg);
 }
 
+void RosInterface::publish_driving_mode_sync(const AutowareModeSet & modes) const
+{
+  DrivingModeFlagMsg msg;
+  msg.stamp = now();
+  for (const auto & mode : modes) {
+    tier4_system_msgs::msg::DrivingModeFlagItem item;
+    item.mode = mode.id;
+    item.flag = true;
+    msg.items.push_back(item);
+  }
+  pub_driving_mode_sync_->publish(msg);
+}
+
 void RosInterface::publish_driving_mode_info(const ModeInfo & info) const
 {
   DrivingModeInfoMsg msg;
@@ -252,6 +270,13 @@ void RosInterface::on_driving_mode_continuable(const DrivingModeFlagMsg & msg)
 {
   for (const auto & item : msg.items) {
     logic_->on_continuable_flag(AutowareMode{item.mode}, item.flag);
+  }
+}
+
+void RosInterface::on_driving_mode_sync(const DrivingModeFlagMsg & msg)
+{
+  for (const auto & item : msg.items) {
+    logic_->on_driving_mode_sync(AutowareMode{item.mode}, item.flag);
   }
 }
 

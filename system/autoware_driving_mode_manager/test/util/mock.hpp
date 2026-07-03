@@ -36,6 +36,7 @@ public:
   void publish_operation_mode(const OperationModeState & state) override;
   void publish_mrm_state(const MrmState & state) const override;
   void publish_driving_mode_request(const ModeRequest & request) const override;
+  void publish_driving_mode_sync(const AutowareModeSet & modes) const override;
   void publish_driving_mode_info(const ModeInfo & info) const override;
   void publish_debug_flags(const DebugFlags & flags) const override;
   void publish_debug_request(const RequestModes & request) const override;

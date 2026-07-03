@@ -71,6 +71,11 @@ void MockInterface::publish_driving_mode_request(const ModeRequest & request) co
   (void)request;
 }
 
+void MockInterface::publish_driving_mode_sync(const AutowareModeSet & modes) const
+{
+  (void)modes;
+}
+
 void MockInterface::publish_driving_mode_info(const ModeInfo & info) const
 {
   (void)info;

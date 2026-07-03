@@ -80,6 +80,7 @@ void ManagerMain::update()
   publish_operation_mode();
   publish_mrm_state();
   publish_driving_mode_request();
+  publish_driving_mode_sync();
 
   // Publish debug topics.
   if (interface_->get_enable_debug_topics()) {
@@ -121,6 +122,11 @@ void ManagerMain::publish_driving_mode_request() const
 {
   const auto & mode = request_.autoware_mode;
   interface_->publish_driving_mode_request({mode, config_->priority(mode)});
+}
+
+void ManagerMain::publish_driving_mode_sync() const
+{
+  interface_->publish_driving_mode_sync(self_available_modes_);
 }
 
 void ManagerMain::publish_debug_flags() const
@@ -224,6 +230,19 @@ void ManagerMain::on_continuable_flag(const AutowareMode & mode, bool flag)
   execute_tasks();
 }
 
+void ManagerMain::on_driving_mode_sync(const AutowareMode & mode, bool flag)
+{
+  if (config_->exists(mode)) {
+    return;
+  }
+
+  if (flag) {
+    sync_available_modes_.insert(mode);
+  } else {
+    sync_available_modes_.erase(mode);
+  }
+}
+
 void ManagerMain::on_mrm_state(const AutowareMode & mode, const MrmState::State & state)
 {
   mrm_states_[mode] = state;
@@ -313,17 +332,34 @@ ServiceResponse ManagerMain::change_autoware_control(const AutowareControl & aut
 
 void ManagerMain::update_autoware_mode()
 {
-  AutowareModeSet available;
-  for (const auto & mode : config_->autoware_modes()) {
-    if (temporary_unavailable_modes_.count(mode) == 0) {
+  const auto union_sets = [](const AutowareModeSet & a, const AutowareModeSet & b) {
+    AutowareModeSet result;
+    for (const auto & mode : a) result.insert(mode);
+    for (const auto & mode : b) result.insert(mode);
+    return result;
+  };
+
+  const auto diff_sets = [](const AutowareModeSet & a, const AutowareModeSet & b) {
+    AutowareModeSet result;
+    for (const auto & mode : a) result.insert(mode);
+    for (const auto & mode : b) result.erase(mode);
+    return result;
+  };
+
+  // Update available modes.
+  {
+    AutowareModeSet available_modes;
+    for (const auto & mode : config_->autoware_modes()) {
       if (mode.id != request_.autoware_mode.id) {
-        if (status_->is_available(mode)) available.insert(mode);
+        if (status_->is_available(mode)) available_modes.insert(mode);
       } else {
-        if (status_->is_continuable(mode)) available.insert(mode);
+        if (status_->is_continuable(mode)) available_modes.insert(mode);
       }
     }
+    self_available_modes_ = diff_sets(available_modes, temporary_unavailable_modes_);
   }
 
+  const auto available = union_sets(self_available_modes_, sync_available_modes_);
   const auto mode = plugin_->decide(request_, available);
   const auto prev = request_.autoware_mode;
   if (prev.id == mode.id) {
