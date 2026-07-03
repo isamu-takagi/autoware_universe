@@ -88,6 +88,7 @@ void DefaultPlugin::setup(DrivingModeConfigInterface & config) const
   config.define_command_source(RemoteCommand);
   config.define_command_source(EmergencyStopCommand);
 
+  config.bind_name(AutonomousMode, "autonomous");
   config.bind_name(EmergencyStop, "emergency_stop");
   config.bind_name(ComfortableStop, "comfortable_stop");
 
