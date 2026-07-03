@@ -56,6 +56,17 @@ GateStatusItem ManagerInit::gates() const
 
 void ManagerInit::update()
 {
+  // Set true for ignored flags;
+  const auto stamp = interface_->now();
+  for (const auto & mode : config_->autoware_modes()) {
+    const auto & ignore = config_->ignore_flags(mode);
+    const auto & data = status_->data(mode);
+    if (ignore.available) data->available.update(stamp, true);
+    if (ignore.active) data->active.update(stamp, true);
+    if (ignore.stable) data->stable.update(stamp, true);
+    if (ignore.continuable) data->continuable.update(stamp, true);
+  }
+
   // Detect status timeout.
   status_->update(interface_->now(), 1.0);
 
