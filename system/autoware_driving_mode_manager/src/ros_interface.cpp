@@ -169,7 +169,7 @@ void RosInterface::publish_operation_mode(const OperationModeState & state)
   pub_operation_mode_state_->publish(msg);
 }
 
-void RosInterface::publish_mrm_state(const MrmState & state) const
+void RosInterface::publish_mrm_state(const MrmState & state)
 {
   const auto convert = [](const MrmState::State & state) {
     // clang-format off
@@ -191,7 +191,7 @@ void RosInterface::publish_mrm_state(const MrmState & state) const
   pub_mrm_state_->publish(msg);
 }
 
-void RosInterface::publish_driving_mode_sync(const AutowareModeSet & modes) const
+void RosInterface::publish_driving_mode_sync(const AutowareModeSet & modes)
 {
   DrivingModeFlagMsg msg;
   msg.stamp = now();
@@ -204,7 +204,7 @@ void RosInterface::publish_driving_mode_sync(const AutowareModeSet & modes) cons
   pub_driving_mode_sync_->publish(msg);
 }
 
-void RosInterface::publish_driving_mode_info(const ModeInfo & info) const
+void RosInterface::publish_driving_mode_info(const ModeInfo & info)
 {
   DrivingModeInfoMsg msg;
   msg.stamp = now();
@@ -217,7 +217,7 @@ void RosInterface::publish_driving_mode_info(const ModeInfo & info) const
   pub_driving_mode_info_->publish(msg);
 }
 
-void RosInterface::publish_debug_flags(const DebugFlags & flags) const
+void RosInterface::publish_debug_flags(const DebugFlags & flags)
 {
   DebugModeFlagsMsg msg;
   msg.stamp = now();
@@ -233,7 +233,7 @@ void RosInterface::publish_debug_flags(const DebugFlags & flags) const
   pub_debug_mode_flag_->publish(msg);
 }
 
-void RosInterface::publish_debug_request(const RequestModes & request) const
+void RosInterface::publish_debug_request(const RequestModes & request)
 {
   DebugModeRequestMsg msg;
   msg.stamp = now();
@@ -300,7 +300,7 @@ void RosInterface::on_driving_mode_mrm_state(const DrivingModeMrmStateMsg & msg)
   }
 }
 
-void RosInterface::publish_driving_mode_request(const ModeRequest & request) const
+void RosInterface::publish_driving_mode_request(const ModeRequest & request)
 {
   DrivingModeRequestMsg msg;
   msg.stamp = now();
@@ -393,22 +393,22 @@ void RosInterface::on_change_mrm_request(
   res->status.message = status.message;
 }
 
-void RosInterface::log_info(const std::string & message) const
+void RosInterface::log_info(const std::string & message)
 {
   RCLCPP_INFO_STREAM(node_->get_logger(), message);
 }
 
-void RosInterface::log_warn(const std::string & message) const
+void RosInterface::log_warn(const std::string & message)
 {
   RCLCPP_WARN_STREAM(node_->get_logger(), message);
 }
 
-void RosInterface::log_error(const std::string & message) const
+void RosInterface::log_error(const std::string & message)
 {
   RCLCPP_ERROR_STREAM(node_->get_logger(), message);
 }
 
-void RosInterface::log_debug(const std::string & message) const
+void RosInterface::log_debug(const std::string & message)
 {
   RCLCPP_DEBUG_STREAM(node_->get_logger(), message);
 }

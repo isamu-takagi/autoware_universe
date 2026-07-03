@@ -61,52 +61,52 @@ void MockInterface::publish_operation_mode(const OperationModeState & state)
   operation_mode_state = state;
 }
 
-void MockInterface::publish_mrm_state(const MrmState & state) const
+void MockInterface::publish_mrm_state(const MrmState & state)
 {
   (void)state;
 }
 
-void MockInterface::publish_driving_mode_request(const ModeRequest & request) const
+void MockInterface::publish_driving_mode_request(const ModeRequest & request)
 {
   (void)request;
 }
 
-void MockInterface::publish_driving_mode_sync(const AutowareModeSet & modes) const
+void MockInterface::publish_driving_mode_sync(const AutowareModeSet & modes)
 {
   (void)modes;
 }
 
-void MockInterface::publish_driving_mode_info(const ModeInfo & info) const
+void MockInterface::publish_driving_mode_info(const ModeInfo & info)
 {
   (void)info;
 }
 
-void MockInterface::publish_debug_flags(const DebugFlags & flags) const
+void MockInterface::publish_debug_flags(const DebugFlags & flags)
 {
   (void)flags;
 }
 
-void MockInterface::publish_debug_request(const RequestModes & request) const
+void MockInterface::publish_debug_request(const RequestModes & request)
 {
   (void)request;
 }
 
-void MockInterface::log_info(const std::string & message) const
+void MockInterface::log_info(const std::string & message)
 {
   (void)message;
 }
 
-void MockInterface::log_warn(const std::string & message) const
+void MockInterface::log_warn(const std::string & message)
 {
   (void)message;
 }
 
-void MockInterface::log_error(const std::string & message) const
+void MockInterface::log_error(const std::string & message)
 {
   (void)message;
 }
 
-void MockInterface::log_debug(const std::string & message) const
+void MockInterface::log_debug(const std::string & message)
 {
   (void)message;
 }
