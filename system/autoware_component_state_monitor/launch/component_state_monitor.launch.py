@@ -13,31 +13,31 @@
 # limitations under the License.
 
 
-from collections import defaultdict
 from pathlib import Path
 
 import launch
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
 from launch.actions import OpaqueFunction
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch.substitutions import PathJoinSubstitution
 from launch_ros.actions import ComposableNodeContainer
-from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.utilities import make_namespace_absolute
 from launch_ros.utilities import prefix_namespace
 import yaml
 
 
-def create_diagnostic_name(row):
-    return "{}_topic_status".format(row["module"])
+def create_diag_name(row):
+    return row["module"] + "_topic_status"
+
+
+def create_node_name(row):
+    return "topic_state_monitor_" + row["args"]["node_name_suffix"]
 
 
 def create_topic_monitor_name(row):
-    diag_name = create_diagnostic_name(row)
-    return "topic_state_monitor_{}: {}".format(row["args"]["node_name_suffix"], diag_name)
+    return create_node_name(row) + ": " + create_diag_name(row)
 
 
 def create_topic_monitor_node(row, target_container):
@@ -46,7 +46,7 @@ def create_topic_monitor_node(row, target_container):
     include = PathJoinSubstitution(
         [package, f"launch/load_topic_state_monitor{tf_mode}.launch.xml"]
     )
-    diag_name = create_diagnostic_name(row)
+    diag_name = create_diag_name(row)
     arguments = [("diag_name", diag_name), ("target_container", target_container)] + [
         (k, str(v)) for k, v in row["args"].items()
     ]
@@ -65,32 +65,7 @@ def launch_setup(context, *args, **kwargs):
     rows = yaml.safe_load(Path(LaunchConfiguration("file").perform(context)).read_text())
     rows = [row for row in rows if mode in row["mode"]]
     topic_monitor_nodes = [create_topic_monitor_node(row, target_container) for row in rows]
-    topic_monitor_names = [create_topic_monitor_name(row) for row in rows]
-    topic_monitor_param = defaultdict(lambda: defaultdict(list))
-    for row in rows:
-        topic_monitor_param[row["type"]][row["module"]].append(create_topic_monitor_name(row))
-    topic_monitor_param = {name: dict(module) for name, module in topic_monitor_param.items()}
 
-    agnocast_env = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            PathJoinSubstitution(
-                [
-                    FindPackageShare("autoware_agnocast_wrapper"),
-                    "launch",
-                    "agnocast_env.launch.py",
-                ]
-            )
-        ),
-    )
-    state_monitor_node = Node(
-        namespace="component_state_monitor",
-        name="component",
-        package="autoware_component_state_monitor",
-        executable="component_state_monitor_node",
-        parameters=[{"topic_monitor_names": topic_monitor_names}, topic_monitor_param],
-        additional_env={"LD_PRELOAD": LaunchConfiguration("ld_preload_value")},
-        output="screen",
-    )
     # The topic_state_monitor nodes remain composable nodes loaded into this container by name.
     container = ComposableNodeContainer(
         namespace="component_state_monitor",
@@ -99,7 +74,7 @@ def launch_setup(context, *args, **kwargs):
         executable="component_container",
         composable_node_descriptions=[],
     )
-    return [agnocast_env, state_monitor_node, container, *topic_monitor_nodes]
+    return [container, *topic_monitor_nodes]
 
 
 def generate_launch_description():

@@ -66,7 +66,11 @@ CommandModeDeciderBase::CommandModeDeciderBase(const rclcpp::NodeOptions & optio
   curr_manual_control_ = false;
   curr_operation_mode_ = autoware::command_mode_types::modes::unknown;
   curr_mode_ = autoware::command_mode_types::modes::unknown;
-  last_mode_ = system_request_.operation_mode;
+  if (system_request_.autoware_control) {
+    last_mode_ = system_request_.operation_mode;
+  } else {
+    last_mode_ = autoware::command_mode_types::modes::manual;
+  }
 
   request_stamp_ = std::nullopt;
   transition_stamp_ = std::nullopt;
