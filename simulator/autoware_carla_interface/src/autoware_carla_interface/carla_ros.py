@@ -25,6 +25,7 @@ from autoware_vehicle_msgs.msg import TurnIndicatorsReport
 from autoware_vehicle_msgs.msg import VelocityReport
 from builtin_interfaces.msg import Time
 import carla
+import cv2
 from cv_bridge import CvBridge
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import PoseWithCovarianceStamped
@@ -70,6 +71,8 @@ class carla_ros2_interface(object):
             "vehicle_type": (rclpy.Parameter.Type.STRING, None),
             "use_traffic_manager": (rclpy.Parameter.Type.BOOL, None),
             "max_real_delta_seconds": (rclpy.Parameter.Type.DOUBLE, None),
+            "map_origin_x": (rclpy.Parameter.Type.DOUBLE, 0.0),
+            "map_origin_y": (rclpy.Parameter.Type.DOUBLE, 0.0),
             # Sensor configuration parameters
             "sensor_kit_name": (rclpy.Parameter.Type.STRING, ""),  # Empty = use YAML default
             "sensor_mapping_file": (rclpy.Parameter.Type.STRING, ""),
@@ -444,7 +447,11 @@ class carla_ros2_interface(object):
         """Transform RVIZ initial pose to CARLA (thread-safe)."""
         pose = data.pose.pose
         pose.position.z += 2.0
-        carla_pose_transform = ros_pose_to_carla_transform(pose)
+        carla_pose_transform = ros_pose_to_carla_transform(
+            pose,
+            origin_x=self.param_values["map_origin_x"],
+            origin_y=self.param_values["map_origin_y"],
+        )
 
         with self._state_lock:
             if self.ego_actor is not None:
@@ -479,7 +486,11 @@ class carla_ros2_interface(object):
                 return
             ego_transform = self.ego_actor.get_transform()
 
-        pose_carla.position = carla_location_to_ros_point(ego_transform.location)
+        pose_carla.position = carla_location_to_ros_point(
+            ego_transform.location,
+            origin_x=self.param_values["map_origin_x"],
+            origin_y=self.param_values["map_origin_y"],
+        )
         pose_carla.orientation = carla_rotation_to_ros_quaternion(ego_transform.rotation)
         out_pose_with_cov.header = header
         out_pose_with_cov.pose.pose = pose_carla
@@ -591,14 +602,25 @@ class carla_ros2_interface(object):
 
         # Publish image
         if has_image_subs:
-            image_array = numpy.ndarray(
-                shape=(carla_camera_data.height, carla_camera_data.width, 4),
-                dtype=numpy.uint8,
-                buffer=carla_camera_data.raw_data,
-            )
-            img_msg = self.cv_bridge.cv2_to_imgmsg(image_array, encoding="bgra8")
+            img_msg = self._build_image_msg(carla_camera_data, config.image_encoding)
             img_msg.header = header
             img_pub.publish(img_msg)
+
+    def _build_image_msg(self, carla_camera_data, encoding):
+        """Convert a CARLA camera frame into a ROS image message.
+
+        CARLA renders BGRA. Converting to mono8 here rather than in the
+        consumer keeps three of every four bytes off the wire, and a consumer
+        that wants luminance was going to do this conversion anyway.
+        """
+        image_array = numpy.ndarray(
+            shape=(carla_camera_data.height, carla_camera_data.width, 4),
+            dtype=numpy.uint8,
+            buffer=carla_camera_data.raw_data,
+        )
+        if encoding == "mono8":
+            image_array = cv2.cvtColor(image_array, cv2.COLOR_BGRA2GRAY)
+        return self.cv_bridge.cv2_to_imgmsg(image_array, encoding=encoding)
 
     def imu(self, carla_imu_measurement):
         """Transform and publish IMU measurement to ROS."""
