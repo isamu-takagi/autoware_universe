@@ -61,10 +61,10 @@ private:
   // Driving mode interface
   rclcpp::Subscription<DrivingModeInfo>::SharedPtr sub_driving_mode_info_;
   rclcpp::Publisher<DrivingModeFlag>::SharedPtr pub_driving_mode_stable_;
-  rclcpp::Publisher<DiagnosticArray>::SharedPtr pub_driving_mode_active_;
+  rclcpp::Publisher<DiagnosticArray>::SharedPtr pub_driving_mode_available_;
   void on_driving_mode_info(const DrivingModeInfo & msg);
   void publish_driving_mode_stable(bool flag) const;
-  void publish_driving_mode_active(bool flag) const;
+  void publish_driving_mode_available(bool flag) const;
   std::optional<uint32_t> driving_mode_id_;  // Refer to the driving_mode_manager for this ID.
 };
 
