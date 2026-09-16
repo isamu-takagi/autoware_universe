@@ -14,6 +14,8 @@
 
 #include "utils/logger.hpp"
 
+#include <rclcpp/logging.hpp>
+
 #include <iostream>
 #include <string>
 
@@ -28,6 +30,16 @@ void StdLogger::info(const std::string & message)
 void StdLogger::debug(const std::string & message)
 {
   std::cout << message << std::endl;
+}
+
+void RosLogger::info(const std::string & message)
+{
+  RCLCPP_INFO_STREAM(logger_, message);
+}
+
+void RosLogger::debug(const std::string & message)
+{
+  RCLCPP_DEBUG_STREAM(logger_, message);
 }
 
 }  // namespace autoware::diagnostic_graph_aggregator

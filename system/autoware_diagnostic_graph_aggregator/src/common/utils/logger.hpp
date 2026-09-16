@@ -15,6 +15,8 @@
 #ifndef COMMON__UTILS__LOGGER_HPP_
 #define COMMON__UTILS__LOGGER_HPP_
 
+#include <rclcpp/logger.hpp>
+
 #include <string>
 
 namespace autoware::diagnostic_graph_aggregator
@@ -40,6 +42,17 @@ class StdLogger : public Logger
 public:
   void info(const std::string & message) override;
   void debug(const std::string & message) override;
+};
+
+class RosLogger : public Logger
+{
+public:
+  explicit RosLogger(const rclcpp::Logger & logger) : logger_(logger) {}
+  void info(const std::string & message) override;
+  void debug(const std::string & message) override;
+
+private:
+  rclcpp::Logger logger_;
 };
 
 }  // namespace autoware::diagnostic_graph_aggregator
