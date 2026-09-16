@@ -74,27 +74,27 @@ GraphData ConfigLoader::take()
 void ConfigLoader::load(const std::string & path)
 {
   // Load functions.
-  logger_->info("Load step: load_file_tree");
+  logger_->debug("Load step: load_file_tree");
   load_file_tree(path);
-  logger_->info("Load step: make_node_units");
+  logger_->debug("Load step: make_node_units");
   make_node_units();
-  logger_->info("Load step: make_diag_units");
+  logger_->debug("Load step: make_diag_units");
   make_diag_units();
-  logger_->info("Load step: resolve_links");
+  logger_->debug("Load step: resolve_links");
   resolve_links();
-  logger_->info("Load step: topological_sort");
+  logger_->debug("Load step: topological_sort");
   topological_sort();
 
   // Edit functions.
-  logger_->info("Load step: apply_remove_edits");
+  logger_->debug("Load step: apply_remove_edits");
   apply_remove_edits();
 
   // Finalize functions.
-  logger_->info("Load step: finalize");
+  logger_->debug("Load step: finalize");
   finalize();
-  logger_->info("Load step: validate");
+  logger_->debug("Load step: validate");
   validate();
-  logger_->info("Load step: completed");
+  logger_->debug("Load step: completed");
 }
 
 FileData * ConfigLoader::load_file(const FileContext & context, const std::string & path)
