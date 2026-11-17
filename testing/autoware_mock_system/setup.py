@@ -6,10 +6,12 @@ package_name = "autoware_mock_system"
 setup(
     name=package_name,
     version="0.0.0",
-    packages=find_packages(exclude=["test"]),
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
     data_files=[
         ("share/ament_index/resource_index/packages", [f"resource/{package_name}"]),
         (f"share/{package_name}", ["package.xml"]),
+        (f"lib/{package_name}", ["script/system_mock"]),
     ],
     install_requires=["setuptools"],
     extras_require={"test": ["pytest"]},
