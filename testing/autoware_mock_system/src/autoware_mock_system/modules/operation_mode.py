@@ -13,21 +13,43 @@
 # limitations under the License.
 
 from autoware_adapi_v1_msgs.msg import OperationModeState
+from autoware_system_msgs.srv import ChangeAutowareControl
+from autoware_system_msgs.srv import ChangeOperationMode
 
 from .utils import durable_qos
 
 
 class OperationMode:
     def __init__(self, node):
-        self._state = OperationModeState.UNKNOWN
-        self.pub_operation_mode_state = node.create_publisher(
+        self._pub_state = node.create_publisher(
             OperationModeState,
             "/system/operation_mode/state",
             durable_qos(),
         )
+        self._srv_operation_mode = node.create_service(
+            ChangeOperationMode,
+            "/system/operation_mode/change_operation_mode",
+            self._on_operation_mode,
+        )
+        self._srv_autoware_control = node.create_service(
+            ChangeAutowareControl,
+            "/system/operation_mode/change_autoware_control",
+            self._on_autoware_control,
+        )
 
-    def get_state(self) -> int:
-        return self._state
+        self._state = OperationModeState()
+        self._state.mode = OperationModeState.UNKNOWN
+        self._update()
 
-    def set_state(self, state: int) -> None:
-        self._state = state
+    def _update(self):
+        self._pub_state.publish(self._state)
+
+    def _on_operation_mode(self, request: ChangeOperationMode.Request):
+        self._state = request.operation_mode
+        self._pub_state.publish(OperationModeState(operation_mode=self._state))
+        return ChangeOperationMode.Response(success=True)
+
+    def _on_autoware_control(self, request: ChangeAutowareControl.Request):
+        self._state = request.autoware_control
+        self._pub_state.publish(OperationModeState(operation_mode=self._state))
+        return ChangeAutowareControl.Response(success=True)
