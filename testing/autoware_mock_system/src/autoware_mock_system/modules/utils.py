@@ -23,3 +23,8 @@ def durable_qos(depth=1):
         reliability=QoSReliabilityPolicy.RELIABLE,
         durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
     )
+
+
+class StatePublisher:
+    def __init__(self):
+        pass

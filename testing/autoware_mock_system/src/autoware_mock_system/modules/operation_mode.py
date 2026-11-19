@@ -12,15 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
+
 from autoware_adapi_v1_msgs.msg import OperationModeState
 from autoware_system_msgs.srv import ChangeAutowareControl
 from autoware_system_msgs.srv import ChangeOperationMode
+from rclpy.node import Node
 
 from .utils import durable_qos
 
 
 class OperationMode:
-    def __init__(self, node):
+    def __init__(self, node: Node):
         self._pub_state = node.create_publisher(
             OperationModeState,
             "/system/operation_mode/state",
@@ -37,19 +40,41 @@ class OperationMode:
             self._on_autoware_control,
         )
 
+        self._clock = node.get_clock()
+        # self._timer = node.create_timer(1.0, self._update)
         self._state = OperationModeState()
         self._state.mode = OperationModeState.UNKNOWN
+        self._state.is_autoware_control_enabled = True
+        self._state.is_in_transition = False
+        self._state.is_stop_mode_available = True
+        self._state.is_autonomous_mode_available = True
+        self._state.is_local_mode_available = False
+        self._state.is_remote_mode_available = False
         self._update()
 
     def _update(self):
-        self._pub_state.publish(self._state)
+        state = copy.deepcopy(self._state)
+        state.stamp = self._clock.now().to_msg()
+        self._pub_state.publish(state)
 
-    def _on_operation_mode(self, request: ChangeOperationMode.Request):
-        self._state = request.operation_mode
-        self._pub_state.publish(OperationModeState(operation_mode=self._state))
-        return ChangeOperationMode.Response(success=True)
+    def _on_operation_mode(self, req, res):
+        mode = self.__class__._mode_dict.get(req.mode)
+        if mode is None:
+            res.status.success = False
+            res.status.message = "unknown mode"
+            return res
+        else:
+            self._state.mode = mode
+            self._update()
+            res.status.success = True
+            return res
 
-    def _on_autoware_control(self, request: ChangeAutowareControl.Request):
-        self._state = request.autoware_control
-        self._pub_state.publish(OperationModeState(operation_mode=self._state))
-        return ChangeAutowareControl.Response(success=True)
+    def _on_autoware_control(self, req, res):
+        pass
+
+    _mode_dict = {
+        ChangeOperationMode.Request.STOP: OperationModeState.STOP,
+        ChangeOperationMode.Request.AUTONOMOUS: OperationModeState.AUTONOMOUS,
+        ChangeOperationMode.Request.LOCAL: OperationModeState.LOCAL,
+        ChangeOperationMode.Request.REMOTE: OperationModeState.REMOTE,
+    }
