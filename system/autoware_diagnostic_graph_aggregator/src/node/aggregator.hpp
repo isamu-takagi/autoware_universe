@@ -15,7 +15,6 @@
 #ifndef NODE__AGGREGATOR_HPP_
 #define NODE__AGGREGATOR_HPP_
 
-#include "command_mode_mapping.hpp"
 #include "driving_mode_mapping.hpp"
 #include "graph/graph.hpp"
 
@@ -41,7 +40,6 @@ public:
 
 private:
   std::unique_ptr<Graph> graph_;
-  std::unique_ptr<CommandModeMapping> command_modes_;
   std::unique_ptr<DrivingModeMapping> driving_modes_;
   bool allow_override_;
 

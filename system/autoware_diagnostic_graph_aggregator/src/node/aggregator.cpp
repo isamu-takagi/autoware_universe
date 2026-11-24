@@ -52,9 +52,6 @@ AggregatorNode::AggregatorNode(const rclcpp::NodeOptions & options) : Node("aggr
   }
 
   // Init plugins.
-  if (declare_parameter<bool>("use_command_mode_mappings")) {
-    command_modes_ = std::make_unique<CommandModeMapping>(*this, *graph_);
-  }
   if (declare_parameter<bool>("use_driving_mode_mappings")) {
     driving_modes_ = std::make_unique<DrivingModeMapping>(*this, *graph_);
   }
@@ -119,7 +116,6 @@ void AggregatorNode::on_timer()
   }
 
   // Update plugins.
-  if (command_modes_) command_modes_->update(stamp);
   if (driving_modes_) driving_modes_->update(stamp);
 }
 
