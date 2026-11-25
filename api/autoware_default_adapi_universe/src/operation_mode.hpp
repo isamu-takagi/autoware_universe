@@ -26,9 +26,6 @@
 #include <unordered_map>
 #include <vector>
 
-// TODO(Takagi, Isamu): define interface
-#include <tier4_system_msgs/msg/operation_mode_availability.hpp>
-
 // This file should be included after messages.
 #include "utils/types.hpp"
 
@@ -51,7 +48,6 @@ private:
     autoware::component_interface_specs_universe::system::ChangeOperationMode::Service::Request;
   using AutowareControlRequest =
     autoware::component_interface_specs_universe::system::ChangeAutowareControl::Service::Request;
-  using OperationModeAvailability = tier4_system_msgs::msg::OperationModeAvailability;
 
   OperationModeState::Message curr_state_;
   OperationModeState::Message prev_state_;
@@ -70,7 +66,6 @@ private:
   Cli<autoware::component_interface_specs_universe::system::ChangeOperationMode, NodeT> cli_mode_;
   Cli<autoware::component_interface_specs_universe::system::ChangeAutowareControl, NodeT>
     cli_control_;
-  AUTOWARE_SUBSCRIPTION_PTR(OperationModeAvailability) sub_availability_;
 
   void on_change_to_stop(
     const ChangeToStop::Service::Request::SharedPtr req,

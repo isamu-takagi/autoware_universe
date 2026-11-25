@@ -41,13 +41,6 @@ OperationModeNode::OperationModeNode(const rclcpp::NodeOptions & options)
 
   const auto name = "/system/operation_mode/availability";
   const auto qos = rclcpp::QoS(1);
-  const auto callback = [this](const OperationModeAvailability::ConstSharedPtr msg) {
-    mode_available_[OperationModeState::Message::STOP] = msg->stop;
-    mode_available_[OperationModeState::Message::AUTONOMOUS] = msg->autonomous;
-    mode_available_[OperationModeState::Message::LOCAL] = msg->local;
-    mode_available_[OperationModeState::Message::REMOTE] = msg->remote;
-  };
-  sub_availability_ = create_subscription<OperationModeAvailability>(name, qos, callback);
 
   timer_ = autoware::agnocast_wrapper::create_timer(
     this, get_clock(), rclcpp::Rate(5.0).period(), std::bind(&OperationModeNode::on_timer, this));

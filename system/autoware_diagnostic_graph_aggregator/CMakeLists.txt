@@ -29,9 +29,6 @@ ament_auto_add_library(aggregator SHARED
   "src/node/aggregator.cpp"
   "src/node/driving_mode_mapping.cpp"
 )
-ament_auto_add_library(converter SHARED
-  "src/node/converter.cpp"
-)
 target_include_directories(${PROJECT_NAME} PRIVATE "src/common")
 target_include_directories(aggregator PRIVATE "src/common")
 target_link_libraries(${PROJECT_NAME} yaml-cpp)
@@ -53,13 +50,6 @@ autoware_agnocast_wrapper_register_node(aggregator
   ROS2_EXECUTOR SingleThreadedExecutor
 )
 
-autoware_agnocast_wrapper_register_node(converter
-  PLUGIN "autoware::diagnostic_graph_aggregator::ConverterNode"
-  EXECUTABLE "converter_node"
-  AGNOCAST_EXECUTOR AgnocastOnlyCallbackIsolatedExecutor
-  ROS2_EXECUTOR SingleThreadedExecutor
-)
-
 if(BUILD_TESTING)
   get_filename_component(RESOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/files" ABSOLUTE)
   ament_auto_add_gmock(gtest_${PROJECT_NAME}
@@ -76,4 +66,4 @@ if(BUILD_TESTING)
   target_link_libraries(gtest_${PROJECT_NAME} ${PROJECT_NAME} yaml-cpp)
 endif()
 
-ament_auto_package(INSTALL_TO_SHARE config example launch)
+ament_auto_package(USE_SCOPED_HEADER_INSTALL_DIR INSTALL_TO_SHARE config example launch)
