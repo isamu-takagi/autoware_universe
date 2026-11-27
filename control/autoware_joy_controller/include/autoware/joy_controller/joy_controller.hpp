@@ -20,6 +20,7 @@
 #include <autoware_utils/ros/polling_subscriber.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+#include <autoware_adapi_v1_msgs/srv/change_operation_mode.hpp>
 #include <autoware_control_msgs/msg/control.hpp>
 #include <autoware_vehicle_msgs/msg/engage.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
@@ -30,7 +31,6 @@
 #include <tier4_external_api_msgs/msg/gear_shift_stamped.hpp>
 #include <tier4_external_api_msgs/msg/heartbeat.hpp>
 #include <tier4_external_api_msgs/msg/turn_signal_stamped.hpp>
-#include <tier4_external_api_msgs/srv/engage.hpp>
 #include <tier4_external_api_msgs/srv/set_emergency.hpp>
 
 #include <memory>
@@ -44,6 +44,8 @@ using GateModeType = tier4_control_msgs::msg::GateMode::_data_type;
 
 class AutowareJoyControllerNode : public rclcpp::Node
 {
+  using ChangeOperationMode = autoware_adapi_v1_msgs::srv::ChangeOperationMode;
+
 public:
   explicit AutowareJoyControllerNode(const rclcpp::NodeOptions & node_options);
 
@@ -102,7 +104,8 @@ private:
 
   // Service Client
   rclcpp::Client<tier4_external_api_msgs::srv::SetEmergency>::SharedPtr client_emergency_stop_;
-  rclcpp::Client<tier4_external_api_msgs::srv::Engage>::SharedPtr client_autoware_engage_;
+  rclcpp::Client<ChangeOperationMode>::SharedPtr client_change_to_local_;
+  rclcpp::Client<ChangeOperationMode>::SharedPtr client_change_to_stop_;
 
   // Previous State
   autoware_control_msgs::msg::Control prev_control_command_;

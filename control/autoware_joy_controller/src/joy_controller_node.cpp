@@ -417,27 +417,33 @@ void AutowareJoyControllerNode::sendEmergencyRequest(bool emergency)
 
 void AutowareJoyControllerNode::publishAutowareEngage()
 {
-  auto req = std::make_shared<tier4_external_api_msgs::srv::Engage::Request>();
+  rclcpp::Client<ChangeOperationMode>::SharedPtr client;
   if (joy_->autoware_engage()) {
-    req->engage = true;
+    client = client_change_to_local_;
     RCLCPP_INFO(get_logger(), "Autoware Engage");
   }
 
   if (joy_->autoware_disengage()) {
-    req->engage = false;
+    client = client_change_to_stop_;
     RCLCPP_INFO(get_logger(), "Autoware Disengage");
   }
 
-  if (!client_autoware_engage_->service_is_ready()) {
-    RCLCPP_WARN(get_logger(), "%s is unavailable", client_autoware_engage_->get_service_name());
+  if (!client) {
     return;
   }
 
-  client_autoware_engage_->async_send_request(
-    req, [this](rclcpp::Client<tier4_external_api_msgs::srv::Engage>::SharedFuture result) {
+  if (!client->service_is_ready()) {
+    RCLCPP_WARN(get_logger(), "%s is unavailable", client->get_service_name());
+    return;
+  }
+
+  const auto req = std::make_shared<ChangeOperationMode::Request>();
+  client->async_send_request(
+    req, [this, client](rclcpp::Client<ChangeOperationMode>::SharedFuture result) {
+      const auto & status = result.get()->status;
       RCLCPP_INFO(
-        get_logger(), "%s: %d, %s", client_autoware_engage_->get_service_name(),
-        result.get()->status.code, result.get()->status.message.c_str());
+        get_logger(), "%s: %s, %d, %s", client->get_service_name(),
+        status.success ? "success" : "failure", status.code, status.message.c_str());
     });
 }
 
@@ -523,8 +529,8 @@ AutowareJoyControllerNode::AutowareJoyControllerNode(const rclcpp::NodeOptions &
     RCLCPP_INFO(get_logger(), "Waiting for emergency_stop service connection...");
   }
 
-  client_autoware_engage_ =
-    this->create_client<tier4_external_api_msgs::srv::Engage>("service/autoware_engage");
+  client_change_to_local_ = create_client<ChangeOperationMode>("service/change_to_local");
+  client_change_to_stop_ = create_client<ChangeOperationMode>("service/change_to_stop");
 
   // Timer
   initTimer(1.0 / update_rate_);

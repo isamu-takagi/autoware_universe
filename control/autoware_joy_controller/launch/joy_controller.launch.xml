@@ -27,7 +27,8 @@
     <remap from="output/vehicle_engage" to="$(var output_vehicle_engage)"/>
 
     <remap from="service/emergency_stop" to="/api/autoware/set/emergency"/>
-    <remap from="service/autoware_engage" to="/api/autoware/set/engage"/>
+    <remap from="service/change_to_local" to="/api/operation_mode/change_to_local"/>
+    <remap from="service/change_to_stop" to="/api/operation_mode/change_to_stop"/>
 
     <param from="$(var config_file)" allow_substs="true"/>
   </node>
