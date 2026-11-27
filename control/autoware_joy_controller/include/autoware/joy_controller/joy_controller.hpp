@@ -20,26 +20,24 @@
 #include <autoware_utils/ros/polling_subscriber.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+#include <autoware_adapi_v1_msgs/msg/gear_command.hpp>
+#include <autoware_adapi_v1_msgs/msg/hazard_lights_command.hpp>
+#include <autoware_adapi_v1_msgs/msg/manual_operator_heartbeat.hpp>
+#include <autoware_adapi_v1_msgs/msg/turn_indicators_command.hpp>
 #include <autoware_adapi_v1_msgs/srv/change_operation_mode.hpp>
 #include <autoware_adapi_v1_msgs/srv/send_mrm_request.hpp>
 #include <autoware_control_msgs/msg/control.hpp>
-#include <autoware_vehicle_msgs/msg/engage.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <sensor_msgs/msg/joy.hpp>
 #include <tier4_control_msgs/msg/gate_mode.hpp>
 #include <tier4_external_api_msgs/msg/control_command_stamped.hpp>
-#include <tier4_external_api_msgs/msg/gear_shift_stamped.hpp>
-#include <tier4_external_api_msgs/msg/heartbeat.hpp>
-#include <tier4_external_api_msgs/msg/turn_signal_stamped.hpp>
 
 #include <memory>
 #include <string>
 
 namespace autoware::joy_controller
 {
-using GearShiftType = tier4_external_api_msgs::msg::GearShift::_data_type;
-using TurnSignalType = tier4_external_api_msgs::msg::TurnSignal::_data_type;
 using GateModeType = tier4_control_msgs::msg::GateMode::_data_type;
 
 class AutowareJoyControllerNode : public rclcpp::Node
@@ -47,6 +45,13 @@ class AutowareJoyControllerNode : public rclcpp::Node
   using ChangeOperationMode = autoware_adapi_v1_msgs::srv::ChangeOperationMode;
   using SendMrmRequest = autoware_adapi_v1_msgs::srv::SendMrmRequest;
   using MrmRequest = autoware_adapi_v1_msgs::msg::MrmRequest;
+  using Gear = autoware_adapi_v1_msgs::msg::Gear;
+  using GearCommand = autoware_adapi_v1_msgs::msg::GearCommand;
+  using TurnIndicators = autoware_adapi_v1_msgs::msg::TurnIndicators;
+  using TurnIndicatorsCommand = autoware_adapi_v1_msgs::msg::TurnIndicatorsCommand;
+  using HazardLights = autoware_adapi_v1_msgs::msg::HazardLights;
+  using HazardLightsCommand = autoware_adapi_v1_msgs::msg::HazardLightsCommand;
+  using ManualOperatorHeartbeat = autoware_adapi_v1_msgs::msg::ManualOperatorHeartbeat;
 
 public:
   explicit AutowareJoyControllerNode(const rclcpp::NodeOptions & node_options);
@@ -88,11 +93,11 @@ private:
   rclcpp::Publisher<autoware_control_msgs::msg::Control>::SharedPtr pub_control_command_;
   rclcpp::Publisher<tier4_external_api_msgs::msg::ControlCommandStamped>::SharedPtr
     pub_external_control_command_;
-  rclcpp::Publisher<tier4_external_api_msgs::msg::GearShiftStamped>::SharedPtr pub_shift_;
-  rclcpp::Publisher<tier4_external_api_msgs::msg::TurnSignalStamped>::SharedPtr pub_turn_signal_;
-  rclcpp::Publisher<tier4_external_api_msgs::msg::Heartbeat>::SharedPtr pub_heartbeat_;
+  rclcpp::Publisher<GearCommand>::SharedPtr pub_gear_;
+  rclcpp::Publisher<TurnIndicatorsCommand>::SharedPtr pub_turn_indicators_;
+  rclcpp::Publisher<HazardLightsCommand>::SharedPtr pub_hazard_lights_;
+  rclcpp::Publisher<ManualOperatorHeartbeat>::SharedPtr pub_heartbeat_;
   rclcpp::Publisher<tier4_control_msgs::msg::GateMode>::SharedPtr pub_gate_mode_;
-  rclcpp::Publisher<autoware_vehicle_msgs::msg::Engage>::SharedPtr pub_vehicle_engage_;
 
   void publishControlCommand();
   void publishExternalControlCommand();
@@ -103,16 +108,19 @@ private:
   void publishAutowareEngage();
   void publishVehicleEngage();
   void sendEmergencyRequest(bool emergency);
+  void sendChangeOperationMode(const rclcpp::Client<ChangeOperationMode>::SharedPtr & client);
 
   // Service Client
   rclcpp::Client<SendMrmRequest>::SharedPtr client_mrm_request_;
   rclcpp::Client<ChangeOperationMode>::SharedPtr client_change_to_local_;
   rclcpp::Client<ChangeOperationMode>::SharedPtr client_change_to_stop_;
+  rclcpp::Client<ChangeOperationMode>::SharedPtr client_enable_autoware_control_;
+  rclcpp::Client<ChangeOperationMode>::SharedPtr client_disable_autoware_control_;
 
   // Previous State
   autoware_control_msgs::msg::Control prev_control_command_;
   tier4_external_api_msgs::msg::ControlCommand prev_external_control_command_;
-  GearShiftType prev_shift_ = tier4_external_api_msgs::msg::GearShift::NONE;
+  Gear::_status_type prev_gear_ = Gear::UNKNOWN;
   GateModeType prev_gate_mode_ = tier4_control_msgs::msg::GateMode::AUTO;
 
   // Timer

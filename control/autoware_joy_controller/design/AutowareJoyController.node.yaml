@@ -22,21 +22,21 @@ publishers:
   - name: external_control_command
     message_type: tier4_external_api_msgs/msg/ControlCommandStamped
     remap_target: output/external_control_command
-  - name: shift
-    message_type: tier4_external_api_msgs/msg/GearShiftStamped
-    remap_target: output/shift
-  - name: turn_signal
-    message_type: tier4_external_api_msgs/msg/TurnSignalStamped
-    remap_target: output/turn_signal
+  - name: gear
+    message_type: autoware_adapi_v1_msgs/msg/GearCommand
+    remap_target: output/gear
+  - name: turn_indicators
+    message_type: autoware_adapi_v1_msgs/msg/TurnIndicatorsCommand
+    remap_target: output/turn_indicators
+  - name: hazard_lights
+    message_type: autoware_adapi_v1_msgs/msg/HazardLightsCommand
+    remap_target: output/hazard_lights
   - name: gate_mode
     message_type: tier4_control_msgs/msg/GateMode
     remap_target: output/gate_mode
   - name: heartbeat
-    message_type: tier4_external_api_msgs/msg/Heartbeat
+    message_type: autoware_adapi_v1_msgs/msg/ManualOperatorHeartbeat
     remap_target: output/heartbeat
-  - name: vehicle_engage
-    message_type: autoware_vehicle_msgs/msg/Engage
-    remap_target: output/vehicle_engage
 clients:
   - name: mrm_request
     message_type: autoware_adapi_v1_msgs/srv/SendMrmRequest
@@ -47,6 +47,12 @@ clients:
   - name: change_to_stop
     message_type: autoware_adapi_v1_msgs/srv/ChangeOperationMode
     remap_target: service/change_to_stop
+  - name: enable_autoware_control
+    message_type: autoware_adapi_v1_msgs/srv/ChangeOperationMode
+    remap_target: service/enable_autoware_control
+  - name: disable_autoware_control
+    message_type: autoware_adapi_v1_msgs/srv/ChangeOperationMode
+    remap_target: service/disable_autoware_control
 # parameters
 param_files:
   - name: joy_controller_param
@@ -60,8 +66,8 @@ processes:
     outcomes:
       - to_output: control_command
       - to_output: external_control_command
-      - to_output: shift
-      - to_output: turn_signal
+      - to_output: gear
+      - to_output: turn_indicators
+      - to_output: hazard_lights
       - to_output: gate_mode
       - to_output: heartbeat
-      - to_output: vehicle_engage
