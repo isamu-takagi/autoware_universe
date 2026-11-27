@@ -246,8 +246,50 @@ bool AutowareJoyControllerNode::isDataReady()
   return true;
 }
 
+void AutowareJoyControllerNode::checkControlMode()
+{
+  if (is_control_mode_ready_ || is_control_mode_requesting_) {
+    return;
+  }
+
+  const auto status = sub_control_mode_.take_data();
+  if (!status) {
+    RCLCPP_INFO_THROTTLE(
+      get_logger(), *get_clock(), 5000, "Waiting for manual control mode status");
+    return;
+  }
+
+  if (status->mode.mode == ManualControlMode::PEDALS) {
+    RCLCPP_INFO(get_logger(), "Manual control mode is PEDALS");
+    is_control_mode_ready_ = true;
+    return;
+  }
+
+  if (!client_select_control_mode_->service_is_ready()) {
+    RCLCPP_WARN_THROTTLE(
+      get_logger(), *get_clock(), 5000, "%s is unavailable",
+      client_select_control_mode_->get_service_name());
+    return;
+  }
+
+  RCLCPP_INFO(get_logger(), "Select manual control mode: PEDALS");
+  const auto req = std::make_shared<SelectManualControlMode::Request>();
+  req->mode.mode = ManualControlMode::PEDALS;
+  is_control_mode_requesting_ = true;
+  client_select_control_mode_->async_send_request(
+    req, [this](rclcpp::Client<SelectManualControlMode>::SharedFuture result) {
+      const auto & status = result.get()->status;
+      RCLCPP_INFO(
+        get_logger(), "%s: %s, %d, %s", client_select_control_mode_->get_service_name(),
+        status.success ? "success" : "failure", status.code, status.message.c_str());
+      is_control_mode_ready_ = status.success;
+      is_control_mode_requesting_ = false;
+    });
+}
+
 void AutowareJoyControllerNode::onTimer()
 {
+  checkControlMode();
   onOdometry();
   onJoy();
 
@@ -524,6 +566,8 @@ AutowareJoyControllerNode::AutowareJoyControllerNode(const rclcpp::NodeOptions &
   client_change_to_local_ = create_client<ChangeOperationMode>("service/change_to_local");
   client_change_to_stop_ = create_client<ChangeOperationMode>("service/change_to_stop");
   client_change_to_autonomous_ = create_client<ChangeOperationMode>("service/change_to_autonomous");
+  client_select_control_mode_ =
+    create_client<SelectManualControlMode>("service/select_control_mode");
   client_enable_autoware_control_ =
     create_client<ChangeOperationMode>("service/enable_autoware_control");
   client_disable_autoware_control_ =

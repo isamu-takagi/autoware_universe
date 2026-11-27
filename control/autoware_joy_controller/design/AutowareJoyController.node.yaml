@@ -18,6 +18,9 @@ subscribers:
   - name: operation_mode_state
     message_type: autoware_adapi_v1_msgs/msg/OperationModeState
     remap_target: input/operation_mode_state
+  - name: control_mode_status
+    message_type: autoware_adapi_v1_msgs/msg/ManualControlModeStatus
+    remap_target: input/control_mode_status
 publishers:
   - name: pedals
     message_type: autoware_adapi_v1_msgs/msg/PedalsCommand
@@ -56,6 +59,9 @@ clients:
   - name: change_to_autonomous
     message_type: autoware_adapi_v1_msgs/srv/ChangeOperationMode
     remap_target: service/change_to_autonomous
+  - name: select_control_mode
+    message_type: autoware_adapi_v1_msgs/srv/SelectManualControlMode
+    remap_target: service/select_control_mode
   - name: enable_autoware_control
     message_type: autoware_adapi_v1_msgs/srv/ChangeOperationMode
     remap_target: service/enable_autoware_control

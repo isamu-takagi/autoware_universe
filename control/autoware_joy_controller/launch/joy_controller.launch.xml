@@ -2,6 +2,7 @@
   <arg name="input_joy" default="/joy"/>
   <arg name="input_odometry" default="/localization/kinematic_state"/>
   <arg name="input_operation_mode_state" default="/api/operation_mode/state"/>
+  <arg name="input_control_mode_status" default="/api/manual/local/control_mode/status"/>
 
   <arg name="output_pedals" default="/api/manual/local/command/pedals"/>
   <arg name="output_steering" default="/api/manual/local/command/steering"/>
@@ -18,6 +19,7 @@
     <remap from="input/joy" to="$(var input_joy)"/>
     <remap from="input/odometry" to="$(var input_odometry)"/>
     <remap from="input/operation_mode_state" to="$(var input_operation_mode_state)"/>
+    <remap from="input/control_mode_status" to="$(var input_control_mode_status)"/>
 
     <remap from="output/pedals" to="$(var output_pedals)"/>
     <remap from="output/steering" to="$(var output_steering)"/>
@@ -32,6 +34,7 @@
     <remap from="service/change_to_local" to="/api/operation_mode/change_to_local"/>
     <remap from="service/change_to_stop" to="/api/operation_mode/change_to_stop"/>
     <remap from="service/change_to_autonomous" to="/api/operation_mode/change_to_autonomous"/>
+    <remap from="service/select_control_mode" to="/api/manual/local/control_mode/select"/>
     <remap from="service/enable_autoware_control" to="/api/operation_mode/enable_autoware_control"/>
     <remap from="service/disable_autoware_control" to="/api/operation_mode/disable_autoware_control"/>
 

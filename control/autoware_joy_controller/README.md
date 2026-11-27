@@ -23,11 +23,12 @@ ros2 launch autoware_joy_controller joy_controller.launch.xml config_file:=/path
 
 ### Input topics
 
-| Name                           | Type                                            | Description                       |
-| ------------------------------ | ----------------------------------------------- | --------------------------------- |
-| `~/input/joy`                  | sensor_msgs::msg::Joy                           | joy controller command            |
-| `~/input/odometry`             | nav_msgs::msg::Odometry                         | ego vehicle odometry to get twist |
-| `~/input/operation_mode_state` | autoware_adapi_v1_msgs::msg::OperationModeState | current operation mode            |
+| Name                           | Type                                                 | Description                       |
+| ------------------------------ | ---------------------------------------------------- | --------------------------------- |
+| `~/input/joy`                  | sensor_msgs::msg::Joy                                | joy controller command            |
+| `~/input/odometry`             | nav_msgs::msg::Odometry                              | ego vehicle odometry to get twist |
+| `~/input/operation_mode_state` | autoware_adapi_v1_msgs::msg::OperationModeState      | current operation mode            |
+| `~/input/control_mode_status`  | autoware_adapi_v1_msgs::msg::ManualControlModeStatus | current manual control mode       |
 
 ### Output topics
 

@@ -23,6 +23,7 @@
 #include <autoware_adapi_v1_msgs/msg/acceleration_command.hpp>
 #include <autoware_adapi_v1_msgs/msg/gear_command.hpp>
 #include <autoware_adapi_v1_msgs/msg/hazard_lights_command.hpp>
+#include <autoware_adapi_v1_msgs/msg/manual_control_mode_status.hpp>
 #include <autoware_adapi_v1_msgs/msg/manual_operator_heartbeat.hpp>
 #include <autoware_adapi_v1_msgs/msg/operation_mode_state.hpp>
 #include <autoware_adapi_v1_msgs/msg/pedals_command.hpp>
@@ -30,6 +31,7 @@
 #include <autoware_adapi_v1_msgs/msg/turn_indicators_command.hpp>
 #include <autoware_adapi_v1_msgs/msg/velocity_command.hpp>
 #include <autoware_adapi_v1_msgs/srv/change_operation_mode.hpp>
+#include <autoware_adapi_v1_msgs/srv/select_manual_control_mode.hpp>
 #include <autoware_adapi_v1_msgs/srv/send_mrm_request.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
@@ -44,6 +46,9 @@ class AutowareJoyControllerNode : public rclcpp::Node
 {
   using OperationModeState = autoware_adapi_v1_msgs::msg::OperationModeState;
   using ChangeOperationMode = autoware_adapi_v1_msgs::srv::ChangeOperationMode;
+  using ManualControlMode = autoware_adapi_v1_msgs::msg::ManualControlMode;
+  using ManualControlModeStatus = autoware_adapi_v1_msgs::msg::ManualControlModeStatus;
+  using SelectManualControlMode = autoware_adapi_v1_msgs::srv::SelectManualControlMode;
   using SendMrmRequest = autoware_adapi_v1_msgs::srv::SendMrmRequest;
   using MrmRequest = autoware_adapi_v1_msgs::msg::MrmRequest;
   using PedalsCommand = autoware_adapi_v1_msgs::msg::PedalsCommand;
@@ -88,6 +93,8 @@ private:
     this, "input/odometry"};
   autoware_utils::InterProcessPollingSubscriber<OperationModeState> sub_operation_mode_{
     this, "input/operation_mode_state", rclcpp::QoS{1}.transient_local()};
+  autoware_utils::InterProcessPollingSubscriber<ManualControlModeStatus> sub_control_mode_{
+    this, "input/control_mode_status", rclcpp::QoS{1}.transient_local()};
 
   rclcpp::Time last_joy_received_time_;
   std::shared_ptr<const JoyConverterBase> joy_;
@@ -122,6 +129,7 @@ private:
   rclcpp::Client<ChangeOperationMode>::SharedPtr client_change_to_local_;
   rclcpp::Client<ChangeOperationMode>::SharedPtr client_change_to_stop_;
   rclcpp::Client<ChangeOperationMode>::SharedPtr client_change_to_autonomous_;
+  rclcpp::Client<SelectManualControlMode>::SharedPtr client_select_control_mode_;
   rclcpp::Client<ChangeOperationMode>::SharedPtr client_enable_autoware_control_;
   rclcpp::Client<ChangeOperationMode>::SharedPtr client_disable_autoware_control_;
 
@@ -133,6 +141,11 @@ private:
   void initTimer(double period_s);
 
   bool isDataReady();
+
+  // Manual control mode
+  bool is_control_mode_ready_ = false;
+  bool is_control_mode_requesting_ = false;
+  void checkControlMode();
   void onTimer();
 };
 }  // namespace autoware::joy_controller
