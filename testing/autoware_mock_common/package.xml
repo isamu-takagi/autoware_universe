@@ -3,16 +3,23 @@
 <package format="3">
   <name>autoware_mock_common</name>
   <version>0.0.0</version>
-  <description>The autoware_mock_common package</description>
+  <description>Mock engine and plugin mechanism shared by the Autoware mock packages</description>
   <maintainer email="isamu.takagi@tier4.jp">Takagi, Isamu</maintainer>
 
   <license>Apache License 2.0</license>
 
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>autoware_mock_specs</exec_depend>
+  <exec_depend>diagnostic_msgs</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
   <exec_depend>rclpy</exec_depend>
+  <exec_depend>rosidl_runtime_py</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_pep257</test_depend>
   <test_depend>python3-pytest</test_depend>
+  <test_depend>std_msgs</test_depend>
+  <test_depend>std_srvs</test_depend>
 
   <export>
     <build_type>ament_python</build_type>

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Copyright 2026 The Autoware Contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,19 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from rclpy.qos import QoSDurabilityPolicy
-from rclpy.qos import QoSProfile
-from rclpy.qos import QoSReliabilityPolicy
+from autoware_mock_common.main import main
 
-
-def durable_qos(depth=1):
-    return QoSProfile(
-        depth=depth,
-        reliability=QoSReliabilityPolicy.RELIABLE,
-        durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
-    )
-
-
-class StatePublisher:
-    def __init__(self):
-        pass
+if __name__ == "__main__":
+    main()

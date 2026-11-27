@@ -1,0 +1,24 @@
+version: 1
+component: system
+interfaces:
+  - name: /system/operation_mode/state
+    kind: topic
+    role: publisher
+    type: autoware_adapi_v1_msgs/msg/OperationModeState
+    qos:
+      depth: 1
+      reliability: reliable
+      durability: transient_local
+    description: Current operation mode state.
+
+  - name: /system/operation_mode/change_operation_mode
+    kind: service
+    role: server
+    type: autoware_system_msgs/srv/ChangeOperationMode
+    description: Change the operation mode.
+
+  - name: /system/operation_mode/change_autoware_control
+    kind: service
+    role: server
+    type: autoware_system_msgs/srv/ChangeAutowareControl
+    description: Enable or disable autoware control.

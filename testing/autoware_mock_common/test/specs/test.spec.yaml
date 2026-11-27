@@ -1,0 +1,25 @@
+version: 1
+component: test
+interfaces:
+  - name: /test/state
+    kind: topic
+    role: publisher
+    type: std_msgs/msg/String
+    qos: { depth: 1, reliability: reliable, durability: transient_local }
+  - name: /test/input
+    kind: topic
+    role: subscriber
+    type: std_msgs/msg/String
+    qos: { depth: 1, reliability: reliable, durability: volatile }
+  - name: /test/trigger
+    kind: service
+    role: server
+    type: std_srvs/srv/Trigger
+  - name: /diagnostics
+    kind: topic
+    role: publisher
+    type: diagnostic_msgs/msg/DiagnosticArray
+    qos: { depth: 1, reliability: reliable, durability: volatile }
+diagnostics:
+  - name: "test_node: status"
+    rate: { min: 10.0 }

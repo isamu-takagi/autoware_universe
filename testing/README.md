@@ -161,12 +161,12 @@ and the external interfaces of modules (`*.module.yaml`), including message type
 
 The packages are divided by role.
 
-| Package                    | Role                                                 | Status      |
-| -------------------------- | ---------------------------------------------------- | ----------- |
-| `autoware_mock_specs`      | External specification files of all components       | Planned     |
-| `autoware_mock_specs_test` | Tests for consistency of the external specifications | Planned     |
-| `autoware_mock_common`     | Common library shared by mock packages               | In progress |
-| `autoware_mock_system`     | Mock of the system component                         | In progress |
+| Package                    | Role                                                 | Status    |
+| -------------------------- | ---------------------------------------------------- | --------- |
+| `autoware_mock_specs`      | External specification files of all components       | Prototype |
+| `autoware_mock_specs_test` | Tests for consistency of the external specifications | Planned   |
+| `autoware_mock_common`     | Mock engine and plugin mechanism                     | Prototype |
+| `autoware_mock_system`     | Mock of the system component                         | Prototype |
 
 - **Specification package**:
   The external specifications of all components are collected in a single package,
@@ -176,28 +176,165 @@ The packages are divided by role.
   - Consistency between the external specification files and `autoware_component_interface_specs` (C++ test).
   - Consistency between the external specification files and the mocks (runtime test using the ROS graph).
 - **Common package**:
-  Code shared by multiple mock packages (e.g. QoS settings, and the plugin mechanism in the future)
-  is placed in `autoware_mock_common`.
+  Provides the spec-driven mock engine and the plugin mechanism shared by all mock packages.
 - **Mock packages**:
   Each mocked component is provided as a separate package.
   A mock replaces the entire component (e.g. system, planning), not individual nodes within it.
+  Each mock package provides the default plugin of the component (e.g. operation mode state transitions).
 
 The specification packages are named with `mock` because they are currently test-only features.
 When the external specifications become the single source of truth,
 they will be integrated into the spec package (e.g. `autoware_component_interface_specs`).
 
+### Mock engine
+
+The mock engine in `autoware_mock_common` reads a `*.spec.yaml` file
+and automatically creates all interfaces (publishers, subscribers, services, and diagnostics) defined in it.
+This guarantees that the names, types, and QoS of the mock always match the external specification.
+Interfaces not defined in the specification cannot be created.
+
 ### Behavior
 
-- By default, every request succeeds immediately (no transition delay, no failure).
-- In the future, the behavior will be configurable so that tests can define it (e.g. delays, failures, state changes).
+The behavior of each interface is determined by the following layers, in order of priority.
+If a layer does not define the behavior of an interface, the next layer is used.
 
-### Extensibility
+1. **User plugins**: Python plugins loaded by tests.
+2. **User declarations**: Declarative behavior definitions loaded by tests.
+3. **Default plugin**: Provided by each mock package (e.g. operation mode state transitions).
+4. **Built-in default**: Provided by the mock engine.
 
-The way to define behavior is not decided yet.
-One option under consideration is loading user-written Python code as a plugin.
+If multiple definitions conflict on the same interface:
+
+- **Same layer**: It is an error (e.g. two user plugins handle the same service), and the mock fails to start.
+- **Different layers**: The upper layer wins (e.g. a user plugin overrides a user declaration).
+
+Whether definitions conflict depends on the interface type.
+
+| Interface   | Conflict                                                             |
+| ----------- | -------------------------------------------------------------------- |
+| Service     | Yes. Only one definition can respond.                                |
+| Publisher   | Yes. Only one definition can publish (to avoid inconsistent states). |
+| Diagnostics | Yes. Only one definition can set the level.                          |
+| Subscriber  | No. Multiple definitions can receive the same topic.                 |
+
+To detect conflicts at startup, each definition declares the interfaces it owns in advance
+(e.g. `@service` decorators, a `publishes` list in plugins).
+Publishing to a topic not owned by the definition is an error.
+
+The built-in default behavior is as follows.
+
+| Interface   | Built-in default behavior                                     |
+| ----------- | ------------------------------------------------------------- |
+| Service     | Return success immediately (no transition delay, no failure). |
+| Diagnostics | Publish `OK` at the rate defined in the specification.        |
+| Publisher   | Do nothing.                                                   |
+| Subscriber  | Receive messages only.                                        |
+
+### Declarative behavior definition (draft)
+
+Simple behavior can be defined declaratively without writing Python code.
+Complex behavior is written as a plugin.
+
+```yaml
+services:
+  /system/operation_mode/change_operation_mode:
+    delay: 1.0 # [s]
+    response:
+      status:
+        success: false
+        message: injected failure
+diagnostics:
+  "operation_mode_transition_manager: example_status":
+    level: ERROR
+    message: injected error
+```
+
+### Plugin (draft)
+
+Plugins are written in Python.
+Callbacks can be normal functions or coroutines (`async def`), as supported by rclpy.
+
+```python
+from autoware_mock_common import MockPlugin, service, subscription
+
+
+class FailModeChange(MockPlugin):
+    publishes = ["/system/operation_mode/state"]
+
+    def on_init(self, ctx):
+        self.state = ctx.default_message("/system/operation_mode/state")
+        ctx.publish("/system/operation_mode/state", self.state)
+
+    @service("/system/operation_mode/change_operation_mode")
+    def change_mode(self, ctx, req, res):
+        res.status.success = False
+        return res
+
+    @subscription("/some/input")
+    def on_input(self, ctx, msg):
+        pass
+```
+
+The context `ctx` provides the following functions.
+
+- Publish messages (`ctx.publish`).
+- Set the level of diagnostic statuses (`ctx.set_diag(name, level, message)`).
+- Create a default message of an interface (`ctx.default_message`).
+- Access the external specification (`ctx.spec`) and the ROS node (`ctx.node`, e.g. for timers and clock).
+- Share state between plugins (`ctx.shared`).
+
+Plugins are specified as `module:Class` or a file path, and multiple plugins can be stacked.
+
+```bash
+ros2 run autoware_mock_common mock --ros-args \
+  -p spec:=system -p plugins:="['my_test.plugins:FailModeChange', '/path/to/plugin.py']"
+```
+
+### Execution
+
+The mock can be run in either of the following ways.
+
+- **Separate process**: Run as a ROS node (e.g. `ros2 run`, launch files).
+- **In-process**: Create and spin the mock in the same process as the test (e.g. pytest),
+  so that plugins can be defined directly in the test code.
+
+```python
+from autoware_mock_common import MockNode
+
+mock = MockNode(spec="system", plugins=[FailModeChange()])
+```
+
+The mock engine keeps the concurrency mechanism simple, and concurrency is the responsibility of plugin authors.
+
+- The mock uses a single-threaded executor by default.
+- All interfaces created by the engine belong to a reentrant callback group,
+  so a coroutine callback waiting with `await` does not block other callbacks.
+  (With the default mutually exclusive callback group, awaiting a timer inside a callback deadlocks.)
+- The engine does not provide locks or helpers for sleeping.
+  If a plugin needs delays or thread safety (e.g. when accessed from the test thread in-process),
+  the plugin author implements them.
+
+### Recording
+
+The mock records the interactions with other components so that tests can verify them.
+
+- Received service requests and the returned responses.
+- Received messages of subscribed topics.
+- Published messages (including diagnostics).
+
+Each record has a timestamp. Tests can get and clear the records (e.g. `mock.records(name)`, `mock.clear_records()`).
+
+### Behavior change during a test
+
+Changing the behavior during a test (e.g. "fail from now on") may be needed in the future.
+When running in-process, the test can modify plugins directly (thread safety is the responsibility of the plugin author).
+When running as a separate process, a common control service that plugins can receive is an option.
 
 ## Open questions
 
-- How tests define and change the mock behavior (plugin API, parameters, etc.).
+- Details of the plugin API.
+- How to change the behavior during a test when running as a separate process (control interface).
+- How to get the records when running as a separate process.
+- Schema of the declarative behavior definition and its relationship with the formal behavior description in the external specification.
 - Formal description of behavior in the external specification files.
 - Publish behavior of `/system/operation_mode/state` in the actual component (to be checked).
