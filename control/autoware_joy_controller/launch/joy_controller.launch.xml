@@ -1,12 +1,12 @@
 <launch>
-  <arg name="external_cmd_source" default="remote" description="options: local, remote"/>
-
   <arg name="input_joy" default="/joy"/>
   <arg name="input_odometry" default="/localization/kinematic_state"/>
   <arg name="input_operation_mode_state" default="/api/operation_mode/state"/>
 
-  <arg name="output_control_command" default="/external/$(var external_cmd_source)/joy/control_cmd"/>
-  <arg name="output_external_control_command" default="/api/external/set/command/$(var external_cmd_source)/control"/>
+  <arg name="output_pedals" default="/api/manual/local/command/pedals"/>
+  <arg name="output_steering" default="/api/manual/local/command/steering"/>
+  <arg name="output_acceleration" default="/api/manual/local/command/acceleration"/>
+  <arg name="output_velocity" default="/api/manual/local/command/velocity"/>
   <arg name="output_gear" default="/api/manual/local/command/gear"/>
   <arg name="output_turn_indicators" default="/api/manual/local/command/turn_indicators"/>
   <arg name="output_hazard_lights" default="/api/manual/local/command/hazard_lights"/>
@@ -19,8 +19,10 @@
     <remap from="input/odometry" to="$(var input_odometry)"/>
     <remap from="input/operation_mode_state" to="$(var input_operation_mode_state)"/>
 
-    <remap from="output/control_command" to="$(var output_control_command)"/>
-    <remap from="output/external_control_command" to="$(var output_external_control_command)"/>
+    <remap from="output/pedals" to="$(var output_pedals)"/>
+    <remap from="output/steering" to="$(var output_steering)"/>
+    <remap from="output/acceleration" to="$(var output_acceleration)"/>
+    <remap from="output/velocity" to="$(var output_velocity)"/>
     <remap from="output/gear" to="$(var output_gear)"/>
     <remap from="output/turn_indicators" to="$(var output_turn_indicators)"/>
     <remap from="output/hazard_lights" to="$(var output_hazard_lights)"/>

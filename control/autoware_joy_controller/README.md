@@ -31,14 +31,16 @@ ros2 launch autoware_joy_controller joy_controller.launch.xml config_file:=/path
 
 ### Output topics
 
-| Name                                | Type                                                 | Description                              |
-| ----------------------------------- | ---------------------------------------------------- | ---------------------------------------- |
-| `~/output/control_command`          | autoware_control_msgs::msg::Control                  | lateral and longitudinal control command |
-| `~/output/external_control_command` | tier4_external_api_msgs::msg::ControlCommandStamped  | lateral and longitudinal control command |
-| `~/output/gear`                     | autoware_adapi_v1_msgs::msg::GearCommand             | gear command                             |
-| `~/output/turn_indicators`          | autoware_adapi_v1_msgs::msg::TurnIndicatorsCommand   | turn indicators command                  |
-| `~/output/hazard_lights`            | autoware_adapi_v1_msgs::msg::HazardLightsCommand     | hazard lights command                    |
-| `~/output/heartbeat`                | autoware_adapi_v1_msgs::msg::ManualOperatorHeartbeat | operator heartbeat                       |
+| Name                       | Type                                                 | Description             |
+| -------------------------- | ---------------------------------------------------- | ----------------------- |
+| `~/output/pedals`          | autoware_adapi_v1_msgs::msg::PedalsCommand           | pedals command          |
+| `~/output/steering`        | autoware_adapi_v1_msgs::msg::SteeringCommand         | steering command        |
+| `~/output/acceleration`    | autoware_adapi_v1_msgs::msg::AccelerationCommand     | acceleration command    |
+| `~/output/velocity`        | autoware_adapi_v1_msgs::msg::VelocityCommand         | velocity command        |
+| `~/output/gear`            | autoware_adapi_v1_msgs::msg::GearCommand             | gear command            |
+| `~/output/turn_indicators` | autoware_adapi_v1_msgs::msg::TurnIndicatorsCommand   | turn indicators command |
+| `~/output/hazard_lights`   | autoware_adapi_v1_msgs::msg::HazardLightsCommand     | hazard lights command   |
+| `~/output/heartbeat`       | autoware_adapi_v1_msgs::msg::ManualOperatorHeartbeat | operator heartbeat      |
 
 ## Parameters
 

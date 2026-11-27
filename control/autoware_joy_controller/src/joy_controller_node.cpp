@@ -262,55 +262,56 @@ void AutowareJoyControllerNode::onTimer()
 
 void AutowareJoyControllerNode::publishControlCommand()
 {
-  autoware_control_msgs::msg::Control cmd;
-  cmd.stamp = this->now();
+  const auto stamp = this->now();
+  float velocity = 0.0f;
+  float acceleration = 0.0f;
   {
-    cmd.lateral.steering_tire_angle = steer_ratio_ * joy_->steer();
-    cmd.lateral.steering_tire_rotation_rate = steering_angle_velocity_;
-
     if (joy_->accel()) {
-      cmd.longitudinal.acceleration = accel_ratio_ * joy_->accel();
-      cmd.longitudinal.velocity =
-        twist_->twist.linear.x + velocity_gain_ * cmd.longitudinal.acceleration;
-      cmd.longitudinal.velocity =
-        std::min(cmd.longitudinal.velocity, static_cast<float>(max_forward_velocity_));
+      acceleration = accel_ratio_ * joy_->accel();
+      velocity = twist_->twist.linear.x + velocity_gain_ * acceleration;
+      velocity = std::min(velocity, static_cast<float>(max_forward_velocity_));
     }
 
     if (joy_->brake()) {
-      cmd.longitudinal.velocity = 0.0;
-      cmd.longitudinal.acceleration = -brake_ratio_ * joy_->brake();
+      velocity = 0.0;
+      acceleration = -brake_ratio_ * joy_->brake();
     }
 
     // Backward
     if (joy_->accel() && joy_->brake()) {
-      cmd.longitudinal.acceleration = backward_accel_ratio_ * joy_->accel();
-      cmd.longitudinal.velocity =
-        twist_->twist.linear.x - velocity_gain_ * cmd.longitudinal.acceleration;
-      cmd.longitudinal.velocity =
-        std::max(cmd.longitudinal.velocity, static_cast<float>(-max_backward_velocity_));
+      acceleration = backward_accel_ratio_ * joy_->accel();
+      velocity = twist_->twist.linear.x - velocity_gain_ * acceleration;
+      velocity = std::max(velocity, static_cast<float>(-max_backward_velocity_));
     }
   }
 
-  pub_control_command_->publish(cmd);
-  prev_control_command_ = cmd;
+  AccelerationCommand acceleration_command;
+  acceleration_command.stamp = stamp;
+  acceleration_command.acceleration = acceleration;
+  pub_acceleration_->publish(acceleration_command);
+
+  VelocityCommand velocity_command;
+  velocity_command.stamp = stamp;
+  velocity_command.velocity = velocity;
+  pub_velocity_->publish(velocity_command);
 }
 
 void AutowareJoyControllerNode::publishExternalControlCommand()
 {
-  tier4_external_api_msgs::msg::ControlCommandStamped cmd_stamped;
-  cmd_stamped.stamp = this->now();
-  {
-    auto & cmd = cmd_stamped.control;
+  const auto stamp = this->now();
 
-    cmd.steering_angle = steer_ratio_ * joy_->steer();
-    cmd.steering_angle_velocity = steering_angle_velocity_;
-    cmd.throttle =
-      accel_ratio_ * calcMapping(static_cast<double>(joy_->accel()), accel_sensitivity_);
-    cmd.brake = brake_ratio_ * calcMapping(static_cast<double>(joy_->brake()), brake_sensitivity_);
-  }
+  PedalsCommand pedals;
+  pedals.stamp = stamp;
+  pedals.throttle =
+    accel_ratio_ * calcMapping(static_cast<double>(joy_->accel()), accel_sensitivity_);
+  pedals.brake = brake_ratio_ * calcMapping(static_cast<double>(joy_->brake()), brake_sensitivity_);
+  pub_pedals_->publish(pedals);
 
-  pub_external_control_command_->publish(cmd_stamped);
-  prev_external_control_command_ = cmd_stamped.control;
+  SteeringCommand steering;
+  steering.stamp = stamp;
+  steering.steering_tire_angle = steer_ratio_ * joy_->steer();
+  steering.steering_tire_velocity = steering_angle_velocity_;
+  pub_steering_->publish(steering);
 }
 
 void AutowareJoyControllerNode::publishShift()
@@ -499,11 +500,10 @@ AutowareJoyControllerNode::AutowareJoyControllerNode(const rclcpp::NodeOptions &
   }
 
   // Publisher
-  pub_control_command_ =
-    this->create_publisher<autoware_control_msgs::msg::Control>("output/control_command", 1);
-  pub_external_control_command_ =
-    this->create_publisher<tier4_external_api_msgs::msg::ControlCommandStamped>(
-      "output/external_control_command", 1);
+  pub_pedals_ = create_publisher<PedalsCommand>("output/pedals", 1);
+  pub_steering_ = create_publisher<SteeringCommand>("output/steering", 1);
+  pub_acceleration_ = create_publisher<AccelerationCommand>("output/acceleration", 1);
+  pub_velocity_ = create_publisher<VelocityCommand>("output/velocity", 1);
   pub_gear_ = create_publisher<GearCommand>("output/gear", 1);
   pub_turn_indicators_ = create_publisher<TurnIndicatorsCommand>("output/turn_indicators", 1);
   pub_hazard_lights_ = create_publisher<HazardLightsCommand>("output/hazard_lights", 1);

@@ -19,12 +19,18 @@ subscribers:
     message_type: autoware_adapi_v1_msgs/msg/OperationModeState
     remap_target: input/operation_mode_state
 publishers:
-  - name: control_command
-    message_type: autoware_control_msgs/msg/Control
-    remap_target: output/control_command
-  - name: external_control_command
-    message_type: tier4_external_api_msgs/msg/ControlCommandStamped
-    remap_target: output/external_control_command
+  - name: pedals
+    message_type: autoware_adapi_v1_msgs/msg/PedalsCommand
+    remap_target: output/pedals
+  - name: steering
+    message_type: autoware_adapi_v1_msgs/msg/SteeringCommand
+    remap_target: output/steering
+  - name: acceleration
+    message_type: autoware_adapi_v1_msgs/msg/AccelerationCommand
+    remap_target: output/acceleration
+  - name: velocity
+    message_type: autoware_adapi_v1_msgs/msg/VelocityCommand
+    remap_target: output/velocity
   - name: gear
     message_type: autoware_adapi_v1_msgs/msg/GearCommand
     remap_target: output/gear
@@ -67,8 +73,10 @@ processes:
     trigger_conditions:
       - periodic: 10.0 # Hz
     outcomes:
-      - to_output: control_command
-      - to_output: external_control_command
+      - to_output: pedals
+      - to_output: steering
+      - to_output: acceleration
+      - to_output: velocity
       - to_output: gear
       - to_output: turn_indicators
       - to_output: hazard_lights

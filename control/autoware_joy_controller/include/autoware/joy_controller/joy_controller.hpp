@@ -20,18 +20,20 @@
 #include <autoware_utils/ros/polling_subscriber.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+#include <autoware_adapi_v1_msgs/msg/acceleration_command.hpp>
 #include <autoware_adapi_v1_msgs/msg/gear_command.hpp>
 #include <autoware_adapi_v1_msgs/msg/hazard_lights_command.hpp>
 #include <autoware_adapi_v1_msgs/msg/manual_operator_heartbeat.hpp>
 #include <autoware_adapi_v1_msgs/msg/operation_mode_state.hpp>
+#include <autoware_adapi_v1_msgs/msg/pedals_command.hpp>
+#include <autoware_adapi_v1_msgs/msg/steering_command.hpp>
 #include <autoware_adapi_v1_msgs/msg/turn_indicators_command.hpp>
+#include <autoware_adapi_v1_msgs/msg/velocity_command.hpp>
 #include <autoware_adapi_v1_msgs/srv/change_operation_mode.hpp>
 #include <autoware_adapi_v1_msgs/srv/send_mrm_request.hpp>
-#include <autoware_control_msgs/msg/control.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <sensor_msgs/msg/joy.hpp>
-#include <tier4_external_api_msgs/msg/control_command_stamped.hpp>
 
 #include <memory>
 #include <string>
@@ -44,6 +46,10 @@ class AutowareJoyControllerNode : public rclcpp::Node
   using ChangeOperationMode = autoware_adapi_v1_msgs::srv::ChangeOperationMode;
   using SendMrmRequest = autoware_adapi_v1_msgs::srv::SendMrmRequest;
   using MrmRequest = autoware_adapi_v1_msgs::msg::MrmRequest;
+  using PedalsCommand = autoware_adapi_v1_msgs::msg::PedalsCommand;
+  using SteeringCommand = autoware_adapi_v1_msgs::msg::SteeringCommand;
+  using AccelerationCommand = autoware_adapi_v1_msgs::msg::AccelerationCommand;
+  using VelocityCommand = autoware_adapi_v1_msgs::msg::VelocityCommand;
   using Gear = autoware_adapi_v1_msgs::msg::Gear;
   using GearCommand = autoware_adapi_v1_msgs::msg::GearCommand;
   using TurnIndicators = autoware_adapi_v1_msgs::msg::TurnIndicators;
@@ -91,9 +97,10 @@ private:
   void onOdometry();
 
   // Publisher
-  rclcpp::Publisher<autoware_control_msgs::msg::Control>::SharedPtr pub_control_command_;
-  rclcpp::Publisher<tier4_external_api_msgs::msg::ControlCommandStamped>::SharedPtr
-    pub_external_control_command_;
+  rclcpp::Publisher<PedalsCommand>::SharedPtr pub_pedals_;
+  rclcpp::Publisher<SteeringCommand>::SharedPtr pub_steering_;
+  rclcpp::Publisher<AccelerationCommand>::SharedPtr pub_acceleration_;
+  rclcpp::Publisher<VelocityCommand>::SharedPtr pub_velocity_;
   rclcpp::Publisher<GearCommand>::SharedPtr pub_gear_;
   rclcpp::Publisher<TurnIndicatorsCommand>::SharedPtr pub_turn_indicators_;
   rclcpp::Publisher<HazardLightsCommand>::SharedPtr pub_hazard_lights_;
@@ -119,8 +126,6 @@ private:
   rclcpp::Client<ChangeOperationMode>::SharedPtr client_disable_autoware_control_;
 
   // Previous State
-  autoware_control_msgs::msg::Control prev_control_command_;
-  tier4_external_api_msgs::msg::ControlCommand prev_external_control_command_;
   Gear::_status_type prev_gear_ = Gear::UNKNOWN;
 
   // Timer
