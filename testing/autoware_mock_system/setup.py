@@ -19,9 +19,4 @@ setup(
     maintainer="Takagi, Isamu",
     maintainer_email="isamu.takagi@tier4.jp",
     license="Apache License 2.0",
-    entry_points={
-        "launch.frontend.launch_extension": [
-            "autoware_mock_system = autoware_mock_system",
-        ],
-    },
 )

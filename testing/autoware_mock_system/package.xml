@@ -9,9 +9,8 @@
   <license>Apache License 2.0</license>
 
   <exec_depend>autoware_adapi_v1_msgs</exec_depend>
-  <exec_depend>launch</exec_depend>
-  <exec_depend>launch_ros</exec_depend>
-  <exec_depend>python3-yaml</exec_depend>
+  <exec_depend>autoware_mock_common</exec_depend>
+  <exec_depend>autoware_system_msgs</exec_depend>
   <exec_depend>rclpy</exec_depend>
 
   <test_depend>ament_copyright</test_depend>

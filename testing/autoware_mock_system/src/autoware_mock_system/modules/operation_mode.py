@@ -15,11 +15,10 @@
 import copy
 
 from autoware_adapi_v1_msgs.msg import OperationModeState
+from autoware_mock_common.utils import durable_qos
 from autoware_system_msgs.srv import ChangeAutowareControl
 from autoware_system_msgs.srv import ChangeOperationMode
 from rclpy.node import Node
-
-from .utils import durable_qos
 
 
 class OperationMode:
