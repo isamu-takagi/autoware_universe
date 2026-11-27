@@ -3,6 +3,7 @@
 
   <arg name="input_joy" default="/joy"/>
   <arg name="input_odometry" default="/localization/kinematic_state"/>
+  <arg name="input_operation_mode_state" default="/api/operation_mode/state"/>
 
   <arg name="output_control_command" default="/external/$(var external_cmd_source)/joy/control_cmd"/>
   <arg name="output_external_control_command" default="/api/external/set/command/$(var external_cmd_source)/control"/>
@@ -10,25 +11,25 @@
   <arg name="output_turn_indicators" default="/api/manual/local/command/turn_indicators"/>
   <arg name="output_hazard_lights" default="/api/manual/local/command/hazard_lights"/>
   <arg name="output_heartbeat" default="/api/manual/local/operator/heartbeat"/>
-  <arg name="output_gate_mode" default="/control/gate_mode_cmd"/>
 
   <arg name="config_file" default="$(find-pkg-share autoware_joy_controller)/config/joy_controller_ds4.param.yaml"/>
 
   <node pkg="autoware_joy_controller" exec="autoware_joy_controller" name="joy_controller" output="screen">
     <remap from="input/joy" to="$(var input_joy)"/>
     <remap from="input/odometry" to="$(var input_odometry)"/>
+    <remap from="input/operation_mode_state" to="$(var input_operation_mode_state)"/>
 
     <remap from="output/control_command" to="$(var output_control_command)"/>
     <remap from="output/external_control_command" to="$(var output_external_control_command)"/>
     <remap from="output/gear" to="$(var output_gear)"/>
     <remap from="output/turn_indicators" to="$(var output_turn_indicators)"/>
     <remap from="output/hazard_lights" to="$(var output_hazard_lights)"/>
-    <remap from="output/gate_mode" to="$(var output_gate_mode)"/>
     <remap from="output/heartbeat" to="$(var output_heartbeat)"/>
 
     <remap from="service/mrm_request" to="/api/fail_safe/mrm_request/send"/>
     <remap from="service/change_to_local" to="/api/operation_mode/change_to_local"/>
     <remap from="service/change_to_stop" to="/api/operation_mode/change_to_stop"/>
+    <remap from="service/change_to_autonomous" to="/api/operation_mode/change_to_autonomous"/>
     <remap from="service/enable_autoware_control" to="/api/operation_mode/enable_autoware_control"/>
     <remap from="service/disable_autoware_control" to="/api/operation_mode/disable_autoware_control"/>
 

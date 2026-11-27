@@ -15,6 +15,9 @@ subscribers:
   - name: odometry
     message_type: nav_msgs/msg/Odometry
     remap_target: input/odometry
+  - name: operation_mode_state
+    message_type: autoware_adapi_v1_msgs/msg/OperationModeState
+    remap_target: input/operation_mode_state
 publishers:
   - name: control_command
     message_type: autoware_control_msgs/msg/Control
@@ -31,9 +34,6 @@ publishers:
   - name: hazard_lights
     message_type: autoware_adapi_v1_msgs/msg/HazardLightsCommand
     remap_target: output/hazard_lights
-  - name: gate_mode
-    message_type: tier4_control_msgs/msg/GateMode
-    remap_target: output/gate_mode
   - name: heartbeat
     message_type: autoware_adapi_v1_msgs/msg/ManualOperatorHeartbeat
     remap_target: output/heartbeat
@@ -47,6 +47,9 @@ clients:
   - name: change_to_stop
     message_type: autoware_adapi_v1_msgs/srv/ChangeOperationMode
     remap_target: service/change_to_stop
+  - name: change_to_autonomous
+    message_type: autoware_adapi_v1_msgs/srv/ChangeOperationMode
+    remap_target: service/change_to_autonomous
   - name: enable_autoware_control
     message_type: autoware_adapi_v1_msgs/srv/ChangeOperationMode
     remap_target: service/enable_autoware_control
@@ -69,5 +72,4 @@ processes:
       - to_output: gear
       - to_output: turn_indicators
       - to_output: hazard_lights
-      - to_output: gate_mode
       - to_output: heartbeat

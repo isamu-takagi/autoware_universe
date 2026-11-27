@@ -26,11 +26,9 @@
 
 namespace
 {
-using autoware::joy_controller::GateModeType;
 using Gear = autoware_adapi_v1_msgs::msg::Gear;
 using TurnIndicators = autoware_adapi_v1_msgs::msg::TurnIndicators;
 using HazardLights = autoware_adapi_v1_msgs::msg::HazardLights;
-using GateMode = tier4_control_msgs::msg::GateMode;
 
 Gear::_status_type getUpperShift(const Gear::_status_type shift)
 {
@@ -131,20 +129,6 @@ const char * getHazardLightsName(const HazardLights::_status_type hazard_lights)
   return "NOT_SUPPORTED";
 }
 
-const char * getGateModeName(const GateModeType & gate_mode)
-{
-  using tier4_control_msgs::msg::GateMode;
-
-  if (gate_mode == GateMode::AUTO) {
-    return "AUTO";
-  }
-  if (gate_mode == GateMode::EXTERNAL) {
-    return "EXTERNAL";
-  }
-
-  return "NOT_SUPPORTED";
-}
-
 double calcMapping(const double input, const double sensitivity)
 {
   const double exponent = 1.0 / (std::max(0.001, std::min(1.0, sensitivity)));
@@ -181,12 +165,12 @@ void AutowareJoyControllerNode::onJoy()
     publishTurnSignal();
   }
 
-  if (joy_->gate_mode()) {
-    publishGateMode();
-  }
-
   if (joy_->autoware_engage() || joy_->autoware_disengage()) {
     publishAutowareEngage();
+  }
+
+  if (joy_->gate_mode()) {
+    switchAutonomousMode();
   }
 
   if (joy_->vehicle_engage() || joy_->vehicle_disengage()) {
@@ -389,24 +373,6 @@ void AutowareJoyControllerNode::publishTurnSignal()
   pub_hazard_lights_->publish(hazard_lights);
 }
 
-void AutowareJoyControllerNode::publishGateMode()
-{
-  tier4_control_msgs::msg::GateMode gate_mode;
-
-  if (prev_gate_mode_ == GateMode::AUTO) {
-    gate_mode.data = GateMode::EXTERNAL;
-  }
-
-  if (prev_gate_mode_ == GateMode::EXTERNAL) {
-    gate_mode.data = GateMode::AUTO;
-  }
-
-  RCLCPP_INFO(get_logger(), "GateMode::%s", getGateModeName(gate_mode.data));
-
-  pub_gate_mode_->publish(gate_mode);
-  prev_gate_mode_ = gate_mode.data;
-}
-
 void AutowareJoyControllerNode::publishHeartbeat()
 {
   ManualOperatorHeartbeat heartbeat;
@@ -444,6 +410,23 @@ void AutowareJoyControllerNode::publishAutowareEngage()
   if (joy_->autoware_disengage()) {
     RCLCPP_INFO(get_logger(), "Autoware Disengage");
     sendChangeOperationMode(client_change_to_stop_);
+  }
+}
+
+void AutowareJoyControllerNode::switchAutonomousMode()
+{
+  const auto state = sub_operation_mode_.take_data();
+  if (!state) {
+    RCLCPP_WARN(get_logger(), "operation mode state is not received");
+    return;
+  }
+
+  if (state->mode == OperationModeState::AUTONOMOUS) {
+    RCLCPP_INFO(get_logger(), "Switch to Local Mode");
+    sendChangeOperationMode(client_change_to_local_);
+  } else if (state->mode == OperationModeState::LOCAL) {
+    RCLCPP_INFO(get_logger(), "Switch to Autonomous Mode");
+    sendChangeOperationMode(client_change_to_autonomous_);
   }
 }
 
@@ -524,7 +507,6 @@ AutowareJoyControllerNode::AutowareJoyControllerNode(const rclcpp::NodeOptions &
   pub_gear_ = create_publisher<GearCommand>("output/gear", 1);
   pub_turn_indicators_ = create_publisher<TurnIndicatorsCommand>("output/turn_indicators", 1);
   pub_hazard_lights_ = create_publisher<HazardLightsCommand>("output/hazard_lights", 1);
-  pub_gate_mode_ = this->create_publisher<tier4_control_msgs::msg::GateMode>("output/gate_mode", 1);
   pub_heartbeat_ = create_publisher<ManualOperatorHeartbeat>("output/heartbeat", 1);
 
   // Service Client
@@ -541,6 +523,7 @@ AutowareJoyControllerNode::AutowareJoyControllerNode(const rclcpp::NodeOptions &
 
   client_change_to_local_ = create_client<ChangeOperationMode>("service/change_to_local");
   client_change_to_stop_ = create_client<ChangeOperationMode>("service/change_to_stop");
+  client_change_to_autonomous_ = create_client<ChangeOperationMode>("service/change_to_autonomous");
   client_enable_autoware_control_ =
     create_client<ChangeOperationMode>("service/enable_autoware_control");
   client_disable_autoware_control_ =

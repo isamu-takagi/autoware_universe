@@ -23,10 +23,11 @@ ros2 launch autoware_joy_controller joy_controller.launch.xml config_file:=/path
 
 ### Input topics
 
-| Name               | Type                    | Description                       |
-| ------------------ | ----------------------- | --------------------------------- |
-| `~/input/joy`      | sensor_msgs::msg::Joy   | joy controller command            |
-| `~/input/odometry` | nav_msgs::msg::Odometry | ego vehicle odometry to get twist |
+| Name                           | Type                                            | Description                       |
+| ------------------------------ | ----------------------------------------------- | --------------------------------- |
+| `~/input/joy`                  | sensor_msgs::msg::Joy                           | joy controller command            |
+| `~/input/odometry`             | nav_msgs::msg::Odometry                         | ego vehicle odometry to get twist |
+| `~/input/operation_mode_state` | autoware_adapi_v1_msgs::msg::OperationModeState | current operation mode            |
 
 ### Output topics
 
@@ -37,7 +38,6 @@ ros2 launch autoware_joy_controller joy_controller.launch.xml config_file:=/path
 | `~/output/gear`                     | autoware_adapi_v1_msgs::msg::GearCommand             | gear command                             |
 | `~/output/turn_indicators`          | autoware_adapi_v1_msgs::msg::TurnIndicatorsCommand   | turn indicators command                  |
 | `~/output/hazard_lights`            | autoware_adapi_v1_msgs::msg::HazardLightsCommand     | hazard lights command                    |
-| `~/output/gate_mode`                | tier4_control_msgs::msg::GateMode                    | gate mode (Auto or External)             |
 | `~/output/heartbeat`                | autoware_adapi_v1_msgs::msg::ManualOperatorHeartbeat | operator heartbeat                       |
 
 ## Parameters
@@ -72,7 +72,7 @@ ros2 launch autoware_joy_controller joy_controller.launch.xml config_file:=/path
 | Turn Signal Left     | L1                    |
 | Turn Signal Right    | R1                    |
 | Clear Turn Signal    | A                     |
-| Gate Mode            | B                     |
+| Switch Autonomous    | B                     |
 | Emergency Stop       | Select                |
 | Clear Emergency Stop | Start                 |
 | Autoware Engage      | X                     |
@@ -94,7 +94,7 @@ ros2 launch autoware_joy_controller joy_controller.launch.xml config_file:=/path
 | Turn Signal Left     | L1                         |
 | Turn Signal Right    | R1                         |
 | Clear Turn Signal    | SHARE                      |
-| Gate Mode            | OPTIONS                    |
+| Switch Autonomous    | OPTIONS                    |
 | Emergency Stop       | PS                         |
 | Clear Emergency Stop | PS                         |
 | Autoware Engage      | ○                          |
@@ -116,7 +116,7 @@ ros2 launch autoware_joy_controller joy_controller.launch.xml config_file:=/path
 | Turn Signal Left     | LB                    |
 | Turn Signal Right    | RB                    |
 | Clear Turn Signal    | A                     |
-| Gate Mode            | B                     |
+| Switch Autonomous    | B                     |
 | Emergency Stop       | View                  |
 | Clear Emergency Stop | Menu                  |
 | Autoware Engage      | X                     |
