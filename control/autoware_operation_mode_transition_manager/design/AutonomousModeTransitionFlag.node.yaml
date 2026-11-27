@@ -22,6 +22,9 @@ subscribers:
   - name: trajectory_follower_control_cmd
     message_type: autoware_control_msgs/msg/Control
     remap_target: trajectory_follower_control_cmd
+  - name: driving_mode_info
+    message_type: tier4_system_msgs/msg/DrivingModeInfo
+    remap_target: /system/driving_mode/info
 publishers:
   - name: transition_available
     message_type: tier4_system_msgs/msg/ModeChangeAvailable
@@ -29,6 +32,13 @@ publishers:
   - name: transition_completed
     message_type: tier4_system_msgs/msg/ModeChangeAvailable
     remap_target: /system/command_mode/transition/completed
+  - name: driving_mode_stable
+    message_type: tier4_system_msgs/msg/DrivingModeFlag
+    remap_target: /system/driving_mode/stable
+  - name: diagnostics
+    message_type: diagnostic_msgs/msg/DiagnosticArray
+    global: /diagnostics
+    remap_target: /diagnostics
   - name: debug_info
     message_type: autoware_operation_mode_transition_manager/msg/OperationModeTransitionManagerDebug
     remap_target: ~/debug_info
@@ -45,4 +55,6 @@ processes:
     outcomes:
       - to_output: transition_available
       - to_output: transition_completed
+      - to_output: driving_mode_stable
+      - to_output: diagnostics
       - to_output: debug_info

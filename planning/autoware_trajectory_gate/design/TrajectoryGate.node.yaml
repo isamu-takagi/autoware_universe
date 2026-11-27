@@ -1,0 +1,59 @@
+autoware_system_design_format: 0.3.0
+
+# node information
+name: TrajectoryGate.node
+
+package:
+  name: autoware_trajectory_gate
+  provider: autoware
+
+launch:
+  plugin: autoware::trajectory_gate::TrajectoryGate
+  executable: trajectory_gate_node
+  node_output: screen
+
+# interfaces
+subscribers:
+  # trajectory sources listed in the source parameter
+  - name: main_trajectory
+    message_type: autoware_planning_msgs/msg/Trajectory
+    remap_target: ~/inputs/main/trajectory
+  - name: mrm1_trajectory
+    message_type: autoware_planning_msgs/msg/Trajectory
+    remap_target: ~/inputs/mrm1/trajectory
+  - name: mrm2_trajectory
+    message_type: autoware_planning_msgs/msg/Trajectory
+    remap_target: ~/inputs/mrm2/trajectory
+
+publishers:
+  - name: trajectory
+    message_type: autoware_planning_msgs/msg/Trajectory
+    remap_target: ~/output/trajectory
+  - name: source_status
+    message_type: tier4_system_msgs/msg/TrajectorySourceStatus
+    remap_target: ~/source/status
+
+servers:
+  - name: source_change
+    message_type: tier4_system_msgs/srv/ChangeTrajectorySource
+    remap_target: ~/source/change
+
+# parameters
+param_files:
+  - name: config
+    default: config/trajectory_gate.param.yaml
+
+param_values: []
+
+# processes
+processes:
+  - name: relay_trajectory
+    trigger_conditions:
+      - on_input: main_trajectory
+    outcomes:
+      - to_output: trajectory
+  - name: publish_source_status
+    trigger_conditions:
+      - periodic: 10.0
+    outcomes:
+      - to_output: source_status

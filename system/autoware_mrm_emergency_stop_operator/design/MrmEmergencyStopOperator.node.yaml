@@ -33,6 +33,7 @@ publishers:
     remap_target: ~/output/mrm/emergency_stop/control_cmd
   - name: mrm_state
     message_type: tier4_system_msgs/msg/DrivingModeMrmState
+    global: /system/driving_mode/mrm_state
     remap_target: ~/output/mrm_state
 
 servers:

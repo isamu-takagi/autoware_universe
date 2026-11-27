@@ -11,6 +11,18 @@
   <arg name="inputs/main/hazard_lights" default="/planning/hazard_lights_cmd"/>
   <arg name="inputs/main/turn_indicators" default="/planning/turn_indicators_cmd"/>
 
+  <!-- Enabled if "local" is listed in config input_names -->
+  <arg name="inputs/local/control" default="/external/local/control_cmd"/>
+  <arg name="inputs/local/gear" default="/external/local/gear_cmd"/>
+  <arg name="inputs/local/hazard_lights" default="/external/local/hazard_lights_cmd"/>
+  <arg name="inputs/local/turn_indicators" default="/external/local/turn_indicators_cmd"/>
+
+  <!-- Enabled if "remote" is listed in config input_names -->
+  <arg name="inputs/remote/control" default="/external/remote/control_cmd"/>
+  <arg name="inputs/remote/gear" default="/external/remote/gear_cmd"/>
+  <arg name="inputs/remote/hazard_lights" default="/external/remote/hazard_lights_cmd"/>
+  <arg name="inputs/remote/turn_indicators" default="/external/remote/turn_indicators_cmd"/>
+
   <!-- Enabled if "emergency_stop" is listed in config input_names -->
   <arg name="inputs/emergency_stop/control" default="/system/emergency/control_cmd"/>
   <arg name="inputs/emergency_stop/gear" default="/system/emergency/gear_cmd"/>
@@ -27,6 +39,14 @@
     <remap from="~/inputs/main/gear" to="$(var inputs/main/gear)"/>
     <remap from="~/inputs/main/hazard_lights" to="$(var inputs/main/hazard_lights)"/>
     <remap from="~/inputs/main/turn_indicators" to="$(var inputs/main/turn_indicators)"/>
+    <remap from="~/inputs/local/control" to="$(var inputs/local/control)"/>
+    <remap from="~/inputs/local/gear" to="$(var inputs/local/gear)"/>
+    <remap from="~/inputs/local/hazard_lights" to="$(var inputs/local/hazard_lights)"/>
+    <remap from="~/inputs/local/turn_indicators" to="$(var inputs/local/turn_indicators)"/>
+    <remap from="~/inputs/remote/control" to="$(var inputs/remote/control)"/>
+    <remap from="~/inputs/remote/gear" to="$(var inputs/remote/gear)"/>
+    <remap from="~/inputs/remote/hazard_lights" to="$(var inputs/remote/hazard_lights)"/>
+    <remap from="~/inputs/remote/turn_indicators" to="$(var inputs/remote/turn_indicators)"/>
     <remap from="~/inputs/emergency_stop/control" to="$(var inputs/emergency_stop/control)"/>
     <remap from="~/inputs/emergency_stop/gear" to="$(var inputs/emergency_stop/gear)"/>
     <remap from="~/inputs/emergency_stop/hazard_lights" to="$(var inputs/emergency_stop/hazard_lights)"/>

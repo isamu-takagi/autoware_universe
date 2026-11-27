@@ -1,0 +1,116 @@
+autoware_system_design_format: 0.3.0
+
+# node information
+name: DrivingModeManager.node
+
+package:
+  name: autoware_driving_mode_manager
+  provider: autoware
+
+launch:
+  plugin: autoware::driving_mode_manager::DrivingModeManager
+  executable: driving_mode_manager_node
+  node_output: screen
+
+# interfaces
+subscribers:
+  # driving mode flags reported by the diagnostic graph, the transition checker and the MRM operators
+  - name: driving_mode_available
+    message_type: tier4_system_msgs/msg/DrivingModeFlag
+    remap_target: ~/system/driving_mode/available
+  - name: driving_mode_active
+    message_type: tier4_system_msgs/msg/DrivingModeFlag
+    remap_target: ~/system/driving_mode/active
+  - name: driving_mode_stable
+    message_type: tier4_system_msgs/msg/DrivingModeFlag
+    remap_target: ~/system/driving_mode/stable
+  - name: driving_mode_continuable
+    message_type: tier4_system_msgs/msg/DrivingModeFlag
+    remap_target: ~/system/driving_mode/continuable
+  - name: driving_mode_mrm_state
+    message_type: tier4_system_msgs/msg/DrivingModeMrmState
+    global: /system/driving_mode/mrm_state
+    remap_target: ~/system/driving_mode/mrm_state
+  # status of the gates and the vehicle
+  - name: trajectory_source_status
+    message_type: tier4_system_msgs/msg/TrajectorySourceStatus
+    remap_target: ~/trajectory/source/status
+  - name: command_source_status
+    message_type: tier4_system_msgs/msg/CommandSourceStatus
+    remap_target: ~/command/source/status
+  - name: command_filter_status
+    message_type: tier4_system_msgs/msg/CommandFilterStatus
+    remap_target: ~/command/filter/status
+  - name: control_mode_report
+    message_type: autoware_vehicle_msgs/msg/ControlModeReport
+    remap_target: ~/vehicle/control_mode/report
+
+publishers:
+  - name: operation_mode_state
+    message_type: autoware_adapi_v1_msgs/msg/OperationModeState
+    remap_target: ~/system/operation_mode_state
+  - name: mrm_state
+    message_type: autoware_adapi_v1_msgs/msg/MrmState
+    remap_target: ~/system/mrm_state
+  - name: driving_mode_request
+    message_type: tier4_system_msgs/msg/DrivingModeRequest
+    remap_target: ~/system/driving_mode/request
+  - name: driving_mode_info
+    message_type: tier4_system_msgs/msg/DrivingModeInfo
+    remap_target: ~/system/driving_mode/info
+  - name: diagnostics
+    message_type: diagnostic_msgs/msg/DiagnosticArray
+    global: /diagnostics
+    remap_target: ~/diagnostics
+  - name: debug_flags
+    message_type: autoware_driving_mode_manager/msg/DebugModeFlags
+    remap_target: ~/debug/flags
+  - name: debug_request
+    message_type: autoware_driving_mode_manager/msg/DebugModeRequest
+    remap_target: ~/debug/request
+
+servers:
+  - name: change_operation_mode
+    message_type: autoware_system_msgs/srv/ChangeOperationMode
+    remap_target: ~/system/change_operation_mode
+  - name: change_autoware_control
+    message_type: autoware_system_msgs/srv/ChangeAutowareControl
+    remap_target: ~/system/change_autoware_control
+  - name: change_mrm_request
+    message_type: tier4_system_msgs/srv/ChangeMrmRequest
+    remap_target: ~/system/change_mrm_request
+
+clients:
+  - name: trajectory_source_change
+    message_type: tier4_system_msgs/srv/ChangeTrajectorySource
+    remap_target: ~/trajectory/source/change
+  - name: command_source_change
+    message_type: tier4_system_msgs/srv/ChangeCommandSource
+    remap_target: ~/command/source/change
+  - name: command_filter_change
+    message_type: tier4_system_msgs/srv/ChangeCommandFilter
+    remap_target: ~/command/filter/change
+  - name: control_mode_command
+    message_type: autoware_vehicle_msgs/srv/ControlModeCommand
+    remap_target: ~/vehicle/control_mode/command
+
+# parameters
+param_files:
+  - name: config
+    default: config/driving_mode_manager.param.yaml
+
+param_values: []
+
+# processes
+processes:
+  - name: manage_driving_mode
+    trigger_conditions:
+      - periodic: 10.0
+    outcomes:
+      - to_output: operation_mode_state
+      - to_output: mrm_state
+      - to_output: driving_mode_request
+      - to_output: driving_mode_info
+      - to_output: diagnostics
+      - to_output: debug_flags
+      - to_output: debug_request

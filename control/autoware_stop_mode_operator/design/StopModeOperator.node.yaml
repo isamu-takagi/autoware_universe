@@ -16,20 +16,27 @@ launch:
 subscribers:
   - name: route_state
     message_type: autoware_planning_msgs/msg/RouteState
+    remap_target: /planning/route_state
   - name: steering
     message_type: autoware_vehicle_msgs/msg/SteeringReport
+    remap_target: /vehicle/status/steering_status
   - name: velocity
     message_type: autoware_vehicle_msgs/msg/VelocityReport
+    remap_target: /vehicle/status/velocity_status
 
 publishers:
   - name: control
     message_type: autoware_control_msgs/msg/Control
+    remap_target: ~/control
   - name: gear
     message_type: autoware_vehicle_msgs/msg/GearCommand
+    remap_target: ~/gear
   - name: turn_indicators
     message_type: autoware_vehicle_msgs/msg/TurnIndicatorsCommand
+    remap_target: ~/turn_indicators
   - name: hazard_lights
     message_type: autoware_vehicle_msgs/msg/HazardLightsCommand
+    remap_target: ~/hazard_lights
 
 # parameters
 param_files:

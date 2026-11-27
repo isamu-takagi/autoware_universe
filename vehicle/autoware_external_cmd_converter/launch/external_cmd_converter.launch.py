@@ -28,6 +28,12 @@ def _create_mapping_tuple(name):
 
 def generate_launch_description():
     arguments = [
+        # node
+        DeclareLaunchArgument(
+            "node_name",
+            default_value="external_cmd_converter",
+            description="node name",
+        ),
         # map file
         DeclareLaunchArgument(
             "csv_path_accel_map",
@@ -142,7 +148,7 @@ def generate_launch_description():
     node = Node(
         package="autoware_external_cmd_converter",
         executable="external_cmd_converter_node",
-        name="external_cmd_converter",
+        name=LaunchConfiguration("node_name"),
         remappings=remappings,
         parameters=parameters,
         output="screen",
