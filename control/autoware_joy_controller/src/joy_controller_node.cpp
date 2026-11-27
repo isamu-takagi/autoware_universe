@@ -19,7 +19,6 @@
 #include "autoware/joy_controller/joy_converter/xbox_joy_converter.hpp"
 
 #include <autoware/qos_utils/qos_compatibility.hpp>
-#include <tier4_api_utils/tier4_api_utils.hpp>
 
 #include <algorithm>
 #include <memory>
@@ -400,14 +399,14 @@ void AutowareJoyControllerNode::sendEmergencyRequest(bool emergency)
 {
   RCLCPP_INFO(get_logger(), "%s emergency stop", emergency ? "Set" : "Clear");
 
-  auto request = std::make_shared<tier4_external_api_msgs::srv::SetEmergency::Request>();
-  request->emergency = emergency;
+  auto request = std::make_shared<SendMrmRequest::Request>();
+  request->request.sender = "autoware_joy_controller";
+  request->request.strategy = emergency ? MrmRequest::DELEGATE : MrmRequest::CANCEL;
 
-  client_emergency_stop_->async_send_request(
-    request,
-    [this](rclcpp::Client<tier4_external_api_msgs::srv::SetEmergency>::SharedFuture result) {
+  client_mrm_request_->async_send_request(
+    request, [this](rclcpp::Client<SendMrmRequest>::SharedFuture result) {
       auto response = result.get();
-      if (tier4_api_utils::is_success(response->status)) {
+      if (response->status.success) {
         RCLCPP_INFO(get_logger(), "service succeeded");
       } else {
         RCLCPP_WARN(get_logger(), "service failed: %s", response->status.message.c_str());
@@ -518,15 +517,15 @@ AutowareJoyControllerNode::AutowareJoyControllerNode(const rclcpp::NodeOptions &
     this->create_publisher<autoware_vehicle_msgs::msg::Engage>("output/vehicle_engage", 1);
 
   // Service Client
-  client_emergency_stop_ = this->create_client<tier4_external_api_msgs::srv::SetEmergency>(
-    "service/emergency_stop", AUTOWARE_DEFAULT_SERVICES_QOS_PROFILE(), callback_group_services_);
-  while (!client_emergency_stop_->wait_for_service(std::chrono::seconds(1))) {
+  client_mrm_request_ = create_client<SendMrmRequest>(
+    "service/mrm_request", AUTOWARE_DEFAULT_SERVICES_QOS_PROFILE(), callback_group_services_);
+  while (!client_mrm_request_->wait_for_service(std::chrono::seconds(1))) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(get_logger(), "Interrupted while waiting for service.");
       rclcpp::shutdown();
       return;
     }
-    RCLCPP_INFO(get_logger(), "Waiting for emergency_stop service connection...");
+    RCLCPP_INFO(get_logger(), "Waiting for mrm_request service connection...");
   }
 
   client_change_to_local_ = create_client<ChangeOperationMode>("service/change_to_local");

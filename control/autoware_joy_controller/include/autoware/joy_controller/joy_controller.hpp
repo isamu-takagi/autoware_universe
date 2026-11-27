@@ -21,6 +21,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <autoware_adapi_v1_msgs/srv/change_operation_mode.hpp>
+#include <autoware_adapi_v1_msgs/srv/send_mrm_request.hpp>
 #include <autoware_control_msgs/msg/control.hpp>
 #include <autoware_vehicle_msgs/msg/engage.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
@@ -31,7 +32,6 @@
 #include <tier4_external_api_msgs/msg/gear_shift_stamped.hpp>
 #include <tier4_external_api_msgs/msg/heartbeat.hpp>
 #include <tier4_external_api_msgs/msg/turn_signal_stamped.hpp>
-#include <tier4_external_api_msgs/srv/set_emergency.hpp>
 
 #include <memory>
 #include <string>
@@ -45,6 +45,8 @@ using GateModeType = tier4_control_msgs::msg::GateMode::_data_type;
 class AutowareJoyControllerNode : public rclcpp::Node
 {
   using ChangeOperationMode = autoware_adapi_v1_msgs::srv::ChangeOperationMode;
+  using SendMrmRequest = autoware_adapi_v1_msgs::srv::SendMrmRequest;
+  using MrmRequest = autoware_adapi_v1_msgs::msg::MrmRequest;
 
 public:
   explicit AutowareJoyControllerNode(const rclcpp::NodeOptions & node_options);
@@ -103,7 +105,7 @@ private:
   void sendEmergencyRequest(bool emergency);
 
   // Service Client
-  rclcpp::Client<tier4_external_api_msgs::srv::SetEmergency>::SharedPtr client_emergency_stop_;
+  rclcpp::Client<SendMrmRequest>::SharedPtr client_mrm_request_;
   rclcpp::Client<ChangeOperationMode>::SharedPtr client_change_to_local_;
   rclcpp::Client<ChangeOperationMode>::SharedPtr client_change_to_stop_;
 

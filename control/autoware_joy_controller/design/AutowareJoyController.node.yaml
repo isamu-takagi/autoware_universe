@@ -38,9 +38,9 @@ publishers:
     message_type: autoware_vehicle_msgs/msg/Engage
     remap_target: output/vehicle_engage
 clients:
-  - name: emergency_stop
-    message_type: tier4_external_api_msgs/srv/SetEmergency
-    remap_target: service/emergency_stop
+  - name: mrm_request
+    message_type: autoware_adapi_v1_msgs/srv/SendMrmRequest
+    remap_target: service/mrm_request
   - name: change_to_local
     message_type: autoware_adapi_v1_msgs/srv/ChangeOperationMode
     remap_target: service/change_to_local

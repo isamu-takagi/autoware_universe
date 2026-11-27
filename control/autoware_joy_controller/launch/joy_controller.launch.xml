@@ -26,7 +26,7 @@
     <remap from="output/heartbeat" to="$(var output_heartbeat)"/>
     <remap from="output/vehicle_engage" to="$(var output_vehicle_engage)"/>
 
-    <remap from="service/emergency_stop" to="/api/autoware/set/emergency"/>
+    <remap from="service/mrm_request" to="/api/fail_safe/mrm_request/send"/>
     <remap from="service/change_to_local" to="/api/operation_mode/change_to_local"/>
     <remap from="service/change_to_stop" to="/api/operation_mode/change_to_stop"/>
 
